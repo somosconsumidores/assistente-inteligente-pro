@@ -1,13 +1,13 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, MessageSquare, FileText, Scale, AlertCircle, Send } from 'lucide-react';
+import { ArrowLeft, MessageSquare, FileText, Scale, AlertCircle, Send, Database } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useDireitoChat } from '@/hooks/useDireitoChat';
+import KnowledgeBase from '@/components/KnowledgeBase';
 
 const DireitoConsumidor = () => {
   const [activeTab, setActiveTab] = useState('chat');
@@ -58,6 +58,14 @@ const DireitoConsumidor = () => {
           >
             <MessageSquare className="w-4 h-4" />
             <span>Consultoria</span>
+          </Button>
+          <Button 
+            variant={activeTab === 'knowledge' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('knowledge')}
+            className="flex items-center space-x-2"
+          >
+            <Database className="w-4 h-4" />
+            <span>Base de Conhecimento</span>
           </Button>
           <Button 
             variant={activeTab === 'petition' ? 'default' : 'outline'}
@@ -166,6 +174,9 @@ const DireitoConsumidor = () => {
             </div>
           </div>
         )}
+
+        {/* Knowledge Base Tab */}
+        {activeTab === 'knowledge' && <KnowledgeBase />}
 
         {/* Petition Tab */}
         {activeTab === 'petition' && (

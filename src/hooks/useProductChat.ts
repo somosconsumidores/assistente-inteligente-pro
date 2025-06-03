@@ -35,125 +35,166 @@ export const useProductChat = () => {
     return newMessage;
   }, []);
 
+  const cleanProductName = (name: string) => {
+    return name
+      .replace(/\|/g, '') // Remove pipes
+      .replace(/\*\*/g, '') // Remove bold markers
+      .replace(/^\s*-\s*/, '') // Remove leading dashes
+      .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+      .replace(/R\$\s*\d+(?:[.,]\d+)?/g, '') // Remove prices
+      .replace(/\d+[.,]\d+/g, '') // Remove scores
+      .replace(/🏆|💰|⭐/g, '') // Remove emojis
+      .replace(/Melhor da Avaliação|Barato da Avaliação|Nossa Recomendação/gi, '') // Remove seal text
+      .trim();
+  };
+
   const extractFeaturedProducts = useCallback((message: string) => {
     console.log('Extracting products from message:', message);
     const products: FeaturedProduct[] = [];
     
-    // Buscar por tabelas ou seções que contenham os selos
     const lines = message.split('\n');
-    let currentProduct = null;
     let productCounter = 1;
     
     // Extrair preços da mensagem
     const priceMatches = message.match(/R\$\s*\d+(?:[.,]\d+)?/g) || [];
     console.log('Price matches found:', priceMatches);
     
+    // Buscar por produtos específicos mencionados na mensagem
+    const productPatterns = [
+      { name: 'Nike Revolution', regex: /Nike Revolution \d+/gi },
+      { name: 'Adidas Runfalcon', regex: /Adidas Runfalcon/gi },
+      { name: 'Adidas Duramo', regex: /Adidas Duramo SL/gi },
+      { name: 'ASICS Gel-Contend', regex: /ASICS? Gel.?Contend \d+/gi },
+      { name: 'Mizuno Wave Shadow', regex: /Mizuno Wave Shadow \d+/gi },
+      { name: 'Olympikus Joy', regex: /Olympikus Joy/gi }
+    ];
+
+    // Extrair produtos da tabela se existir
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
       
-      // Verificar se a linha contém um dos selos
-      if (line.includes('🏆') && (line.includes('Melhor da Avaliação') || line.includes('Melhor'))) {
-        // Extrair nome do produto da linha ou próximas linhas
-        let productName = line.replace(/🏆.*?Melhor.*?:?\s*/, '').replace(/\*\*/g, '').trim();
-        if (!productName && i + 1 < lines.length) {
-          productName = lines[i + 1].replace(/\*\*/g, '').trim();
+      // Verificar se é linha de tabela com produto
+      if (line.includes('|') && line.split('|').length > 3) {
+        const cells = line.split('|').map(cell => cell.trim()).filter(cell => cell !== '');
+        
+        if (cells.length >= 4 && cells[0] && !cells[0].includes('Modelo')) {
+          const productName = cleanProductName(cells[0]);
+          const price = cells[1] || 'Consulte';
+          const score = parseFloat(cells[3]?.replace(',', '.') || '0');
+          
+          if (productName.length > 2) {
+            // Determinar selo baseado na posição na tabela ou conteúdo
+            let seal: 'melhor' | 'barato' | 'recomendacao' = 'recomendacao';
+            
+            if (message.toLowerCase().includes(productName.toLowerCase()) && message.includes('🏆')) {
+              seal = 'melhor';
+            } else if (message.toLowerCase().includes(productName.toLowerCase()) && message.includes('💰')) {
+              seal = 'barato';
+            }
+            
+            products.push({
+              id: `product-${productCounter}`,
+              name: productName,
+              image: `https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center`,
+              price: price,
+              scoreMestre: score,
+              seal: seal
+            });
+            productCounter++;
+          }
+        }
+      }
+      
+      // Buscar por selos específicos nas linhas
+      if (line.includes('🏆') && (line.includes('Melhor') || line.includes('melhor'))) {
+        const nextLine = i + 1 < lines.length ? lines[i + 1] : '';
+        let productName = cleanProductName(line.replace(/🏆.*?(melhor|Melhor).*?:?\s*/i, ''));
+        
+        if (!productName && nextLine) {
+          productName = cleanProductName(nextLine);
+        }
+        
+        // Buscar por padrões conhecidos se o nome não foi extraído bem
+        if (!productName || productName.length < 3) {
+          for (const pattern of productPatterns) {
+            const match = (line + ' ' + nextLine).match(pattern.regex);
+            if (match) {
+              productName = match[0];
+              break;
+            }
+          }
         }
         
         if (productName && productName.length > 2) {
           products.push({
             id: `melhor-${productCounter}`,
-            name: productName.split(' - ')[0].split('(')[0].trim(),
-            image: '/placeholder.svg',
+            name: productName,
+            image: `https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center`,
             price: priceMatches[0] || 'Consulte',
             scoreMestre: 8.5,
             seal: 'melhor'
           });
           productCounter++;
-          console.log('Added melhor product:', productName);
         }
       }
       
-      if (line.includes('💰') && (line.includes('Barato da Avaliação') || line.includes('Barato'))) {
-        let productName = line.replace(/💰.*?Barato.*?:?\s*/, '').replace(/\*\*/g, '').trim();
-        if (!productName && i + 1 < lines.length) {
-          productName = lines[i + 1].replace(/\*\*/g, '').trim();
+      if (line.includes('💰') && (line.includes('Barato') || line.includes('barato'))) {
+        const nextLine = i + 1 < lines.length ? lines[i + 1] : '';
+        let productName = cleanProductName(line.replace(/💰.*?(barato|Barato).*?:?\s*/i, ''));
+        
+        if (!productName && nextLine) {
+          productName = cleanProductName(nextLine);
+        }
+        
+        if (!productName || productName.length < 3) {
+          for (const pattern of productPatterns) {
+            const match = (line + ' ' + nextLine).match(pattern.regex);
+            if (match) {
+              productName = match[0];
+              break;
+            }
+          }
         }
         
         if (productName && productName.length > 2) {
           products.push({
             id: `barato-${productCounter}`,
-            name: productName.split(' - ')[0].split('(')[0].trim(),
-            image: '/placeholder.svg',
+            name: productName,
+            image: `https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center`,
             price: priceMatches[1] || priceMatches[0] || 'Consulte',
             scoreMestre: 8.0,
             seal: 'barato'
           });
           productCounter++;
-          console.log('Added barato product:', productName);
         }
       }
       
-      if (line.includes('⭐') && (line.includes('Nossa Recomendação') || line.includes('Recomendação'))) {
-        let productName = line.replace(/⭐.*?Recomendação.*?:?\s*/, '').replace(/\*\*/g, '').trim();
-        if (!productName && i + 1 < lines.length) {
-          productName = lines[i + 1].replace(/\*\*/g, '').trim();
+      if (line.includes('⭐') && (line.includes('Recomendação') || line.includes('recomendação'))) {
+        const nextLine = i + 1 < lines.length ? lines[i + 1] : '';
+        let productName = cleanProductName(line.replace(/⭐.*?(recomendação|Recomendação).*?:?\s*/i, ''));
+        
+        if (!productName && nextLine) {
+          productName = cleanProductName(nextLine);
+        }
+        
+        if (!productName || productName.length < 3) {
+          for (const pattern of productPatterns) {
+            const match = (line + ' ' + nextLine).match(pattern.regex);
+            if (match) {
+              productName = match[0];
+              break;
+            }
+          }
         }
         
         if (productName && productName.length > 2) {
           products.push({
             id: `recomendacao-${productCounter}`,
-            name: productName.split(' - ')[0].split('(')[0].trim(),
-            image: '/placeholder.svg',
+            name: productName,
+            image: `https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center`,
             price: priceMatches[2] || priceMatches[0] || 'Consulte',
             scoreMestre: 8.3,
             seal: 'recomendacao'
-          });
-          productCounter++;
-          console.log('Added recomendacao product:', productName);
-        }
-      }
-      
-      // Também buscar por nomes de produtos específicos na tabela
-      if (line.includes('Nike Revolution 6')) {
-        const existingProduct = products.find(p => p.name.includes('Nike Revolution 6'));
-        if (!existingProduct) {
-          products.push({
-            id: `nike-rev-${productCounter}`,
-            name: 'Nike Revolution 6',
-            image: '/placeholder.svg',
-            price: 'R$ 270',
-            scoreMestre: 8.33,
-            seal: 'barato'
-          });
-          productCounter++;
-        }
-      }
-      
-      if (line.includes('Adidas Duramo SL')) {
-        const existingProduct = products.find(p => p.name.includes('Adidas Duramo SL'));
-        if (!existingProduct) {
-          products.push({
-            id: `adidas-duramo-${productCounter}`,
-            name: 'Adidas Duramo SL',
-            image: '/placeholder.svg',
-            price: 'R$ 285',
-            scoreMestre: 8.00,
-            seal: 'recomendacao'
-          });
-          productCounter++;
-        }
-      }
-      
-      if (line.includes('ASICS Gel-Contend 7')) {
-        const existingProduct = products.find(p => p.name.includes('ASICS Gel-Contend 7'));
-        if (!existingProduct) {
-          products.push({
-            id: `asics-gel-${productCounter}`,
-            name: 'ASICS Gel-Contend 7',
-            image: '/placeholder.svg',
-            price: 'R$ 295',
-            scoreMestre: 8.67,
-            seal: 'melhor'
           });
           productCounter++;
         }

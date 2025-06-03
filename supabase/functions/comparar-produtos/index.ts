@@ -17,11 +17,11 @@ Você atua com total independência e isenção, sem qualquer viés de marca. To
 
 Em toda análise de produto (individual ou comparativa), você categoriza os produtos em três selos de destaque:
 
-Melhor da Avaliação – Produto com o melhor desempenho técnico, independentemente do preço.
+🏆 Melhor da Avaliação – Produto com o melhor desempenho técnico, independentemente do preço.
 
-Barato da Avaliação – Produto com o menor preço entre os aprovados, representando excelente custo-benefício.
+💰 Barato da Avaliação – Produto com o menor preço entre os aprovados, representando excelente custo-benefício.
 
-Nossa Recomendação – Produto com o melhor equilíbrio entre preço e qualidade no contexto geral do mercado.
+⭐ Nossa Recomendação – Produto com o melhor equilíbrio entre preço e qualidade no contexto geral do mercado.
 
 Você atribui uma pontuação de 1 a 10 para cada produto, chamada de Score Mestre, calculada com pesos iguais (1/3 cada) de:
 
@@ -37,14 +37,11 @@ Reviews de usuários: Amazon, Mercado Livre, Magazine Luiza
 
 Você apresenta suas comparações em formato claro, com tabelas, rankings, prós e contras. Também explica seus critérios de forma transparente. Se o usuário não der contexto, você pergunta sobre as prioridades, orçamento e necessidades antes de sugerir.
 
-Após apresentar qualquer análise ou comparação, você deve sempre perguntar ao usuário se:
-
-Ele gostou da recomendação
-Ele gostaria de receber uma sugestão baseada em um orçamento específico
-
 Sempre que possível, forneça links diretos e atualizados para as lojas online onde os produtos podem ser comprados, com preferência por sites confiáveis como Amazon, Mercado Livre, Magazine Luiza, Americanas e similares.
 
-Você também oferece a opção de o usuário enviar uma foto do código de barras ou do produto. Com base nessa imagem, você tenta identificar o produto (via número EAN ou aparência), buscar informações técnicas e realizar uma análise completa com Score Mestre. Você avisa ao usuário que a imagem deve estar nítida e que será usada apenas para identificação do produto.`;
+Você também oferece a opção de o usuário enviar uma foto do código de barras ou do produto. Com base nessa imagem, você tenta identificar o produto (via número EAN ou aparência), buscar informações técnicas e realizar uma análise completa com Score Mestre.
+
+Mantenha um tom conversacional e amigável, mas sempre profissional e técnico. Responda de forma natural como se fosse uma conversa real.`;
 
 serve(async (req) => {
   console.log('Comparar produtos function called');
@@ -54,7 +51,7 @@ serve(async (req) => {
   }
 
   try {
-    const { query } = await req.json();
+    const { query, conversation = [] } = await req.json();
     console.log('Query received:', query);
 
     if (!openAIApiKey) {
@@ -65,6 +62,19 @@ serve(async (req) => {
       });
     }
 
+    // Build messages array for conversation context
+    const messages = [
+      { role: 'system', content: systemPrompt }
+    ];
+
+    // Add conversation history if provided
+    if (conversation.length > 0) {
+      messages.push(...conversation.slice(-10)); // Keep last 10 messages for context
+    } else {
+      // If no conversation history, add the current query as user message
+      messages.push({ role: 'user', content: query });
+    }
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -73,10 +83,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Por favor, faça uma análise e comparação completa de: ${query}. Inclua os três selos de destaque, Score Mestre para cada produto, prós e contras, e suas recomendações baseadas nas fontes oficiais mencionadas.` }
-        ],
+        messages: messages,
         temperature: 0.7,
         max_tokens: 2000,
       }),

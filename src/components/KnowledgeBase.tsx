@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, CheckCircle, Clock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import UploadDocumentButton from './UploadDocumentButton';
 
 const KnowledgeBase = () => {
   const [documents, setDocuments] = useState<any[]>([]);
@@ -66,17 +67,22 @@ const KnowledgeBase = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Base de Conhecimento Jurídica</CardTitle>
-        <CardDescription>
-          Documentos disponíveis para consulta pelo assistente jurídico
-        </CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>Base de Conhecimento Jurídica</CardTitle>
+            <CardDescription>
+              Documentos disponíveis para consulta pelo assistente jurídico
+            </CardDescription>
+          </div>
+          <UploadDocumentButton onUploadComplete={loadDocuments} />
+        </div>
       </CardHeader>
       <CardContent>
         {documents.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
             <p>Nenhum documento na base de conhecimento</p>
-            <p className="text-sm">Os documentos são gerenciados pela administração do sistema</p>
+            <p className="text-sm">Clique no botão acima para adicionar o Código de Defesa do Consumidor</p>
           </div>
         ) : (
           <div className="space-y-3">

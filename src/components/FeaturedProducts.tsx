@@ -88,6 +88,23 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
     }
   };
 
+  // Function to clean product name and show only the product name
+  const getCleanProductName = (name: string): string => {
+    return name
+      .replace(/\|/g, '') // Remove pipes
+      .replace(/\*\*/g, '') // Remove bold markers
+      .replace(/^\s*-\s*/, '') // Remove leading dashes
+      .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+      .replace(/R\$\s*\d+(?:[.,]\d+)?/g, '') // Remove prices
+      .replace(/\d+[.,]\d+/g, '') // Remove scores
+      .replace(/🏆|💰|⭐/g, '') // Remove emojis
+      .replace(/Melhor da Avaliação|Barato da Avaliação|Nossa Recomendação/gi, '') // Remove seal text
+      .replace(/Score Mestre[:\s]*\d+/gi, '') // Remove score mentions
+      .replace(/^\s*\d+\.\s*/, '') // Remove leading numbers
+      .replace(/\([^)]*\)/g, '') // Remove anything in parentheses
+      .trim();
+  };
+
   return (
     <div className="mb-8">
       <div className="mb-6">
@@ -104,6 +121,7 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
       }`}>
         {displayProducts.map((product) => {
           const sealInfo = getSealInfo(product.seal);
+          const cleanName = getCleanProductName(product.name);
           
           return (
             <Card key={product.id} className={`overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105 bg-gradient-to-br ${sealInfo.bgColor} border-2`}>
@@ -111,7 +129,7 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
                 <div className="w-full h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
                   <img
                     src={product.image}
-                    alt={product.name}
+                    alt={cleanName}
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       e.currentTarget.src = 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center';
@@ -128,7 +146,7 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
               
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg leading-tight text-gray-900 line-clamp-2">
-                  {product.name}
+                  {cleanName}
                 </CardTitle>
               </CardHeader>
               

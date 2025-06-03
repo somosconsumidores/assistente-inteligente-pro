@@ -54,10 +54,11 @@ serve(async (req) => {
       console.log('Embedding gerado, buscando contexto relevante...');
 
       // Buscar chunks relevantes na base de conhecimento usando a função SQL
+      // Aumentado para 7 chunks e threshold reduzido para 0.6 para melhorar relevância
       const { data: relevantChunks, error: searchError } = await supabase.rpc('match_documents', {
         query_embedding: queryEmbedding,
-        match_threshold: 0.7,
-        match_count: 5
+        match_threshold: 0.6,
+        match_count: 7
       });
 
       if (!searchError && relevantChunks && relevantChunks.length > 0) {

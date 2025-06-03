@@ -43,20 +43,28 @@ serve(async (req) => {
 
     console.log('Processando documento:', document.title);
 
-    // Dividir o conteúdo em chunks maiores (1500 caracteres cada)
-    const chunkSize = 1500;
+    // Dividir o conteúdo em chunks menores com sobreposição
+    const chunkSize = 1000; // Reduzido para 1000 caracteres
+    const overlap = 200;  // Sobreposição de 200 caracteres entre chunks
     const chunks = [];
     const content = document.content;
     
-    for (let i = 0; i < content.length; i += chunkSize) {
+    for (let i = 0; i < content.length; i += (chunkSize - overlap)) {
+      if (i > 0 && i + chunkSize > content.length) {
+        // Se este é o último chunk e seria muito pequeno, pule
+        if (content.length - i < chunkSize / 2) {
+          continue;
+        }
+      }
+      
       const chunk = content.slice(i, i + chunkSize);
       chunks.push({
         text: chunk,
-        index: Math.floor(i / chunkSize)
+        index: chunks.length
       });
     }
 
-    console.log(`Criados ${chunks.length} chunks para processamento`);
+    console.log(`Criados ${chunks.length} chunks para processamento com tamanho ${chunkSize} e sobreposição ${overlap}`);
     let successfulChunks = 0;
 
     // Processar cada chunk e gerar embeddings com retry

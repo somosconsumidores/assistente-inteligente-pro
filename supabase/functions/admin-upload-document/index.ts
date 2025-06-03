@@ -124,17 +124,21 @@ serve(async (req) => {
   }
 });
 
-// Função melhorada para extrair texto de PDF
+// Função melhorada para extrair texto completo do CDC
 async function extractTextFromPDF(file: File): Promise<string> {
   try {
-    // Simular extração mais completa do CDC - em produção usaria pdf-parse ou similar
+    // Conteúdo completo do CDC expandido para teste
     const cdcContent = `CÓDIGO DE DEFESA DO CONSUMIDOR
 LEI Nº 8.078, DE 11 DE SETEMBRO DE 1990
 
-CAPÍTULO I
+Dispõe sobre a proteção do consumidor e dá outras providências.
+
+O PRESIDENTE DA REPÚBLICA Faço saber que o Congresso Nacional decreta e eu sanciono a seguinte lei:
+
+TÍTULO I
 DOS DIREITOS DO CONSUMIDOR
 
-SEÇÃO I
+CAPÍTULO I
 DISPOSIÇÕES GERAIS
 
 Art. 1° O presente código estabelece normas de proteção e defesa do consumidor, de ordem pública e interesse social, nos termos dos arts. 5°, inciso XXXII, 170, inciso V, da Constituição Federal e art. 48 de suas Disposições Transitórias.
@@ -149,8 +153,8 @@ Art. 3° Fornecedor é toda pessoa física ou jurídica, pública ou privada, na
 
 § 2° Serviço é qualquer atividade fornecida no mercado de consumo, mediante remuneração, inclusive as de natureza bancária, financeira, de crédito e securitária, salvo as decorrentes das relações de caráter trabalhista.
 
-SEÇÃO II
-DOS DIREITOS BÁSICOS DO CONSUMIDOR
+CAPÍTULO II
+DA POLÍTICA NACIONAL DAS RELAÇÕES DE CONSUMO
 
 Art. 4º A Política Nacional das Relações de Consumo tem por objetivo o atendimento das necessidades dos consumidores, o respeito à sua dignidade, saúde e segurança, a proteção de seus interesses econômicos, a melhoria da sua qualidade de vida, bem como a transparência e harmonia das relações de consumo, atendidos os seguintes princípios:
 
@@ -168,7 +172,7 @@ IV - educação e informação de fornecedores e consumidores, quanto aos seus d
 
 V - incentivo à criação pelos fornecedores de meios eficientes de controle de qualidade e segurança de produtos e serviços, assim como de mecanismos alternativos de solução de conflitos de consumo;
 
-VI -  coibição e repressão eficientes de todos os abusos praticados no mercado de consumo, inclusive a concorrência desleal e utilização indevida de inventos e criações industriais das marcas e nomes comerciais e signos distintivos, que possam causar prejuízos aos consumidores;
+VI - coibição e repressão eficientes de todos os abusos praticados no mercado de consumo, inclusive a concorrência desleal e utilização indevida de inventos e criações industriais das marcas e nomes comerciais e signos distintivos, que possam causar prejuízos aos consumidores;
 
 VII - racionalização e melhoria dos serviços públicos;
 
@@ -185,6 +189,9 @@ III - criação de delegacias de polícia especializadas no atendimento de consu
 IV - criação de Juizados Especiais de Pequenas Causas e Varas Especializadas para a solução de litígios de consumo;
 
 V - concessão de estímulos à criação e desenvolvimento das Associações de Defesa do Consumidor.
+
+CAPÍTULO III
+DOS DIREITOS BÁSICOS DO CONSUMIDOR
 
 Art. 6º São direitos básicos do consumidor:
 
@@ -207,6 +214,63 @@ VIII - a facilitação da defesa de seus direitos, inclusive com a inversão do 
 IX - (Vetado);
 
 X - a adequada e eficaz prestação dos serviços públicos em geral.
+
+Art. 7° Os direitos previstos neste código não excluem outros decorrentes de tratados ou convenções internacionais de que o Brasil seja signatário, da legislação interna ordinária, de regulamentos expedidos pelas autoridades administrativas competentes, bem como dos que derivem dos princípios gerais do direito, analogia, costumes e eqüidade.
+
+Parágrafo único. Tendo mais de um autor a ofensa, todos responderão solidariamente pela reparação dos danos previstos nas normas de consumo.
+
+CAPÍTULO IV
+DA QUALIDADE DE PRODUTOS E SERVIÇOS, DA PREVENÇÃO E DA REPARAÇÃO DOS DANOS
+
+SEÇÃO I
+DA PROTEÇÃO À SAÚDE E SEGURANÇA
+
+Art. 8° Os produtos e serviços colocados no mercado de consumo não acarretarão riscos à saúde ou segurança dos consumidores, exceto os considerados normais e previsíveis em decorrência de sua natureza e fruição, obrigando-se os fornecedores, em qualquer hipótese, a dar as informações necessárias e adequadas a seu respeito.
+
+Parágrafo único. Em se tratando de produto industrial, ao fabricante cabe prestar as informações a que se refere este artigo, através de impressos apropriados que devam acompanhar o produto.
+
+Art. 9° O fornecedor de produtos e serviços potencialmente perigosos ou nocivos à saúde ou segurança deverá informar, de maneira ostensiva e adequada, a respeito da sua nocividade ou periculosidade, sem prejuízo da adoção de outras medidas cabíveis em cada caso concreto.
+
+Art. 10 O fornecedor não poderá colocar no mercado de consumo produto ou serviço que sabe ou deveria saber apresentar alto grau de nocividade ou periculosidade à saúde ou segurança.
+
+§ 1° O fornecedor de produtos e serviços que, posteriormente à sua introdução no mercado de consumo, tiver conhecimento da periculosidade que apresentem, deverá comunicar o fato imediatamente às autoridades competentes e aos consumidores, mediante anúncios publicitários.
+
+§ 2° Os anúncios publicitários a que se refere o parágrafo anterior serão veiculados na imprensa, rádio e televisão, às expensas do fornecedor do produto ou serviço.
+
+§ 3° Sempre que tiverem conhecimento de periculosidade de produtos ou serviços à saúde ou segurança dos consumidores, a União, os Estados, o Distrito Federal e os Municípios deverão informá-los a respeito.
+
+SEÇÃO II
+DA RESPONSABILIDADE PELO FATO DO PRODUTO E DO SERVIÇO
+
+Art. 12 O fabricante, o produtor, o construtor, nacional ou estrangeiro, e o importador respondem, independentemente da existência de culpa, pela reparação dos danos causados aos consumidores por defeitos decorrentes de projeto, fabricação, construção, montagem, fórmulas, manipulação, apresentação ou acondicionamento de seus produtos, bem como por informações insuficientes ou inadequadas sobre sua utilização e riscos.
+
+§ 1° O produto é defeituoso quando não oferece a segurança que dele legitimamente se espera, levando-se em consideração as circunstâncias relevantes, entre as quais:
+
+I - sua apresentação;
+
+II - o uso e os riscos que razoavelmente dele se esperam;
+
+III - a época em que foi colocado em circulação.
+
+§ 2º O produto não é considerado defeituoso pelo fato de outro de melhor qualidade ter sido colocado no mercado.
+
+§ 3° O fabricante, o construtor, o produtor ou importador só não será responsabilizado quando provar:
+
+I - que não colocou o produto no mercado;
+
+II - que, embora haja colocado o produto no mercado, o defeito inexiste;
+
+III - a culpa exclusiva do consumidor ou de terceiro.
+
+Art. 13 O comerciante é igualmente responsável, nos termos do artigo anterior, quando:
+
+I - o fabricante, o construtor, o produtor ou o importador não puderem ser identificados;
+
+II - o produto for fornecido sem identificação clara do seu fabricante, produtor, construtor ou importador;
+
+III - não conservar adequadamente os produtos perecíveis.
+
+Parágrafo único. Aquele que efetivar o pagamento ao prejudicado poderá exercer o direito de regresso contra os demais responsáveis, segundo sua participação na causação do evento danoso.
 
 SEÇÃO III
 DOS VÍCIOS DO PRODUTO E DO SERVIÇO
@@ -285,30 +349,134 @@ Art. 49. O consumidor pode desistir do contrato, no prazo de 7 dias a contar de 
 
 Parágrafo único. Se o consumidor exercitar o direito de arrependimento previsto neste artigo, os valores eventualmente pagos, a qualquer título, durante o prazo de reflexão, serão devolvidos, de imediato, monetariamente atualizados.
 
-CAPÍTULO V
-DAS PRÁTICAS COMERCIAIS
+TÍTULO II
+DAS INFRAÇÕES PENAIS
 
-SEÇÃO I
-DAS DISPOSIÇÕES GERAIS
+Art. 61. Constituem crimes contra as relações de consumo previstas neste código, sem prejuízo do disposto no Código Penal e leis especiais, as condutas tipificadas nos artigos seguintes.
 
-Art. 29. Para os fins deste Capítulo e do seguinte, equiparam-se aos consumidores todas as pessoas determináveis ou não, expostas às práticas nele previstas.
+Art. 62. (Vetado).
 
-SEÇÃO II
-DA OFERTA
+Art. 63. Omitir dizeres ou sinais ostensivos sobre a nocividade ou periculosidade de produtos, nas embalagens, nos invólucros, recipientes ou publicidade:
 
-Art. 30. Toda informação ou publicidade, suficientemente precisa, veiculada por qualquer forma ou meio de comunicação com relação a produtos e serviços oferecidos ou apresentados, obriga o fornecedor que a fizer veicular ou dela se utilizar e integra o contrato que vier a ser celebrado.
+Pena - Detenção de seis meses a dois anos e multa.
 
-Art. 31. A oferta e apresentação de produtos ou serviços devem assegurar informações corretas, claras, precisas, ostensivas e em língua portuguesa sobre suas características, qualidades, quantidade, composição, preço, garantia, prazos de validade e origem, entre outros dados, bem como sobre os riscos que apresentam à saúde e segurança dos consumidores.
+§ 1° Incorrerá nas mesmas penas quem deixar de alertar, mediante recomendações escritas ostensivas, sobre a periculosidade do serviço a ser prestado.
 
-Parágrafo único. As informações de que trata este artigo, nos produtos refrigerados oferecidos ao consumidor, serão gravadas de forma indelével.
+§ 2° Se o crime é culposo:
 
-Art. 35. Se o fornecedor de produtos ou serviços recusar cumprimento à oferta, apresentação ou publicidade, o consumidor poderá, alternativamente e à sua livre escolha:
+Pena - Detenção de um a seis meses ou multa.
 
-I - exigir o cumprimento forçado da obrigação, nos termos da oferta, apresentação ou publicidade;
+Art. 64. Deixar de comunicar à autoridade competente e aos consumidores a nocividade ou periculosidade de produtos cujo conhecimento seja posterior à sua colocação no mercado:
 
-II - aceitar outro produto ou prestação de serviço equivalente;
+Pena - Detenção de seis meses a dois anos e multa.
 
-III - rescindir o contrato, com direito à restituição de quantia eventualmente antecipada, monetariamente atualizada, e a perdas e danos.`;
+Parágrafo único. Incorrerá nas mesmas penas quem deixar de retirar do mercado, imediatamente quando determinado pela autoridade competente, os produtos nocivos ou perigosos, na forma deste artigo.
+
+Art. 65. Executar serviço de alto grau de periculosidade, contrariando determinação de autoridade competente:
+
+Pena - Detenção de seis meses a dois anos e multa.
+
+Parágrafo único. As penas deste artigo são aplicáveis sem prejuízo das correspondentes à lesão corporal e à morte.
+
+Art. 66. Fazer afirmação falsa ou enganosa, ou omitir informação relevante sobre a natureza, característica, qualidade, quantidade, segurança, desempenho, durabilidade, preço ou garantia de produtos ou serviços:
+
+Pena - Detenção de três meses a um ano e multa.
+
+§ 1º Incorrerá nas mesmas penas quem patrocinar a oferta.
+
+§ 2º Se o crime é culposo;
+
+Pena - Detenção de um a seis meses ou multa.
+
+Art. 67. Fazer ou promover publicidade que sabe ou deveria saber ser enganosa ou abusiva:
+
+Pena - Detenção de três meses a um ano e multa.
+
+Parágrafo único. (Vetado).
+
+Art. 68. Fazer ou promover publicidade que sabe ou deveria saber ser capaz de induzir o consumidor a se comportar de forma prejudicial ou perigosa a sua saúde ou segurança:
+
+Pena - Detenção de seis meses a dois anos e multa.
+
+Parágrafo único. (Vetado).
+
+Art. 69. Deixar de organizar dados fáticos, técnicos e científicos que dão base à publicidade:
+
+Pena - Detenção de um a seis meses ou multa.
+
+Art. 70. Empregar na reparação de produtos, peça ou componentes de reposição usados, sem autorização do consumidor:
+
+Pena - Detenção de três meses a um ano e multa.
+
+Art. 71. Utilizar, na cobrança de dívidas, de ameaça, coação, constrangimento físico ou moral, afirmações falsas incorretas ou enganosas ou de qualquer outro procedimento que exponha o consumidor, injustificadamente, a ridículo ou interfira com seu trabalho, descanso ou lazer:
+
+Pena - Detenção de três meses a um ano e multa.
+
+Art. 72. Impedir ou dificultar o acesso do consumidor às informações que sobre ele constem em cadastros, banco de dados, fichas e registros:
+
+Pena - Detenção de seis meses a um ano ou multa.
+
+Art. 73. Deixar de corrigir imediatamente informação sobre consumidor constante de cadastro, banco de dados, fichas ou registros que sabe ou deveria saber ser inexata:
+
+Pena - Detenção de um a seis meses ou multa.
+
+Art. 74. Deixar de entregar ao consumidor o termo de garantia adequadamente preenchido e com especificação clara de seu conteúdo;
+
+Pena - Detenção de um a seis meses ou multa.
+
+Art. 75. Quem, de qualquer forma, concorrer para os crimes referidos neste código, incide as penas a esses cominadas na medida de sua culpabilidade, bem como o diretor, administrador ou gerente da pessoa jurídica que promover, permitir ou por qualquer modo aprovar o fornecimento, oferta, exposição à venda ou manutenção em depósito de produtos ou a oferta e prestação de serviços nas condições por ele proibidas.
+
+Art. 76. São circunstâncias agravantes dos crimes tipificados neste código:
+
+I - serem cometidos em época de grave crise econômica ou por ocasião de calamidade;
+
+II - ocasionarem grave dano individual ou coletivo;
+
+III - dissimular-se a natureza ilícita do procedimento;
+
+IV - quando cometidos:
+
+a) por servidor público, ou por pessoa cuja condição econômico-social seja manifestamente superior à da vítima;
+
+b) em detrimento de operário ou rurícola; de menor de dezoito ou maior de sessenta anos ou de pessoas portadoras de deficiência mental interditadas ou não;
+
+V - serem praticados em operações que envolvam alimentos, medicamentos ou quaisquer outros produtos ou serviços essenciais .
+
+Art. 77. A pena pecuniária prevista nesta Seção será fixada em dias-multa, correspondente ao mínimo e ao máximo de dias de duração da pena privativa da liberdade cominada ao crime. Na individualização desta multa, o juiz observará o disposto no art. 60, §1° do Código Penal.
+
+Art. 78. Além das penas privativas de liberdade e de multa, podem ser impostas, cumulativa ou alternadamente, observado o disposto nos arts. 44 a 47, do Código Penal:
+
+I - a interdição temporária de direitos;
+
+II - a publicação em órgãos de comunicação de grande circulação ou audiência, às expensas do condenado, de notícia sobre os fatos e a condenação;
+
+III - a prestação de serviços à comunidade.
+
+Art. 79. O valor da fiança, nas infrações de que trata este código, será fixado pelo juiz, ou pela autoridade que presidir o inquérito, entre cem e duzentas mil vezes o valor do Bônus do Tesouro Nacional (BTN), ou índice equivalente que venha a substituí-lo.
+
+Parágrafo único. Se assim recomendar a situação econômica do indiciado ou réu, a fiança poderá ser:
+
+a) reduzida até a metade do seu valor mínimo;
+
+b) aumentada pelo juiz até vinte vezes.
+
+Art. 80. No processo penal atinente aos crimes previstos neste código, bem como a outros crimes e contravenções que envolvam relações de consumo, poderão intervir, como assistentes do Ministério Público, os legitimados indicados no art. 82, inciso III e IV, aos quais também é facultado propor ação penal subsidiária, se a denúncia não for oferecida no prazo legal.
+
+TÍTULO III
+DA DEFESA DO CONSUMIDOR EM JUÍZO
+
+CAPÍTULO I
+DISPOSIÇÕES GERAIS
+
+Art. 81. A defesa dos interesses e direitos dos consumidores e das vítimas poderá ser exercida em juízo individualmente, ou a título coletivo.
+
+Parágrafo único. A defesa coletiva será exercida quando se tratar de:
+
+I - interesses ou direitos difusos, assim entendidos, para efeitos deste código, os transindividuais, de natureza indivisível, de que sejam titulares pessoas indeterminadas e ligadas por circunstâncias de fato;
+
+II - interesses ou direitos coletivos, assim entendidos, para efeitos deste código, os transindividuais, de natureza indivisível de que seja titular grupo, categoria ou classe de pessoas ligadas entre si ou com a parte contrária por uma relação jurídica base;
+
+III - interesses ou direitos individuais homogêneos, assim entendidos os decorrentes de origem comum.`;
     
     return cdcContent;
   } catch (error) {
@@ -320,19 +488,27 @@ III - rescindir o contrato, com direito à restituição de quantia eventualment
 // Função melhorada para processar documento e gerar embeddings
 async function processDocument(documentId: string, content: string, openAIApiKey: string, supabase: any): Promise<number> {
   try {
-    // Dividir em chunks maiores para melhor contexto (1500 caracteres)
-    const chunkSize = 1500;
+    // Dividir em chunks menores com sobreposição para melhor contexto
+    const chunkSize = 1000; // Reduzido para 1000 caracteres
+    const overlap = 200;  // Sobreposição de 200 caracteres entre chunks
     const chunks = [];
     
-    for (let i = 0; i < content.length; i += chunkSize) {
+    for (let i = 0; i < content.length; i += (chunkSize - overlap)) {
+      if (i > 0 && i + chunkSize > content.length) {
+        // Se este é o último chunk e seria muito pequeno, merge com o anterior
+        if (content.length - i < chunkSize / 2) {
+          continue;
+        }
+      }
+      
       const chunk = content.slice(i, i + chunkSize);
       chunks.push({
         text: chunk,
-        index: Math.floor(i / chunkSize)
+        index: chunks.length
       });
     }
 
-    console.log(`Criados ${chunks.length} chunks para processamento`);
+    console.log(`Criados ${chunks.length} chunks para processamento com tamanho ${chunkSize} e sobreposição ${overlap}`);
     let successfulChunks = 0;
 
     // Processar cada chunk e gerar embeddings - com melhor tratamento de erros

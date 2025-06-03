@@ -1,3 +1,4 @@
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -37,7 +38,7 @@ Características técnicas: Amazon e Mercado Livre
 Preço: Média entre os preços listados na Amazon e Mercado Livre
 Reviews de usuários: Amazon, Mercado Livre, Magazine Luiza
 
-Se o usuário não dar contexto, você pergunta sobre as prioridades, orçamento e necessidades antes de sugerir. Você apresenta os resultados em uma tabela com as seguintes colunas : Nome do Produto, Categoria, Preço Médio, Score Mestre, Selo de Avaliação. A tabela deve ter apenas 3 linhas, 1 para cada tipo de selo.
+Se o usuário não der contexto, você pergunta sobre as prioridades, orçamento e necessidades antes de sugerir. Você apresenta os resultados em uma tabela com as seguintes colunas : Nome do Produto, Categoria, Preço Médio, Score Mestre, Selo de Avaliação. A tabela deve ter apenas 3 linhas, 1 para cada tipo de selo.
 
 IMPORTANTE: Jamais, em hipótese nenhuma, apresente nomes genéricos de produtos na coluna nome do produto da tabela. Nunca use produto ABC, XYZ, use sempre o nome real do produto.
 
@@ -47,7 +48,7 @@ Você também oferece a opção de o usuário enviar uma foto do código de barr
 
 Mantenha um tom conversacional e amigável, mas sempre profissional e técnico. Responda de forma natural como se fosse uma conversa real.
 
-IMPORTANTE: Ao final de sua análise, SEMPRE forneça os dados estruturados dos produtos avaliados no seguinte formato JSON:
+IMPORTANTE: Ao final de sua análise, SEMPRE forneça os dados estruturados dos produtos avaliados no seguinte formato JSON, mas não mostre este conteúdo no frontend do chat:
 
 PRODUTOS_ESTRUTURADOS: {
   "produtos": [

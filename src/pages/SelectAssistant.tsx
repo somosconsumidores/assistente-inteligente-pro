@@ -6,9 +6,11 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Scale, DollarSign, ShoppingCart, Plane, ShoppingBasket, Crown, CheckCircle } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 const SelectAssistant = () => {
   const [selectedAssistant, setSelectedAssistant] = useState('');
+  const { profile } = useAuth();
   const navigate = useNavigate();
 
   const assistants = [
@@ -90,7 +92,9 @@ const SelectAssistant = () => {
           
           <div className="flex items-center space-x-2 bg-orange-100 text-orange-800 px-4 py-2 rounded-full">
             <Crown className="w-4 h-4" />
-            <span className="text-sm font-medium">Plano Gratuito</span>
+            <span className="text-sm font-medium">
+              Plano {profile?.plan === 'premium' ? 'Premium' : 'Gratuito'}
+            </span>
           </div>
         </div>
       </header>
@@ -104,29 +108,40 @@ const SelectAssistant = () => {
             </span>
           </h1>
           <p className="text-lg text-gray-600 mb-6">
-            No plano gratuito, você pode escolher 1 assistente para usar gratuitamente.
+            {profile?.plan === 'premium' 
+              ? 'Como usuário premium, você tem acesso a todos os assistentes!'
+              : 'No plano gratuito, você pode escolher 1 assistente para usar gratuitamente.'
+            }
           </p>
           
-          <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-100 to-red-100 text-orange-800 rounded-xl border border-orange-200">
-            <Crown className="w-5 h-5 mr-2" />
-            <span className="font-medium">Quer acesso a todos os 5 assistentes? </span>
-            <button 
-              onClick={handleUpgrade}
-              className="ml-2 text-orange-600 hover:text-orange-700 font-semibold underline"
-            >
-              Fazer upgrade
-            </button>
-          </div>
+          {profile?.plan !== 'premium' && (
+            <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-100 to-red-100 text-orange-800 rounded-xl border border-orange-200">
+              <Crown className="w-5 h-5 mr-2" />
+              <span className="font-medium">Quer acesso a todos os 5 assistentes? </span>
+              <button 
+                onClick={handleUpgrade}
+                className="ml-2 text-orange-600 hover:text-orange-700 font-semibold underline"
+              >
+                Fazer upgrade
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Assistant Selection */}
         <Card className="border-2 border-gray-200">
           <CardHeader>
             <CardTitle className="text-xl font-bold text-center">
-              Selecione seu assistente gratuito
+              {profile?.plan === 'premium' 
+                ? 'Escolha qualquer assistente'
+                : 'Selecione seu assistente gratuito'
+              }
             </CardTitle>
             <CardDescription className="text-center">
-              Você poderá trocar de assistente a qualquer momento
+              {profile?.plan === 'premium' 
+                ? 'Você tem acesso completo a todos os assistentes'
+                : 'Você poderá trocar de assistente a qualquer momento'
+              }
             </CardDescription>
           </CardHeader>
           
@@ -205,7 +220,10 @@ const SelectAssistant = () => {
               </Button>
               
               <p className="text-sm text-gray-500 mt-4">
-                Você poderá trocar de assistente ou fazer upgrade para o plano premium a qualquer momento
+                {profile?.plan === 'premium' 
+                  ? 'Como usuário premium, você pode usar todos os assistentes quando quiser'
+                  : 'Você poderá trocar de assistente ou fazer upgrade para o plano premium a qualquer momento'
+                }
               </p>
             </div>
           </CardContent>

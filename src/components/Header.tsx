@@ -1,12 +1,32 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { MessageSquare, LogIn, UserPlus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 const Header = () => {
-  const { user, logout } = useAuth();
+  const { user, profile, logout } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast({
+        title: "Sucesso!",
+        description: "Logout realizado com sucesso"
+      });
+      navigate('/');
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: error instanceof Error ? error.message : "Erro ao fazer logout",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
     <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
@@ -38,10 +58,12 @@ const Header = () => {
           
           {user ? (
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">Olá, {user.name}</span>
+              <span className="text-sm text-gray-600">
+                Olá, {profile?.name || user.email?.split('@')[0]}
+              </span>
               <Button 
                 variant="outline" 
-                onClick={logout}
+                onClick={handleLogout}
                 className="text-red-600 border-red-300 hover:bg-red-50"
               >
                 Sair

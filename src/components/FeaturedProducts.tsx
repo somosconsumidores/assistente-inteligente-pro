@@ -130,7 +130,6 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
                 <CardTitle className="text-lg leading-tight text-gray-900 line-clamp-2">
                   {product.name}
                 </CardTitle>
-                <p className="text-sm text-gray-600">{sealInfo.description}</p>
               </CardHeader>
               
               <CardContent className="pt-0">

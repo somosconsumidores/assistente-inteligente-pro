@@ -54,15 +54,11 @@ const ProductChat = () => {
     startChat();
   };
 
+  // Only show featured products if we have messages (chat has started) and we're not loading
+  const shouldShowFeaturedProducts = featuredProducts.length > 0 && messages.length > 0 && !isLoading;
+
   return (
     <div className="space-y-6">
-      {/* Featured Products Section - Always show if we have products */}
-      {featuredProducts.length > 0 && (
-        <div className="mb-6">
-          <FeaturedProducts products={featuredProducts} />
-        </div>
-      )}
-
       {/* Chat Interface */}
       <div className="flex flex-col h-[600px] max-w-4xl mx-auto">
         {/* Header */}
@@ -174,6 +170,13 @@ const ProductChat = () => {
           </div>
         </div>
       </div>
+
+      {/* Featured Products Section - Now below the chat and only shows after AI response */}
+      {shouldShowFeaturedProducts && (
+        <div className="max-w-4xl mx-auto">
+          <FeaturedProducts products={featuredProducts} />
+        </div>
+      )}
     </div>
   );
 };

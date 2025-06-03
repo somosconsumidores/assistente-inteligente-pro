@@ -1,8 +1,9 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Star, Award, DollarSign, ExternalLink } from 'lucide-react';
+import { Star, Award, DollarSign, ExternalLink, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface FeaturedProduct {
   id: string;
@@ -19,6 +20,9 @@ interface FeaturedProductsProps {
 }
 
 const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
+  const [productImages, setProductImages] = useState<{[key: string]: string}>({});
+  const [loadingImages, setLoadingImages] = useState<{[key: string]: boolean}>({});
+
   // Filter valid products
   const validProducts = products.filter(product => 
     product.name && 
@@ -26,6 +30,56 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
     product.scoreMestre >= 1 && 
     product.scoreMestre <= 10
   );
+
+  // Generate images for products when they change
+  useEffect(() => {
+    const generateImages = async () => {
+      for (const product of validProducts) {
+        // Skip if we already have an image for this product
+        if (productImages[product.id]) {
+          continue;
+        }
+
+        setLoadingImages(prev => ({ ...prev, [product.id]: true }));
+
+        try {
+          console.log('Generating image for product:', product.name);
+          
+          const { data, error } = await supabase.functions.invoke('generate-product-image', {
+            body: { productName: product.name }
+          });
+
+          if (error) {
+            console.error('Error generating image for', product.name, ':', error);
+            // Use fallback image
+            setProductImages(prev => ({
+              ...prev,
+              [product.id]: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center'
+            }));
+          } else if (data?.imageUrl) {
+            console.log('Image generated successfully for:', product.name);
+            setProductImages(prev => ({
+              ...prev,
+              [product.id]: data.imageUrl
+            }));
+          }
+        } catch (err) {
+          console.error('Error generating image for', product.name, ':', err);
+          // Use fallback image
+          setProductImages(prev => ({
+            ...prev,
+            [product.id]: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center'
+          }));
+        } finally {
+          setLoadingImages(prev => ({ ...prev, [product.id]: false }));
+        }
+      }
+    };
+
+    if (validProducts.length > 0) {
+      generateImages();
+    }
+  }, [validProducts.map(p => p.id).join(',')]); // Only re-run if product IDs change
 
   if (validProducts.length === 0) {
     return null;
@@ -98,19 +152,28 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
       }`}>
         {validProducts.map((product) => {
           const sealInfo = getSealInfo(product.seal);
+          const isImageLoading = loadingImages[product.id];
+          const productImage = productImages[product.id] || product.image;
           
           return (
             <Card key={product.id} className={`overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105 bg-gradient-to-br ${sealInfo.bgColor} border-2`}>
               <div className="relative">
                 <div className="w-full h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center';
-                    }}
-                  />
+                  {isImageLoading ? (
+                    <div className="flex flex-col items-center justify-center">
+                      <Loader2 className="w-8 h-8 animate-spin text-gray-400 mb-2" />
+                      <span className="text-sm text-gray-500">Gerando imagem...</span>
+                    </div>
+                  ) : (
+                    <img
+                      src={productImage}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center';
+                      }}
+                    />
+                  )}
                 </div>
                 <Badge className={`absolute top-3 left-3 ${sealInfo.color} shadow-lg`}>
                   <div className="flex items-center gap-1">

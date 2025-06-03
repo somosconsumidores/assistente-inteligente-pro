@@ -113,10 +113,25 @@ const extractTableProducts = (text: string): any[] => {
         const [name, category, priceStr, scoreStr, sealStr] = columns;
         
         // Extract numeric values
-        const priceMatch = priceStr.match(/[\d,\.]+/);
-        const scoreMatch = scoreStr.match(/[\d,\.]+/);
+        // New logic for price:
+        // priceStr is the input, e.g., "R$ 1.000,50" or "1,234.56"
+        let normalizedPrice = priceStr.replace(/[^\d,\.]/g, ''); // Keep only digits, dots, commas from priceStr
+
+        const hasCommaAsDecimal = /,\d{1,2}$/.test(normalizedPrice); // Checks for "xx,dd" or "xx,d" at the end
+
+        if (hasCommaAsDecimal) {
+            // Format like "1.234,56" or "1000,50"
+            normalizedPrice = normalizedPrice.replace(/\./g, ''); // Remove dots (thousand separators) -> "1234,56"
+            normalizedPrice = normalizedPrice.replace(',', '.');  // Replace comma with dot (decimal separator) -> "1234.56"
+        } else {
+            // Format like "1,234.56" or "1234.56" or "1,234"
+            // Comma is not a decimal separator (or no comma exists)
+            normalizedPrice = normalizedPrice.replace(/,/g, ''); // Remove commas (thousand separators) -> "1234.56" or "1234"
+        }
+        // At this point, normalizedPrice should be in a format like "1234.56" or "1234"
+        const price = parseFloat(normalizedPrice) || 0; // Use || 0 to handle potential NaN from parseFloat
         
-        const price = priceMatch ? parseFloat(priceMatch[0].replace(',', '.')) : 0;
+        const scoreMatch = scoreStr.match(/[\d,\.]+/);
         const score = scoreMatch ? parseFloat(scoreMatch[0].replace(',', '.')) : 0;
         
         // Map seal types
@@ -147,6 +162,7 @@ const extractTableProducts = (text: string): any[] => {
     }
     
     console.log('Total products extracted from table:', products.length);
+
     return products;
   } catch (error) {
     console.log('Error extracting table products:', error);

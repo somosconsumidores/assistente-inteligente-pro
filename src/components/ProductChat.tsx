@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Send, Bot, User, Loader2, RotateCcw } from 'lucide-react';
 import { useProductChat } from '@/hooks/useProductChat';
+import FormattedMessage from './FormattedMessage';
 
 const ProductChat = () => {
   const [inputValue, setInputValue] = useState('');
@@ -91,11 +92,16 @@ const ProductChat = () => {
                 : 'bg-white border-gray-200'
             }`}>
               <CardContent className="p-4">
-                <div className={`text-sm leading-relaxed ${
-                  message.type === 'user' ? 'text-white' : 'text-gray-800'
-                }`}>
-                  <div className="whitespace-pre-wrap">{message.content}</div>
-                </div>
+                {message.type === 'user' ? (
+                  <div className="text-sm leading-relaxed text-white">
+                    <div className="whitespace-pre-wrap">{message.content}</div>
+                  </div>
+                ) : (
+                  <FormattedMessage 
+                    content={message.content} 
+                    className="text-sm"
+                  />
+                )}
                 <span className={`text-xs mt-2 block ${
                   message.type === 'user' ? 'text-blue-100' : 'text-gray-500'
                 }`}>

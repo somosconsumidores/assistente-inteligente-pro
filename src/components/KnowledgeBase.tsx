@@ -1,13 +1,17 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, CheckCircle, Clock } from 'lucide-react';
+import { FileText, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import UploadDocumentButton from './UploadDocumentButton';
 
 const KnowledgeBase = () => {
   const [documents, setDocuments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [documentStats, setDocumentStats] = useState({
+    totalChunks: 0,
+    totalChars: 0,
+  });
 
   useEffect(() => {
     loadDocuments();
@@ -16,6 +20,7 @@ const KnowledgeBase = () => {
   const loadDocuments = async () => {
     setIsLoading(true);
     try {
+      // Buscar documentos
       const { data, error } = await supabase
         .from('knowledge_base')
         .select('*')
@@ -27,6 +32,27 @@ const KnowledgeBase = () => {
       }
 
       setDocuments(data || []);
+
+      // Calcular estatísticas
+      if (data && data.length > 0) {
+        let totalChunks = 0;
+        let totalChars = 0;
+        
+        // Buscar chunks
+        const { data: chunks, error: chunksError } = await supabase
+          .from('knowledge_chunks')
+          .select('chunk_text');
+          
+        if (!chunksError && chunks) {
+          totalChunks = chunks.length;
+          totalChars = chunks.reduce((sum, chunk) => sum + (chunk.chunk_text?.length || 0), 0);
+        }
+        
+        setDocumentStats({
+          totalChunks,
+          totalChars
+        });
+      }
     } catch (error) {
       console.error('Erro ao carregar documentos:', error);
     } finally {
@@ -85,27 +111,51 @@ const KnowledgeBase = () => {
             <p className="text-sm">Clique no botão acima para adicionar o Código de Defesa do Consumidor</p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {documents.map((doc) => (
-              <div key={doc.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <FileText className="w-5 h-5 text-blue-600" />
-                  <div>
-                    <h4 className="font-medium">{doc.title}</h4>
-                    <p className="text-sm text-gray-600">{doc.file_name}</p>
-                    <p className="text-xs text-gray-500">
-                      Adicionado em {new Date(doc.created_at).toLocaleDateString('pt-BR')}
-                    </p>
-                  </div>
+          <>
+            {/* Estatísticas da base */}
+            <div className="bg-blue-50 rounded-lg p-4 mb-4 border border-blue-100">
+              <div className="flex items-center space-x-2 mb-1">
+                <AlertCircle className="w-4 h-4 text-blue-600" />
+                <h4 className="font-medium text-blue-800">Estatísticas da Base de Conhecimento</h4>
+              </div>
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                <div className="bg-white p-3 rounded border border-blue-100">
+                  <p className="text-sm text-gray-600">Total de chunks</p>
+                  <p className="font-bold text-lg">{documentStats.totalChunks}</p>
                 </div>
-                
-                <div className="flex items-center space-x-1">
-                  {getStatusIcon(doc.processed_at)}
-                  <span className="text-sm">{getStatusText(doc.processed_at)}</span>
+                <div className="bg-white p-3 rounded border border-blue-100">
+                  <p className="text-sm text-gray-600">Total de caracteres</p>
+                  <p className="font-bold text-lg">{documentStats.totalChars.toLocaleString()}</p>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+            
+            {/* Lista de documentos */}
+            <div className="space-y-3">
+              {documents.map((doc) => (
+                <div key={doc.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <FileText className="w-5 h-5 text-blue-600" />
+                    <div>
+                      <h4 className="font-medium">{doc.title}</h4>
+                      <p className="text-sm text-gray-600">{doc.file_name}</p>
+                      <p className="text-xs text-gray-500">
+                        Adicionado em {new Date(doc.created_at).toLocaleDateString('pt-BR')}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Tamanho: {doc.content ? (doc.content.length / 1000).toFixed(1) : '0'} KB
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-1">
+                    {getStatusIcon(doc.processed_at)}
+                    <span className="text-sm">{getStatusText(doc.processed_at)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </CardContent>
     </Card>

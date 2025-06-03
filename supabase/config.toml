@@ -1,1 +1,16 @@
+
 project_id = "gfawccsiklzqvzchmbis"
+
+[api]
+enabled = true
+url = "https://gfawccsiklzqvzchmbis.supabase.co"
+service_role_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdmYXdjY3Npa2x6cXZ6Y2htYmlzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODk2MjUwNiwiZXhwIjoyMDY0NTM4NTA2fQ.wjHHyK0dhQtPr6L0hO3GAMXfPMdsdUvGUwxiLGlc-J8"
+
+[functions.admin-upload-document]
+verify_jwt = true
+
+[functions.process-document]
+verify_jwt = true
+
+[functions.direito-chat]
+verify_jwt = false

@@ -43,8 +43,8 @@ serve(async (req) => {
 
     console.log('Processando documento:', document.title);
 
-    // Dividir o conteúdo em chunks (aproximadamente 1000 caracteres cada)
-    const chunkSize = 1000;
+    // Dividir o conteúdo em chunks maiores (1500 caracteres cada)
+    const chunkSize = 1500;
     const chunks = [];
     const content = document.content;
     
@@ -57,30 +57,18 @@ serve(async (req) => {
     }
 
     console.log(`Criados ${chunks.length} chunks para processamento`);
+    let successfulChunks = 0;
 
-    // Processar cada chunk e gerar embeddings
+    // Processar cada chunk e gerar embeddings com retry
     for (const chunk of chunks) {
       try {
-        // Gerar embedding usando OpenAI
-        const embeddingResponse = await fetch('https://api.openai.com/v1/embeddings', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${openAIApiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'text-embedding-3-small',
-            input: chunk.text,
-          }),
-        });
+        // Gerar embedding usando OpenAI com retry
+        const embedding = await generateEmbedding(chunk.text, openAIApiKey, 3);
 
-        if (!embeddingResponse.ok) {
-          console.error('Erro ao gerar embedding:', await embeddingResponse.text());
+        if (!embedding) {
+          console.error('Não foi possível gerar embedding para o chunk', chunk.index);
           continue;
         }
-
-        const embeddingData = await embeddingResponse.json();
-        const embedding = embeddingData.data[0].embedding;
 
         // Salvar o chunk com embedding no banco
         const { error: insertError } = await supabase
@@ -94,9 +82,11 @@ serve(async (req) => {
 
         if (insertError) {
           console.error('Erro ao salvar chunk:', insertError);
+        } else {
+          successfulChunks++;
         }
       } catch (error) {
-        console.error('Erro ao processar chunk:', error);
+        console.error(`Erro ao processar chunk ${chunk.index}:`, error);
       }
     }
 
@@ -111,7 +101,8 @@ serve(async (req) => {
     return new Response(JSON.stringify({ 
       success: true, 
       message: 'Documento processado com sucesso',
-      chunksProcessed: chunks.length 
+      chunksProcessed: successfulChunks,
+      totalChunks: chunks.length
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
@@ -126,3 +117,47 @@ serve(async (req) => {
     });
   }
 });
+
+// Função para gerar embedding com retry
+async function generateEmbedding(text: string, apiKey: string, maxRetries: number): Promise<any> {
+  let retries = 0;
+  
+  while (retries < maxRetries) {
+    try {
+      const embeddingResponse = await fetch('https://api.openai.com/v1/embeddings', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'text-embedding-3-small',
+          input: text,
+        }),
+      });
+
+      if (!embeddingResponse.ok) {
+        const errorText = await embeddingResponse.text();
+        console.error('Erro na API de embeddings:', errorText);
+        throw new Error(`API error: ${errorText}`);
+      }
+
+      const embeddingData = await embeddingResponse.json();
+      return embeddingData.data[0].embedding;
+      
+    } catch (error) {
+      retries++;
+      console.error(`Tentativa ${retries}/${maxRetries} falhou:`, error);
+      
+      if (retries >= maxRetries) {
+        console.error('Máximo de tentativas alcançado');
+        return null;
+      }
+      
+      // Esperar um tempo antes de tentar novamente (exponential backoff)
+      await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retries)));
+    }
+  }
+  
+  return null;
+}

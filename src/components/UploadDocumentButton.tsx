@@ -16,11 +16,11 @@ const UploadDocumentButton = ({ onUploadComplete }: { onUploadComplete?: () => v
       const documentUrl = 'https://a025adad-b360-4787-a9c7-13b92df27cb3.usrfiles.com/ugd/a025ad_016d173f460048828bb7304cc6f5d004.pdf';
       const title = 'Código de Defesa do Consumidor';
       
-      await uploadDocumentFromUrl(documentUrl, title);
+      const result = await uploadDocumentFromUrl(documentUrl, title);
       
       toast({
         title: "Sucesso",
-        description: "Documento adicionado à base de conhecimento com sucesso!",
+        description: `Documento adicionado à base de conhecimento com sucesso! ${result.charactersProcessed || 0} caracteres processados em ${result.chunksProcessed || 0} chunks.`,
       });
       
       if (onUploadComplete) {

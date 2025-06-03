@@ -56,7 +56,7 @@ const ProductChat = () => {
 
   return (
     <div className="space-y-6">
-      {/* Featured Products Section - Moved to top for better visibility */}
+      {/* Featured Products Section - Always show if we have products */}
       {featuredProducts.length > 0 && (
         <div className="mb-6">
           <FeaturedProducts products={featuredProducts} />
@@ -176,9 +176,14 @@ const ProductChat = () => {
       </div>
 
       {/* Debug info - remove in production */}
-      {featuredProducts.length > 0 && (
-        <div className="text-xs text-gray-500 mt-2">
+      {process.env.NODE_ENV === 'development' && (
+        <div className="text-xs text-gray-500 mt-2 p-2 bg-gray-100 rounded">
           Debug: {featuredProducts.length} produtos em destaque encontrados
+          {featuredProducts.length > 0 && (
+            <pre className="mt-1 text-xs">
+              {JSON.stringify(featuredProducts.map(p => ({ name: p.name, seal: p.seal })), null, 2)}
+            </pre>
+          )}
         </div>
       )}
     </div>

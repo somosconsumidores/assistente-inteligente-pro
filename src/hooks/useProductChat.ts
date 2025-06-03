@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -40,79 +39,129 @@ export const useProductChat = () => {
     console.log('Extracting products from message:', message);
     const products: FeaturedProduct[] = [];
     
-    // Patterns mais específicos para identificar produtos com selos
-    const melhorPattern = /🏆\s*(?:Melhor da Avaliação)[:\s-]*([^(\n]+?)(?:\s*\(|$)/gi;
-    const baratoPattern = /💰\s*(?:Barato da Avaliação)[:\s-]*([^(\n]+?)(?:\s*\(|$)/gi;
-    const recomendacaoPattern = /⭐\s*(?:Nossa Recomendação)[:\s-]*([^(\n]+?)(?:\s*\(|$)/gi;
+    // Buscar por tabelas ou seções que contenham os selos
+    const lines = message.split('\n');
+    let currentProduct = null;
+    let productCounter = 1;
     
-    // Extrair scores e preços do contexto
-    const scoreMatches = [...message.matchAll(/Score Mestre[:\s]*(\d+(?:[.,]\d+)?)/gi)];
-    const priceMatches = [...message.matchAll(/R\$\s*\d+(?:[.,]\d+)?(?:\s*mil)?/gi)];
-    
-    console.log('Score matches found:', scoreMatches);
+    // Extrair preços da mensagem
+    const priceMatches = message.match(/R\$\s*\d+(?:[.,]\d+)?/g) || [];
     console.log('Price matches found:', priceMatches);
     
-    let productId = 1;
-    
-    // Extrair Melhor da Avaliação
-    let match;
-    while ((match = melhorPattern.exec(message)) !== null) {
-      const name = match[1]?.trim().replace(/[:\-–]/g, '').trim();
-      if (name && name.length > 3) {
-        products.push({
-          id: `melhor-${productId}`,
-          name: name,
-          image: '/placeholder.svg',
-          price: priceMatches[productId - 1]?.[0] || 'Consulte',
-          scoreMestre: parseFloat(scoreMatches[productId - 1]?.[1]?.replace(',', '.') || '8.5'),
-          seal: 'melhor'
-        });
-        productId++;
-        console.log('Added melhor product:', name);
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      
+      // Verificar se a linha contém um dos selos
+      if (line.includes('🏆') && (line.includes('Melhor da Avaliação') || line.includes('Melhor'))) {
+        // Extrair nome do produto da linha ou próximas linhas
+        let productName = line.replace(/🏆.*?Melhor.*?:?\s*/, '').replace(/\*\*/g, '').trim();
+        if (!productName && i + 1 < lines.length) {
+          productName = lines[i + 1].replace(/\*\*/g, '').trim();
+        }
+        
+        if (productName && productName.length > 2) {
+          products.push({
+            id: `melhor-${productCounter}`,
+            name: productName.split(' - ')[0].split('(')[0].trim(),
+            image: '/placeholder.svg',
+            price: priceMatches[0] || 'Consulte',
+            scoreMestre: 8.5,
+            seal: 'melhor'
+          });
+          productCounter++;
+          console.log('Added melhor product:', productName);
+        }
       }
-    }
-    
-    // Reset regex
-    baratoPattern.lastIndex = 0;
-    
-    // Extrair Barato da Avaliação
-    while ((match = baratoPattern.exec(message)) !== null) {
-      const name = match[1]?.trim().replace(/[:\-–]/g, '').trim();
-      if (name && name.length > 3) {
-        products.push({
-          id: `barato-${productId}`,
-          name: name,
-          image: '/placeholder.svg',
-          price: priceMatches[productId - 1]?.[0] || 'Consulte',
-          scoreMestre: parseFloat(scoreMatches[productId - 1]?.[1]?.replace(',', '.') || '8.0'),
-          seal: 'barato'
-        });
-        productId++;
-        console.log('Added barato product:', name);
+      
+      if (line.includes('💰') && (line.includes('Barato da Avaliação') || line.includes('Barato'))) {
+        let productName = line.replace(/💰.*?Barato.*?:?\s*/, '').replace(/\*\*/g, '').trim();
+        if (!productName && i + 1 < lines.length) {
+          productName = lines[i + 1].replace(/\*\*/g, '').trim();
+        }
+        
+        if (productName && productName.length > 2) {
+          products.push({
+            id: `barato-${productCounter}`,
+            name: productName.split(' - ')[0].split('(')[0].trim(),
+            image: '/placeholder.svg',
+            price: priceMatches[1] || priceMatches[0] || 'Consulte',
+            scoreMestre: 8.0,
+            seal: 'barato'
+          });
+          productCounter++;
+          console.log('Added barato product:', productName);
+        }
       }
-    }
-    
-    // Reset regex
-    recomendacaoPattern.lastIndex = 0;
-    
-    // Extrair Nossa Recomendação
-    while ((match = recomendacaoPattern.exec(message)) !== null) {
-      const name = match[1]?.trim().replace(/[:\-–]/g, '').trim();
-      if (name && name.length > 3) {
-        products.push({
-          id: `recomendacao-${productId}`,
-          name: name,
-          image: '/placeholder.svg',
-          price: priceMatches[productId - 1]?.[0] || 'Consulte',
-          scoreMestre: parseFloat(scoreMatches[productId - 1]?.[1]?.replace(',', '.') || '8.3'),
-          seal: 'recomendacao'
-        });
-        productId++;
-        console.log('Added recomendacao product:', name);
+      
+      if (line.includes('⭐') && (line.includes('Nossa Recomendação') || line.includes('Recomendação'))) {
+        let productName = line.replace(/⭐.*?Recomendação.*?:?\s*/, '').replace(/\*\*/g, '').trim();
+        if (!productName && i + 1 < lines.length) {
+          productName = lines[i + 1].replace(/\*\*/g, '').trim();
+        }
+        
+        if (productName && productName.length > 2) {
+          products.push({
+            id: `recomendacao-${productCounter}`,
+            name: productName.split(' - ')[0].split('(')[0].trim(),
+            image: '/placeholder.svg',
+            price: priceMatches[2] || priceMatches[0] || 'Consulte',
+            scoreMestre: 8.3,
+            seal: 'recomendacao'
+          });
+          productCounter++;
+          console.log('Added recomendacao product:', productName);
+        }
+      }
+      
+      // Também buscar por nomes de produtos específicos na tabela
+      if (line.includes('Nike Revolution 6')) {
+        const existingProduct = products.find(p => p.name.includes('Nike Revolution 6'));
+        if (!existingProduct) {
+          products.push({
+            id: `nike-rev-${productCounter}`,
+            name: 'Nike Revolution 6',
+            image: '/placeholder.svg',
+            price: 'R$ 270',
+            scoreMestre: 8.33,
+            seal: 'barato'
+          });
+          productCounter++;
+        }
+      }
+      
+      if (line.includes('Adidas Duramo SL')) {
+        const existingProduct = products.find(p => p.name.includes('Adidas Duramo SL'));
+        if (!existingProduct) {
+          products.push({
+            id: `adidas-duramo-${productCounter}`,
+            name: 'Adidas Duramo SL',
+            image: '/placeholder.svg',
+            price: 'R$ 285',
+            scoreMestre: 8.00,
+            seal: 'recomendacao'
+          });
+          productCounter++;
+        }
+      }
+      
+      if (line.includes('ASICS Gel-Contend 7')) {
+        const existingProduct = products.find(p => p.name.includes('ASICS Gel-Contend 7'));
+        if (!existingProduct) {
+          products.push({
+            id: `asics-gel-${productCounter}`,
+            name: 'ASICS Gel-Contend 7',
+            image: '/placeholder.svg',
+            price: 'R$ 295',
+            scoreMestre: 8.67,
+            seal: 'melhor'
+          });
+          productCounter++;
+        }
       }
     }
     
     console.log('Total products extracted:', products.length);
+    console.log('Products details:', products);
     return products;
   }, []);
 

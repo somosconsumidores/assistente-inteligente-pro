@@ -36,7 +36,7 @@ const chatSteps: ChatStep[] = [
     field: 'renda',
     type: 'number',
     validation: (value) => value > 0,
-    formatValue: (value) => parseFloat(value.replace(/[^\d]/g, '')) || 0
+    formatValue: (value) => parseFloat(value.replace(/[^\d,]/g, '').replace(',', '.')) || 0
   },
   {
     id: 'gastos-fixos',
@@ -44,7 +44,7 @@ const chatSteps: ChatStep[] = [
     field: 'gastosFixes',
     type: 'number',
     validation: (value) => value >= 0,
-    formatValue: (value) => parseFloat(value.replace(/[^\d]/g, '')) || 0
+    formatValue: (value) => parseFloat(value.replace(/[^\d,]/g, '').replace(',', '.')) || 0
   },
   {
     id: 'gastos-variaveis',
@@ -52,7 +52,7 @@ const chatSteps: ChatStep[] = [
     field: 'gastosVariaveis',
     type: 'number',
     validation: (value) => value >= 0,
-    formatValue: (value) => parseFloat(value.replace(/[^\d]/g, '')) || 0
+    formatValue: (value) => parseFloat(value.replace(/[^\d,]/g, '').replace(',', '.')) || 0
   },
   {
     id: 'dividas',
@@ -60,7 +60,7 @@ const chatSteps: ChatStep[] = [
     field: 'dividas',
     type: 'number',
     validation: (value) => value >= 0,
-    formatValue: (value) => parseFloat(value.replace(/[^\d]/g, '')) || 0
+    formatValue: (value) => parseFloat(value.replace(/[^\d,]/g, '').replace(',', '.')) || 0
   },
   {
     id: 'reserva',
@@ -68,7 +68,7 @@ const chatSteps: ChatStep[] = [
     field: 'reservaEmergencia',
     type: 'number',
     validation: (value) => value >= 0,
-    formatValue: (value) => parseFloat(value.replace(/[^\d]/g, '')) || 0
+    formatValue: (value) => parseFloat(value.replace(/[^\d,]/g, '').replace(',', '.')) || 0
   },
   {
     id: 'investimentos',
@@ -76,7 +76,7 @@ const chatSteps: ChatStep[] = [
     field: 'investimentos',
     type: 'number',
     validation: (value) => value >= 0,
-    formatValue: (value) => parseFloat(value.replace(/[^\d]/g, '')) || 0
+    formatValue: (value) => parseFloat(value.replace(/[^\d,]/g, '').replace(',', '.')) || 0
   },
   {
     id: 'meta-economia',
@@ -84,7 +84,7 @@ const chatSteps: ChatStep[] = [
     field: 'metaEconomia',
     type: 'number',
     validation: (value) => value >= 0,
-    formatValue: (value) => parseFloat(value.replace(/[^\d]/g, '')) || 0
+    formatValue: (value) => parseFloat(value.replace(/[^\d,]/g, '').replace(',', '.')) || 0
   },
   {
     id: 'objetivos',

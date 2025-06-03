@@ -49,9 +49,9 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({ data }) => {
   ];
 
   const patrimonioData = [
-    { name: 'Reserva de Emergência', value: data.reservaEmergencia },
-    { name: 'Investimentos', value: data.investimentos },
-    { name: 'Dívidas', value: -data.dividas }
+    { name: 'Reserva de Emergência', value: data.reservaEmergencia, color: '#10b981' },
+    { name: 'Investimentos', value: data.investimentos, color: '#3b82f6' },
+    { name: 'Dívidas', value: data.dividas, color: '#ef4444' }
   ];
 
   const metasData = [
@@ -210,10 +210,13 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({ data }) => {
                 <Tooltip 
                   formatter={(value: number) => [`R$ ${Math.abs(value).toLocaleString('pt-BR')}`, '']}
                 />
-                <Bar 
-                  dataKey="value" 
-                  fill={(data) => data.value >= 0 ? '#10b981' : '#ef4444'}
-                />
+                {patrimonioData.map((entry, index) => (
+                  <Bar 
+                    key={index}
+                    dataKey="value" 
+                    fill={entry.color}
+                  />
+                ))}
               </BarChart>
             </ResponsiveContainer>
           </CardContent>

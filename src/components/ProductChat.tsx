@@ -54,7 +54,7 @@ const ProductChat = () => {
     startChat();
   };
 
-  // Only show featured products if we have messages (chat has started) and we're not loading
+  // Only show featured products if we have messages AND we're NOT loading AND we have products
   const shouldShowFeaturedProducts = featuredProducts.length > 0 && messages.length > 0 && !isLoading;
 
   return (
@@ -171,7 +171,7 @@ const ProductChat = () => {
         </div>
       </div>
 
-      {/* Featured Products Section - Now below the chat and only shows after AI response */}
+      {/* Featured Products Section - Only shows when AI response is complete */}
       {shouldShowFeaturedProducts && (
         <div className="max-w-4xl mx-auto">
           <FeaturedProducts products={featuredProducts} />

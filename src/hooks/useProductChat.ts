@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -35,292 +36,54 @@ export const useProductChat = () => {
     return newMessage;
   }, []);
 
-  const cleanProductName = (name: string): string => {
-    if (!name) return '';
-    
-    return name
-      .replace(/\|/g, '') // Remove pipes
-      .replace(/\*\*/g, '') // Remove bold markers
-      .replace(/^\s*-\s*/, '') // Remove leading dashes
-      .replace(/\s+/g, ' ') // Replace multiple spaces with single space
-      .replace(/R\$\s*\d+(?:[.,]\d+)?/g, '') // Remove prices
-      .replace(/\d+[.,]\d+/g, '') // Remove scores
-      .replace(/🏆|💰|⭐/g, '') // Remove emojis
-      .replace(/Melhor da Avaliação|Barato da Avaliação|Nossa Recomendação/gi, '') // Remove seal text
-      .replace(/Score Mestre[:\s]*\d+/gi, '') // Remove score mentions
-      .replace(/^\s*\d+\.\s*/, '') // Remove leading numbers
-      .trim();
-  };
-
-  const isValidProductName = (name: string): boolean => {
-    if (!name || name.length < 3) return false;
-    
-    // Check if it's a table header or invalid content
-    const invalidPatterns = [
-      /^modelo$/i,
-      /^produto$/i,
-      /^preço$/i,
-      /^score$/i,
-      /^avaliação$/i,
-      /^marca$/i,
-      /^categoria$/i,
-      /^\d+$/,
-      /^[|\-\s]+$/,
-      /^R\$\s*\d+/,
-      /^\d+[.,]\d+$/,
-      /^short\s+de\s+corrida\s+[a-z]$/i, // Generic names like "Short de Corrida A"
-      /^produto\s+\d+$/i
-    ];
-    
-    return !invalidPatterns.some(pattern => pattern.test(name));
-  };
-
-  const extractRealProductNames = (message: string): string[] => {
-    const productNames: string[] = [];
-    
-    // Pattern 1: Look for brand names with product descriptors
-    const brandPatterns = [
-      /(?:Nike|Adidas|Under Armour|Puma|Asics|New Balance|Lupo|Olympikus|Mizuno|Speedo)\s+[^|\n\r]+?(?=\s*\||$|\n|\r)/gi,
-      /(?:Dry-FIT|Dri-FIT|ClimaLite|HeatGear|TechFit)\s+[^|\n\r]+?(?=\s*\||$|\n|\r)/gi
-    ];
-    
-    brandPatterns.forEach(pattern => {
-      const matches = message.match(pattern);
-      if (matches) {
-        matches.forEach(match => {
-          const cleanName = cleanProductName(match);
-          if (isValidProductName(cleanName) && cleanName.length > 10) {
-            productNames.push(cleanName);
-          }
-        });
+  const fetchProductsFromDatabase = useCallback(async (productIds?: string[], category?: string) => {
+    try {
+      let query = supabase.from('featured_products').select('*');
+      
+      if (productIds && productIds.length > 0) {
+        // Fetch specific products by IDs
+        query = query.in('id', productIds);
+      } else if (category && category !== 'geral') {
+        // Fetch products by category, limit to recent ones
+        query = query
+          .eq('category', category)
+          .order('created_at', { ascending: false })
+          .limit(3);
+      } else {
+        // Fallback: get recent popular products
+        query = query
+          .order('created_at', { ascending: false })
+          .limit(3);
       }
-    });
-    
-    // Pattern 2: Look for product descriptions in table format
-    const lines = message.split('\n');
-    for (const line of lines) {
-      if (line.includes('|') && line.split('|').length >= 3) {
-        const cells = line.split('|').map(cell => cell.trim()).filter(cell => cell !== '');
-        if (cells.length >= 3 && cells[0]) {
-          const cleanName = cleanProductName(cells[0]);
-          // More specific validation for real product names
-          if (cleanName.length > 5 && 
-              !cleanName.toLowerCase().includes('modelo') &&
-              !cleanName.toLowerCase().includes('produto') &&
-              !/^short\s+de\s+corrida\s+[a-z]$/i.test(cleanName) &&
-              !/^produto\s+\d+$/i.test(cleanName)) {
-            productNames.push(cleanName);
-          }
-        }
+
+      const { data: products, error } = await query;
+
+      if (error) {
+        console.error('Error fetching products:', error);
+        return [];
       }
+
+      if (products && products.length > 0) {
+        // Transform to FeaturedProduct format
+        const transformedProducts: FeaturedProduct[] = products.map(product => ({
+          id: product.id,
+          name: product.name,
+          image: product.image_url || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center',
+          price: product.price_average ? `R$ ${product.price_average.toFixed(2)}` : 'Consulte',
+          scoreMestre: product.score_mestre || 8.0,
+          seal: product.seal_type as 'melhor' | 'barato' | 'recomendacao',
+          link: product.store_link
+        }));
+
+        console.log('Fetched products from database:', transformedProducts);
+        return transformedProducts;
+      }
+
+      return [];
+    } catch (err) {
+      console.error('Error fetching products from database:', err);
+      return [];
     }
-    
-    // Pattern 3: Look for specific product mentions with context
-    const productMentions = message.match(/(?:o|a)\s+([A-Z][^.!?\n\r]{10,50})(?:\s+é\s+|,|\.|!)/g);
-    if (productMentions) {
-      productMentions.forEach(mention => {
-        const productName = mention.replace(/^(?:o|a)\s+/, '').replace(/\s+(?:é\s+|,|\.|!).*$/, '');
-        const cleanName = cleanProductName(productName);
-        if (isValidProductName(cleanName) && cleanName.length > 8) {
-          productNames.push(cleanName);
-        }
-      });
-    }
-    
-    return [...new Set(productNames)]; // Remove duplicates
-  };
-
-  const extractFeaturedProducts = useCallback((message: string) => {
-    console.log('Extracting products from message:', message.substring(0, 200) + '...');
-    
-    const products: { [key: string]: FeaturedProduct } = {};
-    
-    // First, try to extract real product names
-    const realProductNames = extractRealProductNames(message);
-    console.log('Real product names found:', realProductNames);
-    
-    // Extract prices from the entire message
-    const priceMatches = message.match(/R\$\s*\d+(?:[.,]\d+)?/g) || [];
-    console.log('Price matches found:', priceMatches);
-    
-    // Extract scores from the entire message
-    const scoreMatches = message.match(/(\d+[.,]\d+)/g) || [];
-    console.log('Score matches found:', scoreMatches);
-    
-    // Method 1: Look for explicit seal mentions with products
-    const sealPatterns = [
-      {
-        seal: 'melhor' as const,
-        patterns: [
-          /🏆\s*(?:Melhor da Avaliação[:\s]*)?([^(\n\r]+?)(?:\s*\(|$)/gi,
-          /Melhor da Avaliação[:\s]*([^(\n\r]+?)(?:\s*\(|$)/gi
-        ]
-      },
-      {
-        seal: 'barato' as const,
-        patterns: [
-          /💰\s*(?:Barato da Avaliação[:\s]*)?([^(\n\r]+?)(?:\s*\(|$)/gi,
-          /Barato da Avaliação[:\s]*([^(\n\r]+?)(?:\s*\(|$)/gi
-        ]
-      },
-      {
-        seal: 'recomendacao' as const,
-        patterns: [
-          /⭐\s*(?:Nossa Recomendação[:\s]*)?([^(\n\r]+?)(?:\s*\(|$)/gi,
-          /Nossa Recomendação[:\s]*([^(\n\r]+?)(?:\s*\(|$)/gi
-        ]
-      }
-    ];
-
-    sealPatterns.forEach(({ seal, patterns }) => {
-      if (products[seal]) return; // Already found one for this seal
-      
-      for (const pattern of patterns) {
-        const matches = [...message.matchAll(pattern)];
-        for (const match of matches) {
-          const rawName = match[1]?.trim();
-          if (!rawName) continue;
-          
-          const cleanName = cleanProductName(rawName);
-          if (isValidProductName(cleanName)) {
-            console.log(`Found ${seal} product:`, cleanName);
-            
-            // Extract score from nearby context
-            let score = 8.0; // Default score
-            const contextStart = Math.max(0, match.index! - 100);
-            const contextEnd = Math.min(message.length, match.index! + match[0].length + 100);
-            const context = message.substring(contextStart, contextEnd);
-            const scoreMatch = context.match(/(\d+[.,]\d+)/);
-            if (scoreMatch) {
-              const parsedScore = parseFloat(scoreMatch[1].replace(',', '.'));
-              if (parsedScore >= 1 && parsedScore <= 10) {
-                score = parsedScore;
-              }
-            }
-            
-            products[seal] = {
-              id: `${seal}-product`,
-              name: cleanName,
-              image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center',
-              price: priceMatches[0] || 'Consulte',
-              scoreMestre: score,
-              seal: seal
-            };
-            break;
-          }
-        }
-        if (products[seal]) break; // Found one, move to next seal
-      }
-    });
-
-    // Method 2: Use real product names if we found them and don't have enough from seals
-    if (Object.keys(products).length < 3 && realProductNames.length > 0) {
-      const sealsToAssign: Array<'melhor' | 'barato' | 'recomendacao'> = ['melhor', 'barato', 'recomendacao'];
-      let sealIndex = 0;
-      
-      for (const productName of realProductNames.slice(0, 3)) {
-        if (sealIndex >= sealsToAssign.length) break;
-        
-        const currentSeal = sealsToAssign[sealIndex];
-        if (products[currentSeal]) {
-          sealIndex++;
-          continue;
-        }
-        
-        console.log(`Assigning real product "${productName}" to seal: ${currentSeal}`);
-        
-        // Try to find price and score for this specific product
-        let price = 'Consulte';
-        let score = 8.0;
-        
-        if (priceMatches[sealIndex]) {
-          price = priceMatches[sealIndex];
-        }
-        
-        if (scoreMatches[sealIndex]) {
-          const parsedScore = parseFloat(scoreMatches[sealIndex].replace(',', '.'));
-          if (parsedScore >= 1 && parsedScore <= 10) {
-            score = parsedScore;
-          }
-        }
-        
-        products[currentSeal] = {
-          id: `${currentSeal}-real-product`,
-          name: productName,
-          image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center',
-          price: price,
-          scoreMestre: score,
-          seal: currentSeal
-        };
-        sealIndex++;
-      }
-    }
-
-    // Method 3: Parse table only if we still don't have enough products
-    if (Object.keys(products).length < 3) {
-      const lines = message.split('\n');
-      const tableRows: string[] = [];
-      
-      // Find table rows
-      for (const line of lines) {
-        if (line.includes('|') && line.split('|').length >= 3) {
-          const cells = line.split('|').map(cell => cell.trim()).filter(cell => cell !== '');
-          if (cells.length >= 3 && cells[0] && !cells[0].toLowerCase().includes('modelo')) {
-            tableRows.push(line);
-          }
-        }
-      }
-      
-      // Process first 3 valid table rows
-      const sealsToAssign: Array<'melhor' | 'barato' | 'recomendacao'> = ['melhor', 'barato', 'recomendacao'];
-      let sealIndex = 0;
-      
-      for (const row of tableRows.slice(0, 3)) {
-        if (sealIndex >= sealsToAssign.length) break;
-        
-        const currentSeal = sealsToAssign[sealIndex];
-        if (products[currentSeal]) {
-          sealIndex++;
-          continue;
-        }
-        
-        const cells = row.split('|').map(cell => cell.trim()).filter(cell => cell !== '');
-        if (cells.length >= 3) {
-          const rawName = cells[0];
-          const cleanName = cleanProductName(rawName);
-          
-          if (isValidProductName(cleanName)) {
-            const price = cells[1] || 'Consulte';
-            let score = 8.0;
-            
-            if (cells[3]) {
-              const parsedScore = parseFloat(cells[3].replace(',', '.'));
-              if (parsedScore >= 1 && parsedScore <= 10) {
-                score = parsedScore;
-              }
-            }
-            
-            console.log(`Assigning table product "${cleanName}" to seal: ${currentSeal}`);
-            
-            products[currentSeal] = {
-              id: `${currentSeal}-table-product`,
-              name: cleanName,
-              image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center',
-              price: price,
-              scoreMestre: score,
-              seal: currentSeal
-            };
-            sealIndex++;
-          }
-        }
-      }
-    }
-
-    const finalProducts = Object.values(products);
-    console.log('Final extracted products:', finalProducts.length);
-    console.log('Products details:', finalProducts.map(p => ({ name: p.name, seal: p.seal, score: p.scoreMestre })));
-    
-    return finalProducts;
   }, []);
 
   const sendMessage = useCallback(async (userMessage: string) => {
@@ -358,11 +121,11 @@ export const useProductChat = () => {
       if (data?.analysis) {
         addMessage(data.analysis, 'assistant');
         
-        // Extract featured products from response
-        const extractedProducts = extractFeaturedProducts(data.analysis);
-        console.log('Setting featured products:', extractedProducts);
-        if (extractedProducts.length > 0) {
-          setFeaturedProducts(extractedProducts);
+        // Fetch products from database
+        const products = await fetchProductsFromDatabase(data.productIds, data.category);
+        console.log('Setting featured products from database:', products);
+        if (products.length > 0) {
+          setFeaturedProducts(products);
         }
       } else {
         throw new Error('Nenhuma resposta recebida');
@@ -375,7 +138,7 @@ export const useProductChat = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [messages, addMessage, extractFeaturedProducts]);
+  }, [messages, addMessage, fetchProductsFromDatabase]);
 
   const startChat = useCallback(() => {
     if (messages.length === 0) {

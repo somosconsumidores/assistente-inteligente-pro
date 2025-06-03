@@ -9,6 +9,54 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      featured_products: {
+        Row: {
+          analysis_context: Json | null
+          brand: string | null
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          name: string
+          price_average: number | null
+          score_mestre: number | null
+          seal_type: string
+          store_link: string | null
+          updated_at: string
+        }
+        Insert: {
+          analysis_context?: Json | null
+          brand?: string | null
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          price_average?: number | null
+          score_mestre?: number | null
+          seal_type: string
+          store_link?: string | null
+          updated_at?: string
+        }
+        Update: {
+          analysis_context?: Json | null
+          brand?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          price_average?: number | null
+          score_mestre?: number | null
+          seal_type?: string
+          store_link?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       knowledge_base: {
         Row: {
           content: string

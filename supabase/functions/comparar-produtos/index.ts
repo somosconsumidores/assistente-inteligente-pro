@@ -1,8 +1,11 @@
 
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+const supabaseUrl = Deno.env.get('SUPABASE_URL');
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -41,7 +44,106 @@ Sempre que possível, forneça links diretos e atualizados para as lojas online 
 
 Você também oferece a opção de o usuário enviar uma foto do código de barras ou do produto. Com base nessa imagem, você tenta identificar o produto (via número EAN ou aparência), buscar informações técnicas e realizar uma análise completa com Score Mestre.
 
-Mantenha um tom conversacional e amigável, mas sempre profissional e técnico. Responda de forma natural como se fosse uma conversa real.`;
+Mantenha um tom conversacional e amigável, mas sempre profissional e técnico. Responda de forma natural como se fosse uma conversa real.
+
+IMPORTANTE: Ao final de sua análise, SEMPRE forneça os dados estruturados dos produtos avaliados no seguinte formato JSON:
+
+PRODUTOS_ESTRUTURADOS: {
+  "produtos": [
+    {
+      "name": "Nome limpo do produto",
+      "category": "categoria-padronizada",
+      "price_average": 99.99,
+      "score_mestre": 8.5,
+      "seal_type": "melhor",
+      "brand": "Marca",
+      "description": "Descrição breve",
+      "image_url": "URL da imagem ou placeholder",
+      "store_link": "URL da loja (opcional)"
+    }
+  ]
+}`;
+
+const detectCategory = (query: string): string => {
+  const lowerQuery = query.toLowerCase();
+  
+  if (lowerQuery.includes('short') && (lowerQuery.includes('corrida') || lowerQuery.includes('running'))) {
+    return 'shorts-corrida';
+  }
+  if (lowerQuery.includes('tênis') || lowerQuery.includes('tenis')) {
+    return 'tenis';
+  }
+  if (lowerQuery.includes('smartphone') || lowerQuery.includes('celular')) {
+    return 'smartphone';
+  }
+  if (lowerQuery.includes('notebook') || lowerQuery.includes('laptop')) {
+    return 'notebook';
+  }
+  if (lowerQuery.includes('headphone') || lowerQuery.includes('fone')) {
+    return 'headphone';
+  }
+  
+  return 'geral';
+};
+
+const extractStructuredProducts = (text: string): any[] => {
+  try {
+    const regex = /PRODUTOS_ESTRUTURADOS:\s*({[\s\S]*?})\s*(?=\n\n|\n$|$)/;
+    const match = text.match(regex);
+    
+    if (match) {
+      const jsonStr = match[1];
+      const data = JSON.parse(jsonStr);
+      return data.produtos || [];
+    }
+  } catch (error) {
+    console.log('Erro ao extrair produtos estruturados:', error);
+  }
+  
+  return [];
+};
+
+const saveProductsToDatabase = async (products: any[], category: string, supabase: any) => {
+  const savedProductIds: string[] = [];
+  
+  for (const product of products) {
+    try {
+      // Set default image if not provided
+      const imageUrl = product.image_url || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center';
+      
+      const { data, error } = await supabase
+        .from('featured_products')
+        .insert({
+          name: product.name,
+          category: product.category || category,
+          price_average: product.price_average,
+          score_mestre: product.score_mestre,
+          seal_type: product.seal_type,
+          brand: product.brand,
+          description: product.description,
+          image_url: imageUrl,
+          store_link: product.store_link,
+          analysis_context: {
+            query_category: category,
+            created_by: 'ai_analysis'
+          }
+        })
+        .select('id')
+        .single();
+      
+      if (error) {
+        console.error('Erro ao salvar produto:', error);
+      } else if (data) {
+        savedProductIds.push(data.id);
+        console.log('Produto salvo com sucesso:', product.name);
+      }
+    } catch (err) {
+      console.error('Erro ao processar produto:', err);
+    }
+  }
+  
+  return savedProductIds;
+};
 
 serve(async (req) => {
   console.log('Comparar produtos function called');
@@ -61,6 +163,13 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
+    // Initialize Supabase client
+    const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
+
+    // Detect category from query
+    const category = detectCategory(query);
+    console.log('Detected category:', category);
 
     // Build messages array for conversation context
     const messages = [
@@ -102,7 +211,21 @@ serve(async (req) => {
     
     const analysis = data.choices[0].message.content;
 
-    return new Response(JSON.stringify({ analysis }), {
+    // Extract and save structured products
+    const structuredProducts = extractStructuredProducts(analysis);
+    console.log('Extracted structured products:', structuredProducts);
+    
+    let productIds: string[] = [];
+    if (structuredProducts.length > 0) {
+      productIds = await saveProductsToDatabase(structuredProducts, category, supabase);
+      console.log('Saved product IDs:', productIds);
+    }
+
+    return new Response(JSON.stringify({ 
+      analysis,
+      productIds,
+      category 
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {

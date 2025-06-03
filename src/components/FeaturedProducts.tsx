@@ -19,7 +19,7 @@ interface FeaturedProductsProps {
 }
 
 const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
-  // Ensure we only show maximum 3 products, one per seal type
+  // Filter valid products
   const validProducts = products.filter(product => 
     product.name && 
     product.name.length >= 3 && 
@@ -27,23 +27,7 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
     product.scoreMestre <= 10
   );
 
-  // Get unique products by seal (priority: melhor, barato, recomendacao)
-  const uniqueProducts: FeaturedProduct[] = [];
-  const seenSeals = new Set<string>();
-  
-  // First pass: prioritize products with specific seals
-  ['melhor', 'barato', 'recomendacao'].forEach(sealType => {
-    const product = validProducts.find(p => p.seal === sealType && !seenSeals.has(p.seal));
-    if (product) {
-      uniqueProducts.push(product);
-      seenSeals.add(product.seal);
-    }
-  });
-
-  // Limit to maximum 3 products
-  const displayProducts = uniqueProducts.slice(0, 3);
-
-  if (displayProducts.length === 0) {
+  if (validProducts.length === 0) {
     return null;
   }
 
@@ -88,21 +72,14 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
     }
   };
 
-  // Function to clean product name and show only the product name
-  const getCleanProductName = (name: string): string => {
-    return name
-      .replace(/\|/g, '') // Remove pipes
-      .replace(/\*\*/g, '') // Remove bold markers
-      .replace(/^\s*-\s*/, '') // Remove leading dashes
-      .replace(/\s+/g, ' ') // Replace multiple spaces with single space
-      .replace(/R\$\s*\d+(?:[.,]\d+)?/g, '') // Remove prices
-      .replace(/\d+[.,]\d+/g, '') // Remove scores
-      .replace(/🏆|💰|⭐/g, '') // Remove emojis
-      .replace(/Melhor da Avaliação|Barato da Avaliação|Nossa Recomendação/gi, '') // Remove seal text
-      .replace(/Score Mestre[:\s]*\d+/gi, '') // Remove score mentions
-      .replace(/^\s*\d+\.\s*/, '') // Remove leading numbers
-      .replace(/\([^)]*\)/g, '') // Remove anything in parentheses
-      .trim();
+  const handleVerOfertas = (product: FeaturedProduct) => {
+    if (product.link) {
+      window.open(product.link, '_blank');
+    } else {
+      // Fallback: search for the product on Google Shopping
+      const searchQuery = encodeURIComponent(product.name);
+      window.open(`https://www.google.com/search?q=${searchQuery}&tbm=shop`, '_blank');
+    }
   };
 
   return (
@@ -110,18 +87,17 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">🏆 Produtos em Destaque</h2>
         <p className="text-gray-600">
-          {displayProducts.length === 1 ? '1 produto selecionado' : `${displayProducts.length} produtos selecionados`} pelo Mestre dos Produtos com base em análise técnica e avaliações
+          {validProducts.length === 1 ? '1 produto selecionado' : `${validProducts.length} produtos selecionados`} pelo Mestre dos Produtos com base em análise técnica e avaliações
         </p>
       </div>
       
       <div className={`grid gap-6 ${
-        displayProducts.length === 1 ? 'md:grid-cols-1 max-w-md mx-auto' :
-        displayProducts.length === 2 ? 'md:grid-cols-2' : 
+        validProducts.length === 1 ? 'md:grid-cols-1 max-w-md mx-auto' :
+        validProducts.length === 2 ? 'md:grid-cols-2' : 
         'md:grid-cols-3'
       }`}>
-        {displayProducts.map((product) => {
+        {validProducts.map((product) => {
           const sealInfo = getSealInfo(product.seal);
-          const cleanName = getCleanProductName(product.name);
           
           return (
             <Card key={product.id} className={`overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105 bg-gradient-to-br ${sealInfo.bgColor} border-2`}>
@@ -129,7 +105,7 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
                 <div className="w-full h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
                   <img
                     src={product.image}
-                    alt={cleanName}
+                    alt={product.name}
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       e.currentTarget.src = 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center';
@@ -146,7 +122,7 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
               
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg leading-tight text-gray-900 line-clamp-2">
-                  {cleanName}
+                  {product.name}
                 </CardTitle>
               </CardHeader>
               
@@ -168,7 +144,10 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
                 </div>
                 
                 <div className="flex gap-2">
-                  <button className="flex-1 bg-orange-600 hover:bg-orange-700 text-white text-center py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                  <button 
+                    onClick={() => handleVerOfertas(product)}
+                    className="flex-1 bg-orange-600 hover:bg-orange-700 text-white text-center py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                  >
                     <ExternalLink className="w-4 h-4" />
                     Ver Ofertas
                   </button>
@@ -178,15 +157,6 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
           );
         })}
       </div>
-      
-      {/* Debug info for development */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="mt-4 p-3 bg-gray-100 rounded text-xs text-gray-600">
-          <strong>Debug:</strong> {displayProducts.length} produtos válidos exibidos de {products.length} produtos recebidos
-          <br />
-          <strong>Selos:</strong> {displayProducts.map(p => p.seal).join(', ')}
-        </div>
-      )}
     </div>
   );
 };

@@ -35,7 +35,9 @@ export const useProductChat = () => {
     return newMessage;
   }, []);
 
-  const cleanProductName = (name: string) => {
+  const cleanProductName = (name: string): string => {
+    if (!name) return '';
+    
     return name
       .replace(/\|/g, '') // Remove pipes
       .replace(/\*\*/g, '') // Remove bold markers
@@ -45,165 +47,176 @@ export const useProductChat = () => {
       .replace(/\d+[.,]\d+/g, '') // Remove scores
       .replace(/🏆|💰|⭐/g, '') // Remove emojis
       .replace(/Melhor da Avaliação|Barato da Avaliação|Nossa Recomendação/gi, '') // Remove seal text
+      .replace(/Score Mestre[:\s]*\d+/gi, '') // Remove score mentions
+      .replace(/^\s*\d+\.\s*/, '') // Remove leading numbers
       .trim();
   };
 
+  const isValidProductName = (name: string): boolean => {
+    if (!name || name.length < 3) return false;
+    
+    // Check if it's a table header or invalid content
+    const invalidPatterns = [
+      /^modelo$/i,
+      /^produto$/i,
+      /^preço$/i,
+      /^score$/i,
+      /^avaliação$/i,
+      /^marca$/i,
+      /^categoria$/i,
+      /^\d+$/,
+      /^[|\-\s]+$/,
+      /^R\$\s*\d+/,
+      /^\d+[.,]\d+$/
+    ];
+    
+    return !invalidPatterns.some(pattern => pattern.test(name));
+  };
+
   const extractFeaturedProducts = useCallback((message: string) => {
-    console.log('Extracting products from message:', message);
-    const products: FeaturedProduct[] = [];
+    console.log('Extracting products from message:', message.substring(0, 200) + '...');
     
-    const lines = message.split('\n');
-    let productCounter = 1;
+    const products: { [key: string]: FeaturedProduct } = {};
     
-    // Extrair preços da mensagem
+    // Extract prices from the entire message
     const priceMatches = message.match(/R\$\s*\d+(?:[.,]\d+)?/g) || [];
     console.log('Price matches found:', priceMatches);
     
-    // Buscar por produtos específicos mencionados na mensagem
-    const productPatterns = [
-      { name: 'Nike Revolution', regex: /Nike Revolution \d+/gi },
-      { name: 'Adidas Runfalcon', regex: /Adidas Runfalcon/gi },
-      { name: 'Adidas Duramo', regex: /Adidas Duramo SL/gi },
-      { name: 'ASICS Gel-Contend', regex: /ASICS? Gel.?Contend \d+/gi },
-      { name: 'Mizuno Wave Shadow', regex: /Mizuno Wave Shadow \d+/gi },
-      { name: 'Olympikus Joy', regex: /Olympikus Joy/gi }
+    // Extract scores from the entire message
+    const scoreMatches = message.match(/(\d+[.,]\d+)/g) || [];
+    console.log('Score matches found:', scoreMatches);
+    
+    // Method 1: Look for explicit seal mentions with products
+    const sealPatterns = [
+      {
+        seal: 'melhor' as const,
+        patterns: [
+          /🏆\s*(?:Melhor da Avaliação[:\s]*)?([^(\n\r]+?)(?:\s*\(|$)/gi,
+          /Melhor da Avaliação[:\s]*([^(\n\r]+?)(?:\s*\(|$)/gi
+        ]
+      },
+      {
+        seal: 'barato' as const,
+        patterns: [
+          /💰\s*(?:Barato da Avaliação[:\s]*)?([^(\n\r]+?)(?:\s*\(|$)/gi,
+          /Barato da Avaliação[:\s]*([^(\n\r]+?)(?:\s*\(|$)/gi
+        ]
+      },
+      {
+        seal: 'recomendacao' as const,
+        patterns: [
+          /⭐\s*(?:Nossa Recomendação[:\s]*)?([^(\n\r]+?)(?:\s*\(|$)/gi,
+          /Nossa Recomendação[:\s]*([^(\n\r]+?)(?:\s*\(|$)/gi
+        ]
+      }
     ];
 
-    // Extrair produtos da tabela se existir
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
+    sealPatterns.forEach(({ seal, patterns }) => {
+      if (products[seal]) return; // Already found one for this seal
       
-      // Verificar se é linha de tabela com produto
-      if (line.includes('|') && line.split('|').length > 3) {
-        const cells = line.split('|').map(cell => cell.trim()).filter(cell => cell !== '');
-        
-        if (cells.length >= 4 && cells[0] && !cells[0].includes('Modelo')) {
-          const productName = cleanProductName(cells[0]);
-          const price = cells[1] || 'Consulte';
-          const score = parseFloat(cells[3]?.replace(',', '.') || '0');
+      for (const pattern of patterns) {
+        const matches = [...message.matchAll(pattern)];
+        for (const match of matches) {
+          const rawName = match[1]?.trim();
+          if (!rawName) continue;
           
-          if (productName.length > 2) {
-            // Determinar selo baseado na posição na tabela ou conteúdo
-            let seal: 'melhor' | 'barato' | 'recomendacao' = 'recomendacao';
+          const cleanName = cleanProductName(rawName);
+          if (isValidProductName(cleanName)) {
+            console.log(`Found ${seal} product:`, cleanName);
             
-            if (message.toLowerCase().includes(productName.toLowerCase()) && message.includes('🏆')) {
-              seal = 'melhor';
-            } else if (message.toLowerCase().includes(productName.toLowerCase()) && message.includes('💰')) {
-              seal = 'barato';
+            // Extract score from nearby context
+            let score = 8.0; // Default score
+            const contextStart = Math.max(0, match.index! - 100);
+            const contextEnd = Math.min(message.length, match.index! + match[0].length + 100);
+            const context = message.substring(contextStart, contextEnd);
+            const scoreMatch = context.match(/(\d+[.,]\d+)/);
+            if (scoreMatch) {
+              const parsedScore = parseFloat(scoreMatch[1].replace(',', '.'));
+              if (parsedScore >= 1 && parsedScore <= 10) {
+                score = parsedScore;
+              }
             }
             
-            products.push({
-              id: `product-${productCounter}`,
-              name: productName,
-              image: `https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center`,
-              price: price,
+            products[seal] = {
+              id: `${seal}-product`,
+              name: cleanName,
+              image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center',
+              price: priceMatches[0] || 'Consulte',
               scoreMestre: score,
               seal: seal
-            });
-            productCounter++;
+            };
+            break;
+          }
+        }
+        if (products[seal]) break; // Found one, move to next seal
+      }
+    });
+
+    // Method 2: Parse table if seal method didn't find enough products
+    if (Object.keys(products).length < 3) {
+      const lines = message.split('\n');
+      const tableRows: string[] = [];
+      
+      // Find table rows
+      for (const line of lines) {
+        if (line.includes('|') && line.split('|').length >= 3) {
+          const cells = line.split('|').map(cell => cell.trim()).filter(cell => cell !== '');
+          if (cells.length >= 3 && cells[0] && !cells[0].toLowerCase().includes('modelo')) {
+            tableRows.push(line);
           }
         }
       }
       
-      // Buscar por selos específicos nas linhas
-      if (line.includes('🏆') && (line.includes('Melhor') || line.includes('melhor'))) {
-        const nextLine = i + 1 < lines.length ? lines[i + 1] : '';
-        let productName = cleanProductName(line.replace(/🏆.*?(melhor|Melhor).*?:?\s*/i, ''));
-        
-        if (!productName && nextLine) {
-          productName = cleanProductName(nextLine);
-        }
-        
-        // Buscar por padrões conhecidos se o nome não foi extraído bem
-        if (!productName || productName.length < 3) {
-          for (const pattern of productPatterns) {
-            const match = (line + ' ' + nextLine).match(pattern.regex);
-            if (match) {
-              productName = match[0];
-              break;
-            }
-          }
-        }
-        
-        if (productName && productName.length > 2) {
-          products.push({
-            id: `melhor-${productCounter}`,
-            name: productName,
-            image: `https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center`,
-            price: priceMatches[0] || 'Consulte',
-            scoreMestre: 8.5,
-            seal: 'melhor'
-          });
-          productCounter++;
-        }
-      }
+      // Process first 3 valid table rows
+      const sealsToAssign: Array<'melhor' | 'barato' | 'recomendacao'> = ['melhor', 'barato', 'recomendacao'];
+      let sealIndex = 0;
       
-      if (line.includes('💰') && (line.includes('Barato') || line.includes('barato'))) {
-        const nextLine = i + 1 < lines.length ? lines[i + 1] : '';
-        let productName = cleanProductName(line.replace(/💰.*?(barato|Barato).*?:?\s*/i, ''));
+      for (const row of tableRows.slice(0, 3)) {
+        if (sealIndex >= sealsToAssign.length) break;
         
-        if (!productName && nextLine) {
-          productName = cleanProductName(nextLine);
+        const currentSeal = sealsToAssign[sealIndex];
+        if (products[currentSeal]) {
+          sealIndex++;
+          continue;
         }
         
-        if (!productName || productName.length < 3) {
-          for (const pattern of productPatterns) {
-            const match = (line + ' ' + nextLine).match(pattern.regex);
-            if (match) {
-              productName = match[0];
-              break;
+        const cells = row.split('|').map(cell => cell.trim()).filter(cell => cell !== '');
+        if (cells.length >= 3) {
+          const rawName = cells[0];
+          const cleanName = cleanProductName(rawName);
+          
+          if (isValidProductName(cleanName)) {
+            const price = cells[1] || 'Consulte';
+            let score = 8.0;
+            
+            if (cells[3]) {
+              const parsedScore = parseFloat(cells[3].replace(',', '.'));
+              if (parsedScore >= 1 && parsedScore <= 10) {
+                score = parsedScore;
+              }
             }
+            
+            console.log(`Assigning table product "${cleanName}" to seal: ${currentSeal}`);
+            
+            products[currentSeal] = {
+              id: `${currentSeal}-table-product`,
+              name: cleanName,
+              image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center',
+              price: price,
+              scoreMestre: score,
+              seal: currentSeal
+            };
+            sealIndex++;
           }
-        }
-        
-        if (productName && productName.length > 2) {
-          products.push({
-            id: `barato-${productCounter}`,
-            name: productName,
-            image: `https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center`,
-            price: priceMatches[1] || priceMatches[0] || 'Consulte',
-            scoreMestre: 8.0,
-            seal: 'barato'
-          });
-          productCounter++;
-        }
-      }
-      
-      if (line.includes('⭐') && (line.includes('Recomendação') || line.includes('recomendação'))) {
-        const nextLine = i + 1 < lines.length ? lines[i + 1] : '';
-        let productName = cleanProductName(line.replace(/⭐.*?(recomendação|Recomendação).*?:?\s*/i, ''));
-        
-        if (!productName && nextLine) {
-          productName = cleanProductName(nextLine);
-        }
-        
-        if (!productName || productName.length < 3) {
-          for (const pattern of productPatterns) {
-            const match = (line + ' ' + nextLine).match(pattern.regex);
-            if (match) {
-              productName = match[0];
-              break;
-            }
-          }
-        }
-        
-        if (productName && productName.length > 2) {
-          products.push({
-            id: `recomendacao-${productCounter}`,
-            name: productName,
-            image: `https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center`,
-            price: priceMatches[2] || priceMatches[0] || 'Consulte',
-            scoreMestre: 8.3,
-            seal: 'recomendacao'
-          });
-          productCounter++;
         }
       }
     }
+
+    const finalProducts = Object.values(products);
+    console.log('Final extracted products:', finalProducts.length);
+    console.log('Products details:', finalProducts.map(p => ({ name: p.name, seal: p.seal, score: p.scoreMestre })));
     
-    console.log('Total products extracted:', products.length);
-    console.log('Products details:', products);
-    return products;
+    return finalProducts;
   }, []);
 
   const sendMessage = useCallback(async (userMessage: string) => {
@@ -241,7 +254,7 @@ export const useProductChat = () => {
       if (data?.analysis) {
         addMessage(data.analysis, 'assistant');
         
-        // Extrair produtos destacados da resposta
+        // Extract featured products from response
         const extractedProducts = extractFeaturedProducts(data.analysis);
         console.log('Setting featured products:', extractedProducts);
         if (extractedProducts.length > 0) {

@@ -19,7 +19,31 @@ interface FeaturedProductsProps {
 }
 
 const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
-  if (products.length === 0) {
+  // Ensure we only show maximum 3 products, one per seal type
+  const validProducts = products.filter(product => 
+    product.name && 
+    product.name.length >= 3 && 
+    product.scoreMestre >= 1 && 
+    product.scoreMestre <= 10
+  );
+
+  // Get unique products by seal (priority: melhor, barato, recomendacao)
+  const uniqueProducts: FeaturedProduct[] = [];
+  const seenSeals = new Set<string>();
+  
+  // First pass: prioritize products with specific seals
+  ['melhor', 'barato', 'recomendacao'].forEach(sealType => {
+    const product = validProducts.find(p => p.seal === sealType && !seenSeals.has(p.seal));
+    if (product) {
+      uniqueProducts.push(product);
+      seenSeals.add(product.seal);
+    }
+  });
+
+  // Limit to maximum 3 products
+  const displayProducts = uniqueProducts.slice(0, 3);
+
+  if (displayProducts.length === 0) {
     return null;
   }
 
@@ -68,11 +92,17 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
     <div className="mb-8">
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">🏆 Produtos em Destaque</h2>
-        <p className="text-gray-600">Produtos selecionados pelo Mestre dos Produtos com base em análise técnica e avaliações</p>
+        <p className="text-gray-600">
+          {displayProducts.length === 1 ? '1 produto selecionado' : `${displayProducts.length} produtos selecionados`} pelo Mestre dos Produtos com base em análise técnica e avaliações
+        </p>
       </div>
       
-      <div className="grid md:grid-cols-3 gap-6">
-        {products.map((product) => {
+      <div className={`grid gap-6 ${
+        displayProducts.length === 1 ? 'md:grid-cols-1 max-w-md mx-auto' :
+        displayProducts.length === 2 ? 'md:grid-cols-2' : 
+        'md:grid-cols-3'
+      }`}>
+        {displayProducts.map((product) => {
           const sealInfo = getSealInfo(product.seal);
           
           return (
@@ -84,7 +114,6 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
                     alt={product.name}
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      // Fallback para uma imagem de tênis genérica
                       e.currentTarget.src = 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center';
                     }}
                   />
@@ -98,7 +127,9 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
               </div>
               
               <CardHeader className="pb-3">
-                <CardTitle className="text-lg leading-tight text-gray-900">{product.name}</CardTitle>
+                <CardTitle className="text-lg leading-tight text-gray-900 line-clamp-2">
+                  {product.name}
+                </CardTitle>
                 <p className="text-sm text-gray-600">{sealInfo.description}</p>
               </CardHeader>
               
@@ -111,7 +142,9 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
                   <div className="text-right">
                     <p className="text-sm text-gray-600">Score Mestre</p>
                     <div className="flex items-center gap-1">
-                      <span className="text-2xl font-bold text-orange-600">{product.scoreMestre.toFixed(1)}</span>
+                      <span className="text-2xl font-bold text-orange-600">
+                        {typeof product.scoreMestre === 'number' ? product.scoreMestre.toFixed(1) : '8.0'}
+                      </span>
                       <span className="text-sm text-gray-500">/10</span>
                     </div>
                   </div>
@@ -128,6 +161,15 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
           );
         })}
       </div>
+      
+      {/* Debug info for development */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="mt-4 p-3 bg-gray-100 rounded text-xs text-gray-600">
+          <strong>Debug:</strong> {displayProducts.length} produtos válidos exibidos de {products.length} produtos recebidos
+          <br />
+          <strong>Selos:</strong> {displayProducts.map(p => p.seal).join(', ')}
+        </div>
+      )}
     </div>
   );
 };

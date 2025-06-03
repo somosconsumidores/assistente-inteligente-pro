@@ -1,18 +1,22 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { MessageSquare } from 'lucide-react';
+import { MessageSquare, LogIn, UserPlus } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Header = () => {
+  const { user, logout } = useAuth();
+
   return (
     <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <div className="flex items-center space-x-2">
+        <Link to="/" className="flex items-center space-x-2">
           <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-sm">BI</span>
           </div>
           <span className="font-bold text-xl text-gray-900">Biblioteca AI</span>
-        </div>
+        </Link>
         
         <nav className="hidden md:flex items-center space-x-8">
           <a href="#assistentes" className="text-gray-600 hover:text-blue-600 transition-colors">
@@ -31,9 +35,34 @@ const Header = () => {
             <MessageSquare className="w-4 h-4" />
             <span>WhatsApp</span>
           </Button>
-          <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-            Começar Grátis
-          </Button>
+          
+          {user ? (
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-gray-600">Olá, {user.name}</span>
+              <Button 
+                variant="outline" 
+                onClick={logout}
+                className="text-red-600 border-red-300 hover:bg-red-50"
+              >
+                Sair
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center space-x-2">
+              <Button variant="outline" asChild>
+                <Link to="/login" className="flex items-center space-x-1">
+                  <LogIn className="w-4 h-4" />
+                  <span>Entrar</span>
+                </Link>
+              </Button>
+              <Button asChild className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                <Link to="/register" className="flex items-center space-x-1">
+                  <UserPlus className="w-4 h-4" />
+                  <span>Criar Conta</span>
+                </Link>
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </header>

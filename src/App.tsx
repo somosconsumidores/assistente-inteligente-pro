@@ -4,7 +4,11 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 import SelectAssistant from "./pages/SelectAssistant";
 import DireitoConsumidor from "./pages/DireitoConsumidor";
@@ -20,19 +24,47 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/select-assistant" element={<SelectAssistant />} />
-          <Route path="/direito-consumidor" element={<DireitoConsumidor />} />
-          <Route path="/financas" element={<Financas />} />
-          <Route path="/produtos" element={<Produtos />} />
-          <Route path="/viagens" element={<Viagens />} />
-          <Route path="/supermercado" element={<Supermercado />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/select-assistant" element={
+              <ProtectedRoute>
+                <SelectAssistant />
+              </ProtectedRoute>
+            } />
+            <Route path="/direito-consumidor" element={
+              <ProtectedRoute>
+                <DireitoConsumidor />
+              </ProtectedRoute>
+            } />
+            <Route path="/financas" element={
+              <ProtectedRoute>
+                <Financas />
+              </ProtectedRoute>
+            } />
+            <Route path="/produtos" element={
+              <ProtectedRoute>
+                <Produtos />
+              </ProtectedRoute>
+            } />
+            <Route path="/viagens" element={
+              <ProtectedRoute>
+                <Viagens />
+              </ProtectedRoute>
+            } />
+            <Route path="/supermercado" element={
+              <ProtectedRoute>
+                <Supermercado />
+              </ProtectedRoute>
+            } />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

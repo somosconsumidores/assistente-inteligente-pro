@@ -114,7 +114,7 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade }) 
 
             {/* Lock Overlay for Blocked Assistants */}
             {!isAccessible && (
-              <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center z-20">
+              <div className="absolute inset-0 bg-white/20 backdrop-blur-sm flex items-center justify-center z-20">
                 <div className="text-center p-6">
                   <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Lock className="w-8 h-8 text-gray-500" />

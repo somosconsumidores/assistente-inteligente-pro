@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Star, Award, DollarSign, ExternalLink, Loader2, RefreshCw, Search } from 'lucide-react';
+import { Star, Award, DollarSign, ExternalLink, Loader2, RefreshCw, Search, ImageOff } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface FeaturedProduct {
@@ -54,11 +54,7 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
           if (error) {
             console.error('Error searching image for', product.name, ':', error);
             setImageErrors(prev => ({ ...prev, [product.id]: true }));
-            // Use fallback image
-            setProductImages(prev => ({
-              ...prev,
-              [product.id]: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center'
-            }));
+            setProductImages(prev => ({ ...prev, [product.id]: '' }));
           } else if (data?.imageUrl) {
             console.log('Product image found successfully for:', product.name);
             setProductImages(prev => ({
@@ -66,16 +62,13 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
               [product.id]: data.imageUrl
             }));
           } else {
-            throw new Error('No image returned from search');
+            setImageErrors(prev => ({ ...prev, [product.id]: true }));
+            setProductImages(prev => ({ ...prev, [product.id]: '' }));
           }
         } catch (err) {
           console.error('Error searching product image for', product.name, ':', err);
           setImageErrors(prev => ({ ...prev, [product.id]: true }));
-          // Use fallback image
-          setProductImages(prev => ({
-            ...prev,
-            [product.id]: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center'
-          }));
+          setProductImages(prev => ({ ...prev, [product.id]: '' }));
         } finally {
           setLoadingImages(prev => ({ ...prev, [product.id]: false }));
         }
@@ -109,10 +102,14 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
           [product.id]: data.imageUrl
         }));
         setImageErrors(prev => ({ ...prev, [product.id]: false }));
+      } else {
+        setImageErrors(prev => ({ ...prev, [product.id]: true }));
+        setProductImages(prev => ({ ...prev, [product.id]: '' }));
       }
     } catch (err) {
       console.error('Retry failed for', product.name, ':', err);
       setImageErrors(prev => ({ ...prev, [product.id]: true }));
+      setProductImages(prev => ({ ...prev, [product.id]: '' }));
     } finally {
       setLoadingImages(prev => ({ ...prev, [product.id]: false }));
     }
@@ -191,7 +188,7 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
           const sealInfo = getSealInfo(product.seal);
           const isImageLoading = loadingImages[product.id];
           const hasImageError = imageErrors[product.id];
-          const productImage = productImages[product.id] || product.image;
+          const productImage = productImages[product.id];
           
           return (
             <Card key={product.id} className={`overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105 bg-gradient-to-br ${sealInfo.bgColor} border-2`}>
@@ -202,14 +199,15 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
                       <Search className="w-8 h-8 animate-pulse text-gray-400 mb-2" />
                       <span className="text-sm text-gray-500">Buscando imagem...</span>
                     </div>
-                  ) : (
+                  ) : productImage ? (
                     <div className="relative w-full h-full">
                       <img
                         src={productImage}
                         alt={product.name}
                         className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.src = 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center';
+                        onError={() => {
+                          setImageErrors(prev => ({ ...prev, [product.id]: true }));
+                          setProductImages(prev => ({ ...prev, [product.id]: '' }));
                         }}
                       />
                       {hasImageError && (
@@ -221,6 +219,18 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
                           <RefreshCw className="w-4 h-4 text-gray-600" />
                         </button>
                       )}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center text-gray-500">
+                      <ImageOff className="w-12 h-12 mb-2" />
+                      <span className="text-sm font-medium">Imagem Não Encontrada</span>
+                      <button
+                        onClick={() => retryImageSearch(product)}
+                        className="mt-2 bg-white/80 hover:bg-white p-1 rounded-full shadow-md transition-colors"
+                        title="Buscar imagem novamente"
+                      >
+                        <RefreshCw className="w-4 h-4 text-gray-600" />
+                      </button>
                     </div>
                   )}
                 </div>

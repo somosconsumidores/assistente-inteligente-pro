@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,6 +30,11 @@ const ProductChat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Log featured products for debugging
+  useEffect(() => {
+    console.log('Featured products updated in ProductChat:', featuredProducts);
+  }, [featuredProducts]);
+
   const handleSend = async () => {
     if (!inputValue.trim() || isLoading) return;
     
@@ -50,7 +56,7 @@ const ProductChat = () => {
 
   return (
     <div className="space-y-6">
-      {/* Featured Products Section */}
+      {/* Featured Products Section - Moved to top for better visibility */}
       {featuredProducts.length > 0 && (
         <div className="mb-6">
           <FeaturedProducts products={featuredProducts} />
@@ -168,6 +174,13 @@ const ProductChat = () => {
           </div>
         </div>
       </div>
+
+      {/* Debug info - remove in production */}
+      {featuredProducts.length > 0 && (
+        <div className="text-xs text-gray-500 mt-2">
+          Debug: {featuredProducts.length} produtos em destaque encontrados
+        </div>
+      )}
     </div>
   );
 };

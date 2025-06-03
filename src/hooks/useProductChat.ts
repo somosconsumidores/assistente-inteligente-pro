@@ -37,40 +37,82 @@ export const useProductChat = () => {
   }, []);
 
   const extractFeaturedProducts = useCallback((message: string) => {
+    console.log('Extracting products from message:', message);
     const products: FeaturedProduct[] = [];
     
-    // Patterns mais robustos para identificar produtos com selos
-    const patterns = [
-      { regex: /🏆\s*Melhor da Avaliação[:\s-]*([^(\n]+?)(?:\s*\(|$)/gi, seal: 'melhor' as const },
-      { regex: /💰\s*Barato da Avaliação[:\s-]*([^(\n]+?)(?:\s*\(|$)/gi, seal: 'barato' as const },
-      { regex: /⭐\s*Nossa Recomendação[:\s-]*([^(\n]+?)(?:\s*\(|$)/gi, seal: 'recomendacao' as const }
-    ];
+    // Patterns mais específicos para identificar produtos com selos
+    const melhorPattern = /🏆\s*(?:Melhor da Avaliação)[:\s-]*([^(\n]+?)(?:\s*\(|$)/gi;
+    const baratoPattern = /💰\s*(?:Barato da Avaliação)[:\s-]*([^(\n]+?)(?:\s*\(|$)/gi;
+    const recomendacaoPattern = /⭐\s*(?:Nossa Recomendação)[:\s-]*([^(\n]+?)(?:\s*\(|$)/gi;
     
     // Extrair scores e preços do contexto
     const scoreMatches = [...message.matchAll(/Score Mestre[:\s]*(\d+(?:[.,]\d+)?)/gi)];
     const priceMatches = [...message.matchAll(/R\$\s*\d+(?:[.,]\d+)?(?:\s*mil)?/gi)];
     
+    console.log('Score matches found:', scoreMatches);
+    console.log('Price matches found:', priceMatches);
+    
     let productId = 1;
     
-    patterns.forEach(({ regex, seal }) => {
-      let match;
-      while ((match = regex.exec(message)) !== null) {
-        const name = match[1]?.trim().replace(/[:\-–]/g, '').trim() || `Produto ${productId}`;
-        
-        if (name && name.length > 3) { // Validar nome mínimo
-          products.push({
-            id: `${seal}-${productId}`,
-            name: name,
-            image: '/placeholder.svg',
-            price: priceMatches[productId - 1]?.[0] || 'Consulte',
-            scoreMestre: parseFloat(scoreMatches[productId - 1]?.[1]?.replace(',', '.') || '8.5'),
-            seal: seal
-          });
-          productId++;
-        }
+    // Extrair Melhor da Avaliação
+    let match;
+    while ((match = melhorPattern.exec(message)) !== null) {
+      const name = match[1]?.trim().replace(/[:\-–]/g, '').trim();
+      if (name && name.length > 3) {
+        products.push({
+          id: `melhor-${productId}`,
+          name: name,
+          image: '/placeholder.svg',
+          price: priceMatches[productId - 1]?.[0] || 'Consulte',
+          scoreMestre: parseFloat(scoreMatches[productId - 1]?.[1]?.replace(',', '.') || '8.5'),
+          seal: 'melhor'
+        });
+        productId++;
+        console.log('Added melhor product:', name);
       }
-    });
+    }
     
+    // Reset regex
+    baratoPattern.lastIndex = 0;
+    
+    // Extrair Barato da Avaliação
+    while ((match = baratoPattern.exec(message)) !== null) {
+      const name = match[1]?.trim().replace(/[:\-–]/g, '').trim();
+      if (name && name.length > 3) {
+        products.push({
+          id: `barato-${productId}`,
+          name: name,
+          image: '/placeholder.svg',
+          price: priceMatches[productId - 1]?.[0] || 'Consulte',
+          scoreMestre: parseFloat(scoreMatches[productId - 1]?.[1]?.replace(',', '.') || '8.0'),
+          seal: 'barato'
+        });
+        productId++;
+        console.log('Added barato product:', name);
+      }
+    }
+    
+    // Reset regex
+    recomendacaoPattern.lastIndex = 0;
+    
+    // Extrair Nossa Recomendação
+    while ((match = recomendacaoPattern.exec(message)) !== null) {
+      const name = match[1]?.trim().replace(/[:\-–]/g, '').trim();
+      if (name && name.length > 3) {
+        products.push({
+          id: `recomendacao-${productId}`,
+          name: name,
+          image: '/placeholder.svg',
+          price: priceMatches[productId - 1]?.[0] || 'Consulte',
+          scoreMestre: parseFloat(scoreMatches[productId - 1]?.[1]?.replace(',', '.') || '8.3'),
+          seal: 'recomendacao'
+        });
+        productId++;
+        console.log('Added recomendacao product:', name);
+      }
+    }
+    
+    console.log('Total products extracted:', products.length);
     return products;
   }, []);
 
@@ -111,6 +153,7 @@ export const useProductChat = () => {
         
         // Extrair produtos destacados da resposta
         const extractedProducts = extractFeaturedProducts(data.analysis);
+        console.log('Setting featured products:', extractedProducts);
         if (extractedProducts.length > 0) {
           setFeaturedProducts(extractedProducts);
         }

@@ -94,7 +94,7 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade }) 
             className={`relative overflow-hidden transition-all duration-300 ${
               isAccessible 
                 ? `hover:shadow-xl hover:-translate-y-1 cursor-pointer bg-gradient-to-br ${assistant.bgColor} border-0` 
-                : 'bg-gray-50 border-2 border-gray-200 opacity-75'
+                : `bg-gradient-to-br ${assistant.bgColor} border-2 border-gray-200`
             }`}
             onClick={() => handleAssistantClick(assistant)}
           >
@@ -114,7 +114,7 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade }) 
 
             {/* Lock Overlay for Blocked Assistants */}
             {!isAccessible && (
-              <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-20">
+              <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center z-20">
                 <div className="text-center p-6">
                   <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Lock className="w-8 h-8 text-gray-500" />
@@ -137,15 +137,13 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade }) 
             )}
 
             <CardHeader className="pb-4">
-              <div className={`w-12 h-12 bg-gradient-to-br ${assistant.color} rounded-lg flex items-center justify-center mb-4 ${
-                !isAccessible ? 'opacity-50' : ''
-              }`}>
+              <div className={`w-12 h-12 bg-gradient-to-br ${assistant.color} rounded-lg flex items-center justify-center mb-4`}>
                 <IconComponent className="w-6 h-6 text-white" />
               </div>
-              <CardTitle className={`text-xl font-bold ${isAccessible ? 'text-gray-900' : 'text-gray-500'}`}>
+              <CardTitle className="text-xl font-bold text-gray-900">
                 {assistant.title}
               </CardTitle>
-              <CardDescription className={`leading-relaxed ${isAccessible ? 'text-gray-600' : 'text-gray-400'}`}>
+              <CardDescription className="leading-relaxed text-gray-600">
                 {assistant.description}
               </CardDescription>
             </CardHeader>
@@ -154,10 +152,8 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade }) 
               <div className="space-y-3 mb-6">
                 {assistant.benefits.map((benefit, index) => (
                   <div key={index} className="flex items-center space-x-2">
-                    <CheckCircle className={`w-4 h-4 flex-shrink-0 ${
-                      isAccessible ? 'text-green-500' : 'text-gray-400'
-                    }`} />
-                    <span className={`text-sm ${isAccessible ? 'text-gray-700' : 'text-gray-400'}`}>
+                    <CheckCircle className="w-4 h-4 flex-shrink-0 text-green-500" />
+                    <span className="text-sm text-gray-700">
                       {benefit}
                     </span>
                   </div>

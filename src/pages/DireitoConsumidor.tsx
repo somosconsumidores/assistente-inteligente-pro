@@ -217,6 +217,7 @@ const DireitoConsumidor = () => {
           </Card>
         )}
 
+        {/* Guide Tab */}
         {activeTab === 'guide' && (
           <div className="space-y-6">
             <Card>

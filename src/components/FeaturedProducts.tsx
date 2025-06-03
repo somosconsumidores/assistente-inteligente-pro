@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Star, Award, DollarSign, ExternalLink, Loader2 } from 'lucide-react';
+import { Star, Award, DollarSign, ExternalLink, Loader2, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface FeaturedProduct {
@@ -22,6 +21,7 @@ interface FeaturedProductsProps {
 const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
   const [productImages, setProductImages] = useState<{[key: string]: string}>({});
   const [loadingImages, setLoadingImages] = useState<{[key: string]: boolean}>({});
+  const [imageErrors, setImageErrors] = useState<{[key: string]: boolean}>({});
 
   // Filter valid products
   const validProducts = products.filter(product => 
@@ -35,15 +35,16 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
   useEffect(() => {
     const generateImages = async () => {
       for (const product of validProducts) {
-        // Skip if we already have an image for this product
-        if (productImages[product.id]) {
+        // Skip if we already have an image for this product or it's currently loading
+        if (productImages[product.id] || loadingImages[product.id]) {
           continue;
         }
 
         setLoadingImages(prev => ({ ...prev, [product.id]: true }));
+        setImageErrors(prev => ({ ...prev, [product.id]: false }));
 
         try {
-          console.log('Generating image for product:', product.name);
+          console.log('Generating AI image for product:', product.name);
           
           const { data, error } = await supabase.functions.invoke('generate-product-image', {
             body: { productName: product.name }
@@ -51,20 +52,24 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
 
           if (error) {
             console.error('Error generating image for', product.name, ':', error);
+            setImageErrors(prev => ({ ...prev, [product.id]: true }));
             // Use fallback image
             setProductImages(prev => ({
               ...prev,
               [product.id]: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center'
             }));
           } else if (data?.imageUrl) {
-            console.log('Image generated successfully for:', product.name);
+            console.log('AI image generated successfully for:', product.name);
             setProductImages(prev => ({
               ...prev,
               [product.id]: data.imageUrl
             }));
+          } else {
+            throw new Error('No image returned from API');
           }
         } catch (err) {
-          console.error('Error generating image for', product.name, ':', err);
+          console.error('Error generating AI image for', product.name, ':', err);
+          setImageErrors(prev => ({ ...prev, [product.id]: true }));
           // Use fallback image
           setProductImages(prev => ({
             ...prev,
@@ -80,6 +85,37 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
       generateImages();
     }
   }, [validProducts.map(p => p.id).join(',')]); // Only re-run if product IDs change
+
+  const retryImageGeneration = async (product: FeaturedProduct) => {
+    setLoadingImages(prev => ({ ...prev, [product.id]: true }));
+    setImageErrors(prev => ({ ...prev, [product.id]: false }));
+
+    try {
+      console.log('Retrying AI image generation for:', product.name);
+      
+      const { data, error } = await supabase.functions.invoke('generate-product-image', {
+        body: { productName: product.name }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data?.imageUrl) {
+        console.log('AI image retry successful for:', product.name);
+        setProductImages(prev => ({
+          ...prev,
+          [product.id]: data.imageUrl
+        }));
+        setImageErrors(prev => ({ ...prev, [product.id]: false }));
+      }
+    } catch (err) {
+      console.error('Retry failed for', product.name, ':', err);
+      setImageErrors(prev => ({ ...prev, [product.id]: true }));
+    } finally {
+      setLoadingImages(prev => ({ ...prev, [product.id]: false }));
+    }
+  };
 
   if (validProducts.length === 0) {
     return null;
@@ -153,6 +189,7 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
         {validProducts.map((product) => {
           const sealInfo = getSealInfo(product.seal);
           const isImageLoading = loadingImages[product.id];
+          const hasImageError = imageErrors[product.id];
           const productImage = productImages[product.id] || product.image;
           
           return (
@@ -162,17 +199,28 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
                   {isImageLoading ? (
                     <div className="flex flex-col items-center justify-center">
                       <Loader2 className="w-8 h-8 animate-spin text-gray-400 mb-2" />
-                      <span className="text-sm text-gray-500">Gerando imagem...</span>
+                      <span className="text-sm text-gray-500">Gerando imagem IA...</span>
                     </div>
                   ) : (
-                    <img
-                      src={productImage}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.src = 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center';
-                      }}
-                    />
+                    <div className="relative w-full h-full">
+                      <img
+                        src={productImage}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center';
+                        }}
+                      />
+                      {hasImageError && (
+                        <button
+                          onClick={() => retryImageGeneration(product)}
+                          className="absolute top-2 right-2 bg-white/80 hover:bg-white p-1 rounded-full shadow-md transition-colors"
+                          title="Tentar gerar imagem novamente"
+                        >
+                          <RefreshCw className="w-4 h-4 text-gray-600" />
+                        </button>
+                      )}
+                    </div>
                   )}
                 </div>
                 <Badge className={`absolute top-3 left-3 ${sealInfo.color} shadow-lg`}>

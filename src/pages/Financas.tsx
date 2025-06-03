@@ -2,13 +2,29 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { ArrowLeft, TrendingUp, DollarSign, PiggyBank, Target } from 'lucide-react';
+import { ArrowLeft, MessageCircle, BarChart3, Lightbulb, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import FinancialChat from '@/components/FinancialChat';
+import FinancialDashboard from '@/components/FinancialDashboard';
+import FinancialInsights from '@/components/FinancialInsights';
+import { FinancialData } from '@/hooks/useFinancialChat';
 
 const Financas = () => {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('chat');
+  const [financialData, setFinancialData] = useState<FinancialData | null>(null);
+  const [hasCompletedChat, setHasCompletedChat] = useState(false);
+
+  const handleChatComplete = (data: FinancialData) => {
+    setFinancialData(data);
+    setHasCompletedChat(true);
+    setActiveTab('dashboard');
+  };
+
+  const resetExperience = () => {
+    setFinancialData(null);
+    setHasCompletedChat(false);
+    setActiveTab('chat');
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
@@ -22,157 +38,94 @@ const Financas = () => {
             </Link>
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-gradient-to-br from-green-600 to-blue-600 rounded-lg flex items-center justify-center">
-                <DollarSign className="w-5 h-5 text-white" />
+                <BarChart3 className="w-5 h-5 text-white" />
               </div>
               <span className="font-bold text-xl text-gray-900">Mestre das Finanças</span>
             </div>
           </div>
+          
+          {hasCompletedChat && (
+            <Button onClick={resetExperience} variant="outline" size="sm">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Reiniciar
+            </Button>
+          )}
         </div>
       </header>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Navigation Tabs */}
-        <div className="flex space-x-4 mb-8">
-          <Button 
-            variant={activeTab === 'dashboard' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('dashboard')}
-            className="flex items-center space-x-2"
-          >
-            <TrendingUp className="w-4 h-4" />
-            <span>Dashboard</span>
-          </Button>
-          <Button 
-            variant={activeTab === 'planning' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('planning')}
-            className="flex items-center space-x-2"
-          >
-            <Target className="w-4 h-4" />
-            <span>Planejamento</span>
-          </Button>
-          <Button 
-            variant={activeTab === 'goals' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('goals')}
-            className="flex items-center space-x-2"
-          >
-            <PiggyBank className="w-4 h-4" />
-            <span>Metas</span>
-          </Button>
-        </div>
+        {/* Welcome Card - Apenas se não completou o chat */}
+        {!hasCompletedChat && activeTab === 'chat' && (
+          <Card className="mb-8 bg-gradient-to-r from-green-500 to-blue-600 text-white border-0">
+            <CardHeader>
+              <CardTitle className="text-2xl">Bem-vindo ao seu Consultor Financeiro Pessoal! 🎯</CardTitle>
+              <CardDescription className="text-white/90">
+                Vou te ajudar a organizar suas finanças de forma simples e personalizada. 
+                Através de uma conversa, vou entender sua situação e criar um plano sob medida para você.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        )}
 
-        {/* Dashboard Tab */}
-        {activeTab === 'dashboard' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Renda Mensal</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-green-600">R$ 0,00</div>
-                <p className="text-xs text-muted-foreground">Nenhuma renda cadastrada</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Gastos</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-red-600">R$ 0,00</div>
-                <p className="text-xs text-muted-foreground">Nenhum gasto registrado</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Economia</CardTitle>
-                <PiggyBank className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-blue-600">R$ 0,00</div>
-                <p className="text-xs text-muted-foreground">Nenhuma economia acumulada</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Meta do Mês</CardTitle>
-                <Target className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">0%</div>
-                <p className="text-xs text-muted-foreground">Nenhuma meta definida</p>
-              </CardContent>
-            </Card>
+        {/* Navigation Tabs - Apenas após completar o chat */}
+        {hasCompletedChat && (
+          <div className="flex space-x-4 mb-8">
+            <Button 
+              variant={activeTab === 'dashboard' ? 'default' : 'outline'}
+              onClick={() => setActiveTab('dashboard')}
+              className="flex items-center space-x-2"
+            >
+              <BarChart3 className="w-4 h-4" />
+              <span>Meu Dashboard</span>
+            </Button>
+            <Button 
+              variant={activeTab === 'insights' ? 'default' : 'outline'}
+              onClick={() => setActiveTab('insights')}
+              className="flex items-center space-x-2"
+            >
+              <Lightbulb className="w-4 h-4" />
+              <span>Análises e Dicas</span>
+            </Button>
+            <Button 
+              variant={activeTab === 'chat' ? 'default' : 'outline'}
+              onClick={() => setActiveTab('chat')}
+              className="flex items-center space-x-2"
+            >
+              <MessageCircle className="w-4 h-4" />
+              <span>Conversar Novamente</span>
+            </Button>
           </div>
         )}
 
-        {/* Planning Tab */}
-        {activeTab === 'planning' && (
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Configurar Plano Financeiro</CardTitle>
-                <CardDescription>Vamos criar um plano personalizado para sua situação financeira</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="renda">Renda Mensal Total</Label>
-                    <Input id="renda" placeholder="R$ 0,00" />
-                  </div>
-                  <div>
-                    <Label htmlFor="gastos-fixos">Gastos Fixos</Label>
-                    <Input id="gastos-fixos" placeholder="R$ 0,00" />
-                  </div>
-                  <div>
-                    <Label htmlFor="gastos-variaveis">Gastos Variáveis</Label>
-                    <Input id="gastos-variaveis" placeholder="R$ 0,00" />
-                  </div>
-                  <div>
-                    <Label htmlFor="dividas">Dívidas Totais</Label>
-                    <Input id="dividas" placeholder="R$ 0,00" />
-                  </div>
-                </div>
-                <Button className="w-full">Gerar Plano Personalizado</Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Seu Plano de Recuperação</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                    <span className="font-medium">Configure seus dados acima para gerar um plano personalizado</span>
-                    <span className="text-gray-500 font-bold">Aguardando dados</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+        {/* Content based on active tab */}
+        {activeTab === 'chat' && (
+          <div className="max-w-4xl mx-auto">
+            <FinancialChat onComplete={handleChatComplete} />
           </div>
         )}
 
-        {/* Goals Tab */}
-        {activeTab === 'goals' && (
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Minhas Metas</CardTitle>
-                <CardDescription>Acompanhe o progresso das suas metas financeiras</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="text-center py-8">
-                  <PiggyBank className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhuma meta cadastrada</h3>
-                  <p className="text-gray-500 mb-4">Comece definindo suas primeiras metas financeiras</p>
-                  <Button>Adicionar Nova Meta</Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+        {activeTab === 'dashboard' && financialData && (
+          <FinancialDashboard data={financialData} />
+        )}
+
+        {activeTab === 'insights' && financialData && (
+          <FinancialInsights data={financialData} />
+        )}
+
+        {/* Placeholder se não há dados e tentou acessar dashboard/insights */}
+        {(activeTab === 'dashboard' || activeTab === 'insights') && !financialData && (
+          <Card className="max-w-md mx-auto text-center">
+            <CardContent className="p-8">
+              <MessageCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Primeiro, vamos conversar!</h3>
+              <p className="text-gray-600 mb-4">
+                Para gerar seu dashboard personalizado, preciso conhecer sua situação financeira.
+              </p>
+              <Button onClick={() => setActiveTab('chat')}>
+                Começar Conversa
+              </Button>
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>

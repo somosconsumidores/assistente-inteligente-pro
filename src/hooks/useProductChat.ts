@@ -60,15 +60,25 @@ export const useProductChat = () => {
       }
 
       if (products && products.length > 0) {
-        const transformedProducts: FeaturedProduct[] = products.map(product => ({
-          id: product.id,
-          name: product.name,
-          image: product.image_url || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center',
-          price: product.price_average ? product.price_average.toString() : 'Consulte',
-          scoreMestre: product.score_mestre || 8.0,
-          seal: product.seal_type as 'melhor' | 'barato' | 'recomendacao',
-          link: product.store_link
-        }));
+        const transformedProducts: FeaturedProduct[] = products.map(product => {
+          // Ensure price is properly formatted
+          let priceValue = product.price_average;
+          
+          // If price is a very small number (like 38.5), it might need to be multiplied
+          if (typeof priceValue === 'number' && priceValue < 100) {
+            priceValue = priceValue * 1000;
+          }
+          
+          return {
+            id: product.id,
+            name: product.name,
+            image: product.image_url || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center',
+            price: priceValue ? priceValue.toString() : 'Consulte',
+            scoreMestre: product.score_mestre || 8.0,
+            seal: product.seal_type as 'melhor' | 'barato' | 'recomendacao',
+            link: product.store_link
+          };
+        });
 
         console.log('Fetched products from database:', transformedProducts);
         return transformedProducts;

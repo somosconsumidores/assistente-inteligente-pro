@@ -24,15 +24,33 @@ interface ProductCardProps {
   onImageError: () => void;
 }
 
-const formatPrice = (price: number): string => {
-  if (!price || price === 0) return 'Consulte';
+const formatPrice = (price: string | number): string => {
+  if (!price || price === 0 || price === '0') return 'Consulte';
+  
+  let numericPrice: number;
+  
+  if (typeof price === 'string') {
+    // Remove any non-numeric characters except dots and commas
+    const cleanPrice = price.replace(/[^\d.,]/g, '');
+    // Replace comma with dot for parsing
+    numericPrice = parseFloat(cleanPrice.replace(',', '.'));
+  } else {
+    numericPrice = price;
+  }
+  
+  if (isNaN(numericPrice) || numericPrice === 0) return 'Consulte';
+  
+  // If the price seems to be in thousands (like 38 meaning 38000), multiply by 1000
+  if (numericPrice < 100) {
+    numericPrice = numericPrice * 1000;
+  }
   
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
-  }).format(price);
+  }).format(numericPrice);
 };
 
 const ProductCard = ({ 
@@ -45,12 +63,7 @@ const ProductCard = ({
 }: ProductCardProps) => {
   const sealComponent = ProductSeal({ seal: product.seal });
   
-  // Parse the price correctly - it should already be a number in the database
-  const priceValue = typeof product.price === 'string' 
-    ? parseFloat(product.price.replace(/[^\d.,]/g, '').replace(',', '.')) 
-    : product.price;
-  
-  const formattedPrice = typeof priceValue === 'number' ? formatPrice(priceValue) : product.price;
+  const formattedPrice = formatPrice(product.price);
 
   return (
     <Card className={`overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105 bg-gradient-to-br ${sealComponent.sealInfo.bgColor} border-2`}>

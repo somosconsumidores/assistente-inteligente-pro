@@ -165,6 +165,18 @@ export type Database = {
         Args: { "": string } | { "": unknown } | { "": unknown }
         Returns: unknown
       }
+      match_documents: {
+        Args: {
+          query_embedding: string
+          match_threshold?: number
+          match_count?: number
+        }
+        Returns: {
+          chunk_text: string
+          chunk_index: number
+          knowledge_base: Json
+        }[]
+      }
       sparsevec_out: {
         Args: { "": unknown }
         Returns: unknown

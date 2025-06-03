@@ -51,21 +51,27 @@ serve(async (req) => {
       const embeddingData = await embeddingResponse.json();
       const queryEmbedding = embeddingData.data[0].embedding;
 
-      // Buscar chunks relevantes na base de conhecimento
+      console.log('Embedding gerado, buscando contexto relevante...');
+
+      // Buscar chunks relevantes na base de conhecimento usando a função SQL
       const { data: relevantChunks, error: searchError } = await supabase.rpc('match_documents', {
         query_embedding: queryEmbedding,
         match_threshold: 0.7,
-        match_count: 3
+        match_count: 5
       });
 
       if (!searchError && relevantChunks && relevantChunks.length > 0) {
-        relevantContext = '\n\nCONTEXTO DA BASE DE CONHECIMENTO:\n' + 
-          relevantChunks.map((chunk: any) => 
-            `- ${chunk.chunk_text.substring(0, 500)}...`
-          ).join('\n');
+        relevantContext = '\n\nCONTEXTO DA BASE DE CONHECIMENTO (CDC):\n' + 
+          relevantChunks.map((chunk: any, index: number) => 
+            `[${index + 1}] ${chunk.chunk_text}`
+          ).join('\n\n');
         
-        console.log('Contexto relevante encontrado:', relevantChunks.length, 'chunks');
+        console.log('Contexto relevante encontrado:', relevantChunks.length, 'chunks do CDC');
+      } else {
+        console.log('Nenhum contexto relevante encontrado ou erro na busca:', searchError);
       }
+    } else {
+      console.log('Erro ao gerar embedding, usando apenas conhecimento base');
     }
 
     const systemPrompt = `Você é um advogado especialista em Direito do Consumidor brasileiro. Sua função é orientar consumidores sobre seus direitos com base no Código de Defesa do Consumidor (CDC) e legislação brasileira relacionada.
@@ -79,7 +85,7 @@ INSTRUÇÕES IMPORTANTES:
 - Seja empático e acolhedor com o consumidor
 - Use linguagem clara e acessível, evitando juridiquês excessivo
 - Sempre que possível, sugira tentativas de resolução amigável antes da via judicial
-- Se houver informações da base de conhecimento, incorpore-as naturalmente na resposta
+- Quando houver informações da base de conhecimento, incorpore-as naturalmente na resposta, citando os artigos específicos
 
 ÁREAS DE CONHECIMENTO:
 - Vícios e defeitos em produtos e serviços
@@ -93,9 +99,9 @@ INSTRUÇÕES IMPORTANTES:
 
 ${relevantContext}
 
-Responda sempre de forma profissional, precisa e útil.`;
+Responda sempre de forma profissional, precisa e útil, baseando-se preferencialmente no contexto fornecido da base de conhecimento quando disponível.`;
 
-    console.log('Enviando mensagem para OpenAI com contexto');
+    console.log('Enviando mensagem para OpenAI com contexto do CDC');
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',

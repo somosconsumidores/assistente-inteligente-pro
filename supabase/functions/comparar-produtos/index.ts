@@ -1,4 +1,3 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -86,21 +85,90 @@ const detectCategory = (query: string): string => {
   return 'geral';
 };
 
+const extractTableProducts = (text: string): any[] => {
+  try {
+    console.log('Attempting to extract products from table format...');
+    
+    // Split text into lines and find table content
+    const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    
+    // Find lines that contain table data (with | separators)
+    const tableLines = lines.filter(line => 
+      line.includes('|') && 
+      !line.match(/^[\s\-\|]+$/) && // Ignore header separator lines (only dashes, spaces, pipes)
+      !line.toLowerCase().includes('nome do produto') // Ignore header line
+    );
+    
+    console.log('Found table lines:', tableLines.length);
+    
+    const products: any[] = [];
+    
+    for (const line of tableLines) {
+      const columns = line.split('|').map(col => col.trim()).filter(col => col.length > 0);
+      
+      if (columns.length >= 5) {
+        const [name, category, priceStr, scoreStr, sealStr] = columns;
+        
+        // Extract numeric values
+        const priceMatch = priceStr.match(/[\d,\.]+/);
+        const scoreMatch = scoreStr.match(/[\d,\.]+/);
+        
+        const price = priceMatch ? parseFloat(priceMatch[0].replace(',', '.')) : 0;
+        const score = scoreMatch ? parseFloat(scoreMatch[0].replace(',', '.')) : 0;
+        
+        // Map seal types
+        let sealType = 'recomendacao';
+        if (sealStr.toLowerCase().includes('melhor') || sealStr.includes('🏆')) {
+          sealType = 'melhor';
+        } else if (sealStr.toLowerCase().includes('barato') || sealStr.includes('💰')) {
+          sealType = 'barato';
+        } else if (sealStr.toLowerCase().includes('recomenda') || sealStr.includes('⭐')) {
+          sealType = 'recomendacao';
+        }
+        
+        const product = {
+          name: name.replace(/[\*\#]+/g, '').trim(),
+          category: category.toLowerCase().replace(/[\s\-]+/g, '-'),
+          price_average: price,
+          score_mestre: score,
+          seal_type: sealType,
+          brand: name.split(' ')[0], // First word as brand approximation
+          description: `${name} - Produto avaliado pelo Consumo Inteligente`,
+          image_url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center',
+          store_link: null
+        };
+        
+        products.push(product);
+        console.log('Extracted product:', product.name, 'Seal:', product.seal_type);
+      }
+    }
+    
+    console.log('Total products extracted from table:', products.length);
+    return products;
+  } catch (error) {
+    console.log('Error extracting table products:', error);
+    return [];
+  }
+};
+
 const extractStructuredProducts = (text: string): any[] => {
   try {
+    // First try JSON extraction (backward compatibility)
     const regex = /PRODUTOS_ESTRUTURADOS:\s*({[\s\S]*?})\s*(?=\n\n|\n$|$)/;
     const match = text.match(regex);
     
     if (match) {
       const jsonStr = match[1];
       const data = JSON.parse(jsonStr);
+      console.log('Extracted products from JSON format:', data.produtos?.length || 0);
       return data.produtos || [];
     }
   } catch (error) {
-    console.log('Erro ao extrair produtos estruturados:', error);
+    console.log('JSON extraction failed, trying table extraction:', error);
   }
   
-  return [];
+  // If JSON extraction fails, try table extraction
+  return extractTableProducts(text);
 };
 
 const saveProductsToDatabase = async (products: any[], category: string, supabase: any) => {
@@ -211,7 +279,7 @@ serve(async (req) => {
     
     const analysis = data.choices[0].message.content;
 
-    // Extract and save structured products
+    // Extract and save structured products (now supports both JSON and table formats)
     const structuredProducts = extractStructuredProducts(analysis);
     console.log('Extracted structured products:', structuredProducts);
     

@@ -119,6 +119,9 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade }) 
                   <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Lock className="w-8 h-8 text-gray-500" />
                   </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    {assistant.title}
+                  </h3>
                   <p className="text-sm text-gray-600 mb-4 font-medium">
                     Este assistente requer plano Premium
                   </p>

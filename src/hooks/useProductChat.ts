@@ -9,10 +9,21 @@ interface Message {
   timestamp: Date;
 }
 
+interface FeaturedProduct {
+  id: string;
+  name: string;
+  image: string;
+  price: string;
+  scoreMestre: number;
+  seal: 'melhor' | 'barato' | 'recomendacao';
+  link?: string;
+}
+
 export const useProductChat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([]);
 
   const addMessage = useCallback((content: string, type: 'user' | 'assistant') => {
     const newMessage: Message = {
@@ -23,6 +34,44 @@ export const useProductChat = () => {
     };
     setMessages(prev => [...prev, newMessage]);
     return newMessage;
+  }, []);
+
+  const extractFeaturedProducts = useCallback((message: string) => {
+    const products: FeaturedProduct[] = [];
+    
+    // Patterns mais robustos para identificar produtos com selos
+    const patterns = [
+      { regex: /🏆\s*Melhor da Avaliação[:\s-]*([^(\n]+?)(?:\s*\(|$)/gi, seal: 'melhor' as const },
+      { regex: /💰\s*Barato da Avaliação[:\s-]*([^(\n]+?)(?:\s*\(|$)/gi, seal: 'barato' as const },
+      { regex: /⭐\s*Nossa Recomendação[:\s-]*([^(\n]+?)(?:\s*\(|$)/gi, seal: 'recomendacao' as const }
+    ];
+    
+    // Extrair scores e preços do contexto
+    const scoreMatches = [...message.matchAll(/Score Mestre[:\s]*(\d+(?:[.,]\d+)?)/gi)];
+    const priceMatches = [...message.matchAll(/R\$\s*\d+(?:[.,]\d+)?(?:\s*mil)?/gi)];
+    
+    let productId = 1;
+    
+    patterns.forEach(({ regex, seal }) => {
+      let match;
+      while ((match = regex.exec(message)) !== null) {
+        const name = match[1]?.trim().replace(/[:\-–]/g, '').trim() || `Produto ${productId}`;
+        
+        if (name && name.length > 3) { // Validar nome mínimo
+          products.push({
+            id: `${seal}-${productId}`,
+            name: name,
+            image: '/placeholder.svg',
+            price: priceMatches[productId - 1]?.[0] || 'Consulte',
+            scoreMestre: parseFloat(scoreMatches[productId - 1]?.[1]?.replace(',', '.') || '8.5'),
+            seal: seal
+          });
+          productId++;
+        }
+      }
+    });
+    
+    return products;
   }, []);
 
   const sendMessage = useCallback(async (userMessage: string) => {
@@ -59,6 +108,12 @@ export const useProductChat = () => {
 
       if (data?.analysis) {
         addMessage(data.analysis, 'assistant');
+        
+        // Extrair produtos destacados da resposta
+        const extractedProducts = extractFeaturedProducts(data.analysis);
+        if (extractedProducts.length > 0) {
+          setFeaturedProducts(extractedProducts);
+        }
       } else {
         throw new Error('Nenhuma resposta recebida');
       }
@@ -70,7 +125,7 @@ export const useProductChat = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [messages, addMessage]);
+  }, [messages, addMessage, extractFeaturedProducts]);
 
   const startChat = useCallback(() => {
     if (messages.length === 0) {
@@ -92,12 +147,14 @@ Sobre qual produto você gostaria de conversar hoje?`;
   const clearChat = useCallback(() => {
     setMessages([]);
     setError(null);
+    setFeaturedProducts([]);
   }, []);
 
   return {
     messages,
     isLoading,
     error,
+    featuredProducts,
     sendMessage,
     startChat,
     clearChat

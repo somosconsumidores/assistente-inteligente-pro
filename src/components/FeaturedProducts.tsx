@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +17,18 @@ interface FeaturedProduct {
 interface FeaturedProductsProps {
   products: FeaturedProduct[];
 }
+
+const formatPrice = (price: number): string => {
+  if (!price || price === 0) return 'Consulte';
+  
+  // Format as Brazilian currency
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(price);
+};
 
 const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
   const [productImages, setProductImages] = useState<{[key: string]: string}>({});
@@ -190,6 +201,13 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
           const hasImageError = imageErrors[product.id];
           const productImage = productImages[product.id];
           
+          // Parse the price correctly - it should already be a number in the database
+          const priceValue = typeof product.price === 'string' 
+            ? parseFloat(product.price.replace(/[^\d.,]/g, '').replace(',', '.')) 
+            : product.price;
+          
+          const formattedPrice = typeof priceValue === 'number' ? formatPrice(priceValue) : product.price;
+          
           return (
             <Card key={product.id} className={`overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105 bg-gradient-to-br ${sealInfo.bgColor} border-2`}>
               <div className="relative">
@@ -252,7 +270,7 @@ const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <p className="text-sm text-gray-600">Preço Médio</p>
-                    <p className="text-xl font-bold text-green-600">{product.price}</p>
+                    <p className="text-xl font-bold text-green-600">{formattedPrice}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm text-gray-600">Score Mestre</p>

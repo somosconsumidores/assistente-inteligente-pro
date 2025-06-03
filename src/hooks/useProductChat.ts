@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -41,16 +40,13 @@ export const useProductChat = () => {
       let query = supabase.from('featured_products').select('*');
       
       if (productIds && productIds.length > 0) {
-        // Fetch specific products by IDs
         query = query.in('id', productIds);
       } else if (category && category !== 'geral') {
-        // Fetch products by category, limit to recent ones
         query = query
           .eq('category', category)
           .order('created_at', { ascending: false })
           .limit(3);
       } else {
-        // Fallback: get recent popular products
         query = query
           .order('created_at', { ascending: false })
           .limit(3);
@@ -64,12 +60,11 @@ export const useProductChat = () => {
       }
 
       if (products && products.length > 0) {
-        // Transform to FeaturedProduct format
         const transformedProducts: FeaturedProduct[] = products.map(product => ({
           id: product.id,
           name: product.name,
           image: product.image_url || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center',
-          price: product.price_average ? `R$ ${product.price_average.toFixed(2)}` : 'Consulte',
+          price: product.price_average ? product.price_average.toString() : 'Consulte',
           scoreMestre: product.score_mestre || 8.0,
           seal: product.seal_type as 'melhor' | 'barato' | 'recomendacao',
           link: product.store_link
@@ -89,19 +84,16 @@ export const useProductChat = () => {
   const sendMessage = useCallback(async (userMessage: string) => {
     if (!userMessage.trim()) return;
 
-    // Add user message
     addMessage(userMessage, 'user');
     setIsLoading(true);
     setError(null);
 
     try {
-      // Build conversation context
       const conversationHistory = messages.map(msg => ({
         role: msg.type === 'user' ? 'user' : 'assistant',
         content: msg.content
       }));
 
-      // Add current user message
       conversationHistory.push({
         role: 'user',
         content: userMessage
@@ -121,7 +113,6 @@ export const useProductChat = () => {
       if (data?.analysis) {
         addMessage(data.analysis, 'assistant');
         
-        // Fetch products from database
         const products = await fetchProductsFromDatabase(data.productIds, data.category);
         console.log('Setting featured products from database:', products);
         if (products.length > 0) {

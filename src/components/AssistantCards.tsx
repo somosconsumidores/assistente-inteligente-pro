@@ -2,144 +2,125 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-
-const assistants = [
-  {
-    id: 1,
-    name: "Mestre do Direito do Consumidor",
-    icon: "👨‍⚖️",
-    description: "Seu advogado pessoal para direitos do consumidor",
-    features: [
-      "Responde dúvidas jurídicas",
-      "Redige petições para o JEC",
-      "Passo a passo para ações judiciais",
-      "Suporte 24/7 humanizado"
-    ],
-    color: "from-red-500 to-orange-500",
-    bgColor: "bg-red-50",
-    problem: "Não sabe como agir diante de abusos de empresas"
-  },
-  {
-    id: 2,
-    name: "Mestre das Finanças",
-    icon: "💰",
-    description: "Planejador financeiro pessoal inteligente",
-    features: [
-      "Plano de recuperação financeira",
-      "Dashboard semanal no WhatsApp",
-      "Metas e alertas personalizados",
-      "Controle de despesas automatizado"
-    ],
-    color: "from-green-500 to-emerald-500",
-    bgColor: "bg-green-50",
-    problem: "Falta de orientação financeira prática e personalizada"
-  },
-  {
-    id: 3,
-    name: "Mestre dos Produtos",
-    icon: "🛍️",
-    description: "Consultor de compras inteligentes",
-    features: [
-      "Compara produtos similares",
-      "Perguntas inteligentes sobre uso",
-      "Recomendações personalizadas",
-      "Melhor custo-benefício"
-    ],
-    color: "from-purple-500 to-pink-500",
-    bgColor: "bg-purple-50",
-    problem: "Dificuldade em comparar produtos de forma confiável"
-  },
-  {
-    id: 4,
-    name: "Mestre das Viagens",
-    icon: "✈️",
-    description: "Planejador de viagens completo",
-    features: [
-      "Roteiro diário personalizado",
-      "Sugestões de hospedagem e passeios",
-      "Links diretos para reservas",
-      "Opções econômicas e premium"
-    ],
-    color: "from-blue-500 to-cyan-500",
-    bgColor: "bg-blue-50",
-    problem: "Planejamento de viagem é estressante e desorganizado"
-  },
-  {
-    id: 5,
-    name: "Mestre do Supermercado",
-    icon: "🛒",
-    description: "Avaliador de produtos de supermercado",
-    features: [
-      "Análise por foto ou nome",
-      "Compara qualidade e preço",
-      "Recomenda melhor escolha",
-      "Funciona com qualquer item"
-    ],
-    color: "from-yellow-500 to-orange-500",
-    bgColor: "bg-yellow-50",
-    problem: "Escolher itens é confuso e caro, com pouca transparência"
-  }
-];
+import { Scale, DollarSign, ShoppingCart, Plane, ShoppingBasket } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const AssistantCards = () => {
+  const assistants = [
+    {
+      id: 'direito',
+      title: 'Mestre do Direito do Consumidor',
+      description: 'Seu advogado pessoal para questões de consumo. Redige petições, orienta sobre direitos e te guia no processo judicial.',
+      icon: Scale,
+      color: 'from-blue-600 to-purple-600',
+      bgColor: 'from-blue-50 to-purple-50',
+      features: ['Consultoria jurídica 24/7', 'Geração de petições', 'Guia passo a passo para JEC'],
+      path: '/direito-consumidor'
+    },
+    {
+      id: 'financas',
+      title: 'Mestre das Finanças',
+      description: 'Planejador financeiro pessoal que cria planos de recuperação, dashboards e metas personalizadas.',
+      icon: DollarSign,
+      color: 'from-green-600 to-blue-600',
+      bgColor: 'from-green-50 to-blue-50',
+      features: ['Plano financeiro personalizado', 'Dashboard de acompanhamento', 'Metas e alertas'],
+      path: '/financas'
+    },
+    {
+      id: 'produtos',
+      title: 'Mestre dos Produtos',
+      description: 'Consultor de compras que compara produtos, analisa custo-benefício e recomenda a melhor escolha.',
+      icon: ShoppingCart,
+      color: 'from-orange-600 to-red-600',
+      bgColor: 'from-orange-50 to-red-50',
+      features: ['Comparação inteligente', 'Análise de custo-benefício', 'Recomendações personalizadas'],
+      path: '/produtos'
+    },
+    {
+      id: 'viagens',
+      title: 'Mestre das Viagens',
+      description: 'Planejador completo que cria roteiros personalizados com base no seu perfil, orçamento e estilo.',
+      icon: Plane,
+      color: 'from-sky-600 to-indigo-600',
+      bgColor: 'from-sky-50 to-indigo-50',
+      features: ['Roteiros personalizados', 'Sugestões de hospedagem', 'Integração com reservas'],
+      path: '/viagens'
+    },
+    {
+      id: 'supermercado',
+      title: 'Mestre do Supermercado',
+      description: 'Avaliador de produtos de supermercado que compara qualidade, preço e recomenda as melhores opções.',
+      icon: ShoppingBasket,
+      color: 'from-emerald-600 to-green-600',
+      bgColor: 'from-emerald-50 to-green-50',
+      features: ['Scanner de produtos', 'Comparação de qualidade', 'Escolhas inteligentes'],
+      path: '/supermercado'
+    }
+  ];
+
   return (
     <section id="assistentes" className="py-20 px-4">
-      <div className="container mx-auto max-w-7xl">
+      <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Conheça Seus Assistentes
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+            Conheça Seus <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              5 Assistentes Especializados
+            </span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Cada assistente é especializado em resolver problemas específicos do seu dia a dia, 
-            funcionando como verdadeiros copilotos inteligentes.
+            Cada assistente é um especialista em sua área, pronto para resolver seus problemas específicos 
+            com inteligência artificial avançada.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {assistants.map((assistant, index) => (
-            <Card 
-              key={assistant.id} 
-              className={`${assistant.bgColor} border-0 hover:shadow-xl transition-all duration-300 hover:scale-105 animate-fade-in group`}
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <CardHeader className="text-center pb-4">
-                <div className="text-6xl mb-4 group-hover:scale-110 transition-transform duration-300">
-                  {assistant.icon}
-                </div>
-                <CardTitle className="text-xl font-bold text-gray-900 mb-2">
-                  {assistant.name}
-                </CardTitle>
-                <CardDescription className="text-gray-600 text-base">
-                  {assistant.description}
-                </CardDescription>
-              </CardHeader>
-              
-              <CardContent className="space-y-4">
-                <div className="bg-white/60 p-3 rounded-lg">
-                  <p className="text-sm text-red-600 font-medium mb-2">❌ Problema:</p>
-                  <p className="text-sm text-gray-700">{assistant.problem}</p>
-                </div>
+          {assistants.map((assistant) => {
+            const IconComponent = assistant.icon;
+            return (
+              <Card 
+                key={assistant.id} 
+                className={`relative overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 bg-gradient-to-br ${assistant.bgColor} border-0`}
+              >
+                <CardHeader className="pb-4">
+                  <div className={`w-12 h-12 bg-gradient-to-br ${assistant.color} rounded-lg flex items-center justify-center mb-4`}>
+                    <IconComponent className="w-6 h-6 text-white" />
+                  </div>
+                  <CardTitle className="text-xl font-bold text-gray-900">
+                    {assistant.title}
+                  </CardTitle>
+                  <CardDescription className="text-gray-600 leading-relaxed">
+                    {assistant.description}
+                  </CardDescription>
+                </CardHeader>
                 
-                <div className="space-y-2">
-                  <p className="text-sm font-semibold text-gray-800">✨ Funcionalidades:</p>
-                  <ul className="space-y-1">
-                    {assistant.features.map((feature, idx) => (
-                      <li key={idx} className="text-sm text-gray-700 flex items-center">
-                        <span className="w-1.5 h-1.5 bg-gray-400 rounded-full mr-2"></span>
-                        {feature}
-                      </li>
+                <CardContent className="pt-0">
+                  <div className="space-y-3 mb-6">
+                    {assistant.features.map((feature, index) => (
+                      <div key={index} className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="text-sm text-gray-700">{feature}</span>
+                      </div>
                     ))}
-                  </ul>
-                </div>
-                
-                <Button 
-                  className={`w-full bg-gradient-to-r ${assistant.color} hover:opacity-90 transition-opacity`}
-                >
-                  Experimentar Agora
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+                  </div>
+                  
+                  <Link to={assistant.path}>
+                    <Button 
+                      className={`w-full bg-gradient-to-r ${assistant.color} hover:opacity-90 transition-opacity`}
+                    >
+                      Usar Assistente
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        <div className="text-center mt-16">
+          <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 rounded-full text-sm font-medium">
+            🚀 Todos os assistentes disponíveis em uma única plataforma
+          </div>
         </div>
       </div>
     </section>

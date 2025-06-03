@@ -4,10 +4,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, MessageSquare, FileText, Scale, AlertCircle, Send, Database } from 'lucide-react';
+import { ArrowLeft, MessageSquare, FileText, Scale, AlertCircle, Send, Database, Download, RotateCcw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useDireitoChat } from '@/hooks/useDireitoChat';
 import { useAuth } from '@/contexts/AuthContext';
+import { useGerarPeticao } from '@/hooks/useGerarPeticao';
 import KnowledgeBase from '@/components/KnowledgeBase';
 
 const DireitoConsumidor = () => {
@@ -15,6 +16,16 @@ const DireitoConsumidor = () => {
   const [chatMessage, setChatMessage] = useState('');
   const { messages, sendMessage, isLoading } = useDireitoChat();
   const { user } = useAuth();
+  const { gerarPeticao, isLoading: isGeneratingPetition, peticaoGerada, limparPeticao } = useGerarPeticao();
+
+  // Form states for petition
+  const [formData, setFormData] = useState({
+    nome: '',
+    cpf: '',
+    empresa: '',
+    valor: '',
+    relato: ''
+  });
 
   // Verificar se o usuário atual é o ai01@teste.com
   const isSpecialUser = user?.email === 'ai01@teste.com';
@@ -31,6 +42,40 @@ const DireitoConsumidor = () => {
       e.preventDefault();
       handleSendMessage();
     }
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleGerarPeticao = async () => {
+    await gerarPeticao(formData);
+  };
+
+  const handleNovaConsulta = () => {
+    setFormData({
+      nome: '',
+      cpf: '',
+      empresa: '',
+      valor: '',
+      relato: ''
+    });
+    limparPeticao();
+  };
+
+  const handleDownloadPeticao = () => {
+    if (!peticaoGerada) return;
+    
+    const element = document.createElement('a');
+    const file = new Blob([peticaoGerada], { type: 'text/plain' });
+    element.href = URL.createObjectURL(file);
+    element.download = `peticao_${formData.nome.replace(/\s+/g, '_')}.txt`;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
   };
 
   return (
@@ -163,41 +208,97 @@ const DireitoConsumidor = () => {
 
         {/* Petition Tab */}
         {activeTab === 'petition' && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Gerador de Petição</CardTitle>
-              <CardDescription>Crie uma petição inicial para o Juizado Especial Cível</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="nome">Nome Completo</Label>
-                  <Input id="nome" placeholder="Seu nome completo" />
-                </div>
-                <div>
-                  <Label htmlFor="cpf">CPF</Label>
-                  <Input id="cpf" placeholder="000.000.000-00" />
-                </div>
-                <div>
-                  <Label htmlFor="empresa">Nome da Empresa</Label>
-                  <Input id="empresa" placeholder="Empresa que causou o problema" />
-                </div>
-                <div>
-                  <Label htmlFor="valor">Valor do Dano</Label>
-                  <Input id="valor" placeholder="R$ 0,00" />
-                </div>
+          <div className="max-w-4xl mx-auto space-y-6">
+            {!peticaoGerada ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Gerador de Petição</CardTitle>
+                  <CardDescription>Crie uma petição inicial para o Juizado Especial Cível</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="nome">Nome Completo *</Label>
+                      <Input 
+                        id="nome" 
+                        placeholder="Seu nome completo"
+                        value={formData.nome}
+                        onChange={(e) => handleInputChange('nome', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="cpf">CPF *</Label>
+                      <Input 
+                        id="cpf" 
+                        placeholder="000.000.000-00"
+                        value={formData.cpf}
+                        onChange={(e) => handleInputChange('cpf', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="empresa">Nome da Empresa *</Label>
+                      <Input 
+                        id="empresa" 
+                        placeholder="Empresa que causou o problema"
+                        value={formData.empresa}
+                        onChange={(e) => handleInputChange('empresa', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="valor">Valor do Dano *</Label>
+                      <Input 
+                        id="valor" 
+                        placeholder="R$ 0,00"
+                        value={formData.valor}
+                        onChange={(e) => handleInputChange('valor', e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="relato">Relato dos Fatos *</Label>
+                    <Textarea 
+                      id="relato" 
+                      placeholder="Descreva detalhadamente o que aconteceu..."
+                      className="min-h-32"
+                      value={formData.relato}
+                      onChange={(e) => handleInputChange('relato', e.target.value)}
+                    />
+                  </div>
+                  <Button 
+                    className="w-full"
+                    onClick={handleGerarPeticao}
+                    disabled={isGeneratingPetition}
+                  >
+                    {isGeneratingPetition ? 'Gerando Petição...' : 'Gerar Petição'}
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Petição Gerada</CardTitle>
+                    <CardDescription>Sua petição foi gerada com sucesso</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="bg-gray-50 p-6 rounded-lg border">
+                      <pre className="whitespace-pre-wrap text-sm leading-relaxed">{peticaoGerada}</pre>
+                    </div>
+                    <div className="flex space-x-4 mt-6">
+                      <Button onClick={handleDownloadPeticao} className="flex items-center space-x-2">
+                        <Download className="w-4 h-4" />
+                        <span>Baixar Petição</span>
+                      </Button>
+                      <Button variant="outline" onClick={handleNovaConsulta} className="flex items-center space-x-2">
+                        <RotateCcw className="w-4 h-4" />
+                        <span>Nova Consulta</span>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
-              <div>
-                <Label htmlFor="relato">Relato dos Fatos</Label>
-                <Textarea 
-                  id="relato" 
-                  placeholder="Descreva detalhadamente o que aconteceu..."
-                  className="min-h-32"
-                />
-              </div>
-              <Button className="w-full">Gerar Petição</Button>
-            </CardContent>
-          </Card>
+            )}
+          </div>
         )}
 
         {/* Guide Tab */}

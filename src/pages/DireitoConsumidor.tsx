@@ -5,27 +5,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, MessageSquare, FileText, Scale, AlertCircle } from 'lucide-react';
+import { ArrowLeft, MessageSquare, FileText, Scale, AlertCircle, Send } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useDireitoChat } from '@/hooks/useDireitoChat';
 
 const DireitoConsumidor = () => {
   const [activeTab, setActiveTab] = useState('chat');
   const [chatMessage, setChatMessage] = useState('');
-  const [messages, setMessages] = useState([
-    { type: 'agent', content: 'Olá! Sou seu advogado pessoal do consumidor. Como posso ajudá-lo hoje?' }
-  ]);
+  const { messages, sendMessage, isLoading } = useDireitoChat();
 
-  const handleSendMessage = () => {
-    if (chatMessage.trim()) {
-      setMessages([...messages, { type: 'user', content: chatMessage }]);
+  const handleSendMessage = async () => {
+    if (chatMessage.trim() && !isLoading) {
+      await sendMessage(chatMessage);
       setChatMessage('');
-      // Simular resposta do agente
-      setTimeout(() => {
-        setMessages(prev => [...prev, { 
-          type: 'agent', 
-          content: 'Entendi sua situação. Com base no Código de Defesa do Consumidor, você tem direitos que podem ser exercidos. Vou te orientar sobre os próximos passos...' 
-        }]);
-      }, 1000);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
     }
   };
 
@@ -82,33 +81,63 @@ const DireitoConsumidor = () => {
         {activeTab === 'chat' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
-              <Card className="h-96">
+              <Card className="h-[600px] flex flex-col">
                 <CardHeader>
                   <CardTitle>Consultoria Jurídica</CardTitle>
                   <CardDescription>Tire suas dúvidas sobre direito do consumidor</CardDescription>
                 </CardHeader>
-                <CardContent className="flex flex-col h-full">
-                  <div className="flex-1 overflow-y-auto space-y-4 mb-4">
+                <CardContent className="flex-1 flex flex-col">
+                  <div className="flex-1 overflow-y-auto space-y-4 mb-4 p-4 bg-gray-50 rounded-lg">
                     {messages.map((message, index) => (
                       <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                        <div className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg ${
                           message.type === 'user' 
                             ? 'bg-blue-600 text-white' 
-                            : 'bg-gray-100 text-gray-800'
+                            : 'bg-white text-gray-800 border border-gray-200'
                         }`}>
-                          {message.content}
+                          <div className="whitespace-pre-wrap">{message.content}</div>
+                          {message.timestamp && (
+                            <div className={`text-xs mt-2 ${
+                              message.type === 'user' ? 'text-blue-100' : 'text-gray-500'
+                            }`}>
+                              {message.timestamp.toLocaleTimeString('pt-BR', { 
+                                hour: '2-digit', 
+                                minute: '2-digit' 
+                              })}
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}
+                    {isLoading && (
+                      <div className="flex justify-start">
+                        <div className="bg-white text-gray-800 border border-gray-200 px-4 py-3 rounded-lg">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                            <span className="text-sm text-gray-600">Consultando...</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div className="flex space-x-2">
                     <Input
                       placeholder="Digite sua dúvida jurídica..."
                       value={chatMessage}
                       onChange={(e) => setChatMessage(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                      onKeyPress={handleKeyPress}
+                      disabled={isLoading}
+                      className="flex-1"
                     />
-                    <Button onClick={handleSendMessage}>Enviar</Button>
+                    <Button 
+                      onClick={handleSendMessage}
+                      disabled={isLoading || !chatMessage.trim()}
+                      className="px-3"
+                    >
+                      <Send className="w-4 h-4" />
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -177,7 +206,6 @@ const DireitoConsumidor = () => {
           </Card>
         )}
 
-        {/* Guide Tab */}
         {activeTab === 'guide' && (
           <div className="space-y-6">
             <Card>

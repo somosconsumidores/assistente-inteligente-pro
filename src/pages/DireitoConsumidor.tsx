@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -87,91 +88,67 @@ const DireitoConsumidor = () => {
 
         {/* Chat Tab */}
         {activeTab === 'chat' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-              <Card className="h-[600px] flex flex-col">
-                <CardHeader>
-                  <CardTitle>Consultoria Jurídica</CardTitle>
-                  <CardDescription>Tire suas dúvidas sobre direito do consumidor</CardDescription>
-                </CardHeader>
-                <CardContent className="flex-1 flex flex-col">
-                  <div className="flex-1 overflow-y-auto space-y-4 mb-4 p-4 bg-gray-50 rounded-lg">
-                    {messages.map((message, index) => (
-                      <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg ${
-                          message.type === 'user' 
-                            ? 'bg-blue-600 text-white' 
-                            : 'bg-white text-gray-800 border border-gray-200'
-                        }`}>
-                          <div className="whitespace-pre-wrap">{message.content}</div>
-                          {message.timestamp && (
-                            <div className={`text-xs mt-2 ${
-                              message.type === 'user' ? 'text-blue-100' : 'text-gray-500'
-                            }`}>
-                              {message.timestamp.toLocaleTimeString('pt-BR', { 
-                                hour: '2-digit', 
-                                minute: '2-digit' 
-                              })}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                    {isLoading && (
-                      <div className="flex justify-start">
-                        <div className="bg-white text-gray-800 border border-gray-200 px-4 py-3 rounded-lg">
-                          <div className="flex items-center space-x-2">
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                            <span className="text-sm text-gray-600">Consultando...</span>
+          <div className="max-w-6xl mx-auto">
+            <Card className="h-[600px] flex flex-col">
+              <CardHeader>
+                <CardTitle>Consultoria Jurídica</CardTitle>
+                <CardDescription>Tire suas dúvidas sobre direito do consumidor</CardDescription>
+              </CardHeader>
+              <CardContent className="flex-1 flex flex-col">
+                <div className="flex-1 overflow-y-auto space-y-4 mb-4 p-4 bg-gray-50 rounded-lg">
+                  {messages.map((message, index) => (
+                    <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-4xl px-4 py-3 rounded-lg ${
+                        message.type === 'user' 
+                          ? 'bg-blue-600 text-white' 
+                          : 'bg-white text-gray-800 border border-gray-200'
+                      }`}>
+                        <div className="whitespace-pre-wrap">{message.content}</div>
+                        {message.timestamp && (
+                          <div className={`text-xs mt-2 ${
+                            message.type === 'user' ? 'text-blue-100' : 'text-gray-500'
+                          }`}>
+                            {message.timestamp.toLocaleTimeString('pt-BR', { 
+                              hour: '2-digit', 
+                              minute: '2-digit' 
+                            })}
                           </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  {isLoading && (
+                    <div className="flex justify-start">
+                      <div className="bg-white text-gray-800 border border-gray-200 px-4 py-3 rounded-lg">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                          <span className="text-sm text-gray-600">Consultando...</span>
                         </div>
                       </div>
-                    )}
-                  </div>
-                  <div className="flex space-x-2">
-                    <Input
-                      placeholder="Digite sua dúvida jurídica..."
-                      value={chatMessage}
-                      onChange={(e) => setChatMessage(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      disabled={isLoading}
-                      className="flex-1"
-                    />
-                    <Button 
-                      onClick={handleSendMessage}
-                      disabled={isLoading || !chatMessage.trim()}
-                      className="px-3"
-                    >
-                      <Send className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Seus Direitos</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="text-sm">
-                    <strong>✓ Prazo de Arrependimento</strong>
-                    <p className="text-gray-600">7 dias para devolver produtos</p>
-                  </div>
-                  <div className="text-sm">
-                    <strong>✓ Garantia Legal</strong>
-                    <p className="text-gray-600">30 dias para não duráveis, 90 dias para duráveis</p>
-                  </div>
-                  <div className="text-sm">
-                    <strong>✓ Vício do Produto</strong>
-                    <p className="text-gray-600">Reparo, troca ou devolução</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                    </div>
+                  )}
+                </div>
+                <div className="flex space-x-2">
+                  <Input
+                    placeholder="Digite sua dúvida jurídica..."
+                    value={chatMessage}
+                    onChange={(e) => setChatMessage(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    disabled={isLoading}
+                    className="flex-1"
+                  />
+                  <Button 
+                    onClick={handleSendMessage}
+                    disabled={isLoading || !chatMessage.trim()}
+                    className="px-3"
+                  >
+                    <Send className="w-4 h-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         )}
 

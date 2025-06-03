@@ -18,52 +18,82 @@ Sua proposta única de valor: "Sou capaz de testar, avaliar e comparar quaisquer
 
 Você atua com total independência e isenção, sem qualquer viés de marca. Toda avaliação deve ser baseada em evidências, análises técnicas, preços e a experiência real de usuários. Você evita linguagem promocional e alerta para estratégias de marketing enganosas.
 
-Em toda análise de produto (individual ou comparativa), você categoriza os produtos em três selos de destaque:
+IMPORTANTE: Em toda análise, você DEVE retornar EXATAMENTE 3 produtos seguindo esta estrutura obrigatória:
 
 🏆 Melhor da Avaliação – Produto com o melhor desempenho técnico, independentemente do preço.
-
 💰 Barato da Avaliação – Produto com o menor preço entre os aprovados, representando excelente custo-benefício.
-
 ⭐ Nossa Recomendação – Produto com o melhor equilíbrio entre preço e qualidade no contexto geral do mercado.
 
 Você atribui uma pontuação de 1 a 10 para cada produto, chamada de Score Mestre, calculada com pesos iguais (1/3 cada) de:
-
-Características técnicas do produto
-Preço médio (baseado na Amazon e Mercado Livre)
-Avaliações de usuários reais (Amazon, Mercado Livre, Magazine Luiza)
+- Características técnicas do produto
+- Preço médio (baseado na Amazon e Mercado Livre)
+- Avaliações de usuários reais (Amazon, Mercado Livre, Magazine Luiza)
 
 Suas fontes oficiais de dados são:
-
-Características técnicas: Amazon e Mercado Livre
-Preço: Média entre os preços listados na Amazon e Mercado Livre
-Reviews de usuários: Amazon, Mercado Livre, Magazine Luiza
+- Características técnicas: Amazon e Mercado Livre
+- Preço: Média entre os preços listados na Amazon e Mercado Livre
+- Reviews de usuários: Amazon, Mercado Livre, Magazine Luiza
 
 Você apresenta suas comparações em formato claro, com tabelas, rankings, prós e contras. Também explica seus critérios de forma transparente. Se o usuário não der contexto, você pergunta sobre as prioridades, orçamento e necessidades antes de sugerir.
 
 Sempre que possível, forneça links diretos e atualizados para as lojas online onde os produtos podem ser comprados, com preferência por sites confiáveis como Amazon, Mercado Livre, Magazine Luiza, Americanas e similares.
 
-Você também oferece a opção de o usuário enviar uma foto do código de barras ou do produto. Com base nessa imagem, você tenta identificar o produto (via número EAN ou aparência), buscar informações técnicas e realizar uma análise completa com Score Mestre.
-
 Mantenha um tom conversacional e amigável, mas sempre profissional e técnico. Responda de forma natural como se fosse uma conversa real.
 
-IMPORTANTE: Ao final de sua análise, SEMPRE forneça os dados estruturados dos produtos avaliados no seguinte formato JSON exato. Use EXATAMENTE este formato, sem variações:
+OBRIGATÓRIO: Ao final de TODA análise que contenha produtos, você DEVE fornecer os dados estruturados no seguinte formato JSON EXATO. Use EXATAMENTE este formato, sem variações, com EXATAMENTE 3 produtos:
 
 PRODUTOS_ESTRUTURADOS:
 {
   "produtos": [
     {
-      "name": "Nome limpo do produto",
-      "category": "categoria-padronizada",
-      "price_average": 99.99,
+      "name": "Nome completo e limpo do produto",
+      "category": "categoria-do-produto",
+      "price_average": 999.99,
       "score_mestre": 8.5,
       "seal_type": "melhor",
-      "brand": "Marca",
-      "description": "Descrição breve",
-      "image_url": "URL da imagem ou placeholder",
-      "store_link": "URL da loja (opcional)"
+      "brand": "Nome da Marca",
+      "description": "Descrição clara e concisa do produto em até 100 caracteres",
+      "image_url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center",
+      "store_link": "https://www.amazon.com.br/produto" 
+    },
+    {
+      "name": "Nome completo e limpo do produto",
+      "category": "categoria-do-produto", 
+      "price_average": 699.99,
+      "score_mestre": 8.2,
+      "seal_type": "barato",
+      "brand": "Nome da Marca",
+      "description": "Descrição clara e concisa do produto em até 100 caracteres",
+      "image_url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center",
+      "store_link": "https://www.mercadolivre.com.br/produto"
+    },
+    {
+      "name": "Nome completo e limpo do produto", 
+      "category": "categoria-do-produto",
+      "price_average": 799.99,
+      "score_mestre": 8.7,
+      "seal_type": "recomendacao",
+      "brand": "Nome da Marca",
+      "description": "Descrição clara e concisa do produto em até 100 caracteres",
+      "image_url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center",
+      "store_link": "https://www.magazineluiza.com.br/produto"
     }
   ]
-}`;
+}
+
+REGRAS OBRIGATÓRIAS PARA PRODUTOS_ESTRUTURADOS:
+- SEMPRE 3 produtos, nem mais nem menos
+- SEMPRE um produto para cada seal_type: "melhor", "barato", "recomendacao"
+- price_average: número decimal (ex: 999.99)
+- score_mestre: número entre 1.0 e 10.0 (ex: 8.5)
+- name: nome limpo e descritivo do produto
+- brand: nome real da marca
+- description: máximo 100 caracteres
+- category: categoria relevante em português
+- image_url: sempre usar uma URL do Unsplash relacionada ao produto
+- store_link: URL real da loja quando possível
+
+SEM EXCEÇÕES: Se não conseguir encontrar exatamente 3 produtos diferentes, adapte sua resposta para criar 3 variações baseadas nos dados disponíveis, sempre respeitando os 3 selos obrigatórios.`;
 
 const detectCategory = (query: string): string => {
   const lowerQuery = query.toLowerCase();
@@ -83,6 +113,9 @@ const detectCategory = (query: string): string => {
   if (lowerQuery.includes('headphone') || lowerQuery.includes('fone')) {
     return 'headphone';
   }
+  if (lowerQuery.includes('tv') || lowerQuery.includes('televisão') || lowerQuery.includes('televisao')) {
+    return 'tv';
+  }
   
   return 'geral';
 };
@@ -93,50 +126,43 @@ const extractStructuredProducts = (text: string): any[] => {
   console.log('=== FIM DO TEXTO ===');
 
   try {
-    // Múltiplas tentativas de extração com diferentes padrões
-    const patterns = [
-      /PRODUTOS_ESTRUTURADOS:\s*({[\s\S]*?})\s*(?=\n\n|\n$|$)/,
-      /PRODUTOS_ESTRUTURADOS:\s*\n\s*({[\s\S]*?})\s*(?=\n\n|\n$|$)/,
-      /PRODUTOS_ESTRUTURADOS:?\s*```json\s*({[\s\S]*?})\s*```/,
-      /PRODUTOS_ESTRUTURADOS:?\s*```\s*({[\s\S]*?})\s*```/,
-      /"produtos":\s*\[[\s\S]*?\]/
-    ];
-
-    for (let i = 0; i < patterns.length; i++) {
-      console.log(`Tentativa ${i + 1} com padrão:`, patterns[i]);
-      const match = text.match(patterns[i]);
+    // Padrão principal para capturar o JSON dos produtos
+    const mainPattern = /PRODUTOS_ESTRUTURADOS:\s*\n?\s*({[\s\S]*?})\s*(?=\n\n|\n$|$)/;
+    const match = text.match(mainPattern);
+    
+    if (match) {
+      console.log('Match encontrado:', match[1]);
       
-      if (match) {
-        console.log('Match encontrado:', match[1] || match[0]);
+      try {
+        const data = JSON.parse(match[1]);
+        console.log('JSON parseado com sucesso:', data);
         
-        try {
-          let jsonStr = match[1] || match[0];
+        if (data.produtos && Array.isArray(data.produtos)) {
+          console.log(`Produtos extraídos: ${data.produtos.length}`);
           
-          // Se capturou apenas o array de produtos, envolver em objeto
-          if (jsonStr.startsWith('"produtos":')) {
-            jsonStr = `{${jsonStr}}`;
+          // Validar se temos exatamente 3 produtos
+          if (data.produtos.length === 3) {
+            // Verificar se temos um produto de cada tipo
+            const sealTypes = data.produtos.map(p => p.seal_type);
+            const hasAllSeals = ['melhor', 'barato', 'recomendacao'].every(seal => sealTypes.includes(seal));
+            
+            if (hasAllSeals) {
+              console.log('Estrutura perfeita: 3 produtos com todos os selos');
+              return data.produtos;
+            } else {
+              console.log('Aviso: Nem todos os selos estão presentes:', sealTypes);
+              return data.produtos; // Ainda retorna, mas loga o aviso
+            }
+          } else {
+            console.log(`Aviso: Esperado 3 produtos, encontrado ${data.produtos.length}`);
+            return data.produtos; // Retorna mesmo que não sejam 3
           }
-          
-          const data = JSON.parse(jsonStr);
-          console.log('JSON parseado com sucesso:', data);
-          
-          if (data.produtos && Array.isArray(data.produtos)) {
-            console.log(`Produtos extraídos: ${data.produtos.length}`);
-            return data.produtos;
-          }
-        } catch (parseError) {
-          console.log(`Erro no parsing da tentativa ${i + 1}:`, parseError);
-          continue;
         }
+      } catch (parseError) {
+        console.log('Erro no parsing do JSON:', parseError);
       }
-    }
-
-    // Tentativa de parsing manual se JSON estruturado falhar
-    console.log('Tentando parsing manual...');
-    const manualProducts = tryManualExtraction(text);
-    if (manualProducts.length > 0) {
-      console.log('Parsing manual bem-sucedido:', manualProducts);
-      return manualProducts;
+    } else {
+      console.log('Nenhum padrão de produtos encontrado no texto');
     }
 
   } catch (error) {
@@ -147,88 +173,32 @@ const extractStructuredProducts = (text: string): any[] => {
   return [];
 };
 
-const tryManualExtraction = (text: string): any[] => {
-  // Buscar por padrões específicos no texto
-  const products: any[] = [];
-  
-  // Buscar por menções de produtos com preços e scores
-  const lines = text.split('\n');
-  let currentProduct: any = {};
-  
-  for (const line of lines) {
-    const trimmed = line.trim();
-    
-    // Detectar nomes de produtos (linhas com marcas conhecidas ou padrões)
-    if (trimmed.includes('Score Mestre') || trimmed.includes('R$')) {
-      // Tentar extrair informações básicas da linha
-      const priceMatch = trimmed.match(/R\$\s*(\d+[.,]\d{2})/);
-      const scoreMatch = trimmed.match(/(\d+[.,]\d+)\/10/);
-      
-      if (priceMatch || scoreMatch) {
-        if (Object.keys(currentProduct).length > 0) {
-          products.push(currentProduct);
-        }
-        
-        currentProduct = {
-          name: extractProductName(trimmed),
-          price_average: priceMatch ? parseFloat(priceMatch[1].replace(',', '.')) : null,
-          score_mestre: scoreMatch ? parseFloat(scoreMatch[1].replace(',', '.')) : 8.0,
-          seal_type: 'recomendacao',
-          category: 'geral',
-          brand: extractBrand(trimmed),
-          description: trimmed.substring(0, 100),
-          image_url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center'
-        };
-      }
-    }
-  }
-  
-  if (Object.keys(currentProduct).length > 0) {
-    products.push(currentProduct);
-  }
-  
-  return products;
-};
-
-const extractProductName = (text: string): string => {
-  // Remover preços e scores para tentar extrair o nome
-  let cleaned = text.replace(/R\$\s*\d+[.,]\d{2}/g, '');
-  cleaned = cleaned.replace(/\d+[.,]\d+\/10/g, '');
-  cleaned = cleaned.replace(/Score Mestre/gi, '');
-  cleaned = cleaned.trim();
-  
-  // Pegar as primeiras palavras significativas
-  const words = cleaned.split(' ').filter(word => word.length > 2);
-  return words.slice(0, 4).join(' ') || 'Produto Analisado';
-};
-
-const extractBrand = (text: string): string => {
-  const brands = ['Samsung', 'Apple', 'Xiaomi', 'Motorola', 'Sony', 'JBL', 'Beats', 'Dell', 'HP', 'Lenovo', 'Asus', 'Acer'];
-  for (const brand of brands) {
-    if (text.toLowerCase().includes(brand.toLowerCase())) {
-      return brand;
-    }
-  }
-  return 'Marca';
-};
-
 const validateProduct = (product: any): boolean => {
-  // Validações básicas
+  // Validar nome (obrigatório)
   if (!product.name || typeof product.name !== 'string' || product.name.length < 3) {
     console.log('Produto inválido - nome:', product.name);
     return false;
   }
   
+  // Validar seal_type (deve ser um dos 3 valores válidos)
   if (!product.seal_type || !['melhor', 'barato', 'recomendacao'].includes(product.seal_type)) {
     console.log('Produto inválido - seal_type:', product.seal_type);
     return false;
   }
   
+  // Validar score_mestre (deve estar entre 1 e 10)
   if (product.score_mestre && (product.score_mestre < 1 || product.score_mestre > 10)) {
     console.log('Produto inválido - score_mestre:', product.score_mestre);
     return false;
   }
   
+  // Validar price_average (deve ser um número positivo se fornecido)
+  if (product.price_average && (typeof product.price_average !== 'number' || product.price_average <= 0)) {
+    console.log('Produto inválido - price_average:', product.price_average);
+    return false;
+  }
+  
+  console.log('Produto válido:', product.name);
   return true;
 };
 
@@ -245,25 +215,26 @@ const saveProductsToDatabase = async (products: any[], category: string, supabas
         continue;
       }
       
-      // Garantir valores padrão
+      // Garantir valores padrão e limpar dados
       const productData = {
-        name: product.name,
+        name: product.name.trim(),
         category: product.category || category,
-        price_average: product.price_average || null,
-        score_mestre: product.score_mestre || 8.0,
+        price_average: product.price_average ? parseFloat(product.price_average) : null,
+        score_mestre: product.score_mestre ? parseFloat(product.score_mestre) : 8.0,
         seal_type: product.seal_type,
-        brand: product.brand || 'Marca',
-        description: product.description || `Produto da categoria ${category}`,
+        brand: (product.brand || 'Marca').trim(),
+        description: (product.description || `Produto da categoria ${category}`).trim().substring(0, 100),
         image_url: product.image_url || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center',
         store_link: product.store_link || null,
         analysis_context: {
           query_category: category,
           created_by: 'ai_analysis',
-          extraction_method: 'structured'
+          extraction_method: 'structured_v2',
+          seal_validation: 'passed'
         }
       };
       
-      console.log('Inserindo produto:', productData);
+      console.log('Inserindo produto estruturado:', productData);
       
       const { data, error } = await supabase
         .from('featured_products')
@@ -276,7 +247,7 @@ const saveProductsToDatabase = async (products: any[], category: string, supabas
         console.error('Dados do produto:', productData);
       } else if (data) {
         savedProductIds.push(data.id);
-        console.log('Produto salvo com sucesso:', product.name, 'ID:', data.id);
+        console.log(`Produto salvo com sucesso: ${product.name} (${product.seal_type}) ID: ${data.id}`);
       }
     } catch (err) {
       console.error('Erro ao processar produto:', err);
@@ -285,6 +256,14 @@ const saveProductsToDatabase = async (products: any[], category: string, supabas
   }
   
   console.log(`Total de produtos salvos: ${savedProductIds.length}`);
+  
+  // Validar se salvamos produtos com todos os selos
+  if (savedProductIds.length === 3) {
+    console.log('✅ Sucesso: 3 produtos salvos conforme esperado');
+  } else {
+    console.log(`⚠️ Aviso: Esperado 3 produtos, salvos ${savedProductIds.length}`);
+  }
+  
   return savedProductIds;
 };
 
@@ -338,7 +317,7 @@ serve(async (req) => {
         model: 'gpt-4o-mini',
         messages: messages,
         temperature: 0.7,
-        max_tokens: 2000,
+        max_tokens: 2500,
       }),
     });
 
@@ -364,13 +343,14 @@ serve(async (req) => {
       productIds = await saveProductsToDatabase(structuredProducts, category, supabase);
       console.log('IDs dos produtos salvos:', productIds);
     } else {
-      console.log('Nenhum produto extraído - não será salvo nada no banco');
+      console.log('⚠️ AVISO: Nenhum produto extraído - pode ser um problema na formatação da resposta da IA');
     }
 
     return new Response(JSON.stringify({ 
       analysis,
       productIds,
-      category 
+      category,
+      extractedProductsCount: structuredProducts.length
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

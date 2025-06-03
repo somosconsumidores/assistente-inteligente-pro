@@ -14,7 +14,7 @@ import KnowledgeBase from '@/components/KnowledgeBase';
 const DireitoConsumidor = () => {
   const [activeTab, setActiveTab] = useState('chat');
   const [chatMessage, setChatMessage] = useState('');
-  const { messages, sendMessage, isLoading, petitionFlow } = useDireitoChat();
+  const { messages, sendMessage, isLoading } = useDireitoChat();
   const { user } = useAuth();
   const { gerarPeticao, isLoading: isGeneratingPetition, peticaoGerada, limparPeticao } = useGerarPeticao();
 
@@ -143,23 +143,7 @@ const DireitoConsumidor = () => {
             <Card className="h-[600px] flex flex-col">
               <CardHeader>
                 <CardTitle>Consultoria Jurídica</CardTitle>
-                <CardDescription>
-                  Tire suas dúvidas sobre direito do consumidor ou digite "gerar petição" para criar uma petição inicial
-                </CardDescription>
-                {petitionFlow.isActive && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-blue-700">Gerando Petição</span>
-                      <span className="text-xs text-blue-600">{petitionFlow.getProgressInfo().current}/5</span>
-                    </div>
-                    <div className="w-full bg-blue-200 rounded-full h-2">
-                      <div 
-                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${petitionFlow.getProgressInfo().percentage}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                )}
+                <CardDescription>Tire suas dúvidas sobre direito do consumidor</CardDescription>
               </CardHeader>
               <CardContent className="flex-1 flex flex-col">
                 <div className="flex-1 overflow-y-auto space-y-4 mb-4 p-4 bg-gray-50 rounded-lg">
@@ -168,18 +152,12 @@ const DireitoConsumidor = () => {
                       <div className={`max-w-4xl px-4 py-3 rounded-lg ${
                         message.type === 'user' 
                           ? 'bg-blue-600 text-white' 
-                          : message.isProgress
-                          ? 'bg-blue-50 text-blue-900 border border-blue-200'
                           : 'bg-white text-gray-800 border border-gray-200'
                       }`}>
                         <div className="whitespace-pre-wrap">{message.content}</div>
                         {message.timestamp && (
                           <div className={`text-xs mt-2 ${
-                            message.type === 'user' 
-                              ? 'text-blue-100' 
-                              : message.isProgress
-                              ? 'text-blue-600'
-                              : 'text-gray-500'
+                            message.type === 'user' ? 'text-blue-100' : 'text-gray-500'
                           }`}>
                             {message.timestamp.toLocaleTimeString('pt-BR', { 
                               hour: '2-digit', 
@@ -197,9 +175,7 @@ const DireitoConsumidor = () => {
                           <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
                           <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                           <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                          <span className="text-sm text-gray-600">
-                            {petitionFlow.isActive ? 'Processando...' : 'Consultando...'}
-                          </span>
+                          <span className="text-sm text-gray-600">Consultando...</span>
                         </div>
                       </div>
                     </div>
@@ -207,11 +183,7 @@ const DireitoConsumidor = () => {
                 </div>
                 <div className="flex space-x-2">
                   <Input
-                    placeholder={
-                      petitionFlow.isActive 
-                        ? "Responda à pergunta acima..." 
-                        : "Digite sua dúvida jurídica ou 'gerar petição'..."
-                    }
+                    placeholder="Digite sua dúvida jurídica..."
                     value={chatMessage}
                     onChange={(e) => setChatMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
@@ -241,21 +213,9 @@ const DireitoConsumidor = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Gerador de Petição</CardTitle>
-                  <CardDescription>
-                    Crie uma petição inicial para o Juizado Especial Cível ou use o chat para um processo guiado
-                  </CardDescription>
+                  <CardDescription>Crie uma petição inicial para o Juizado Especial Cível</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <MessageSquare className="w-5 h-5 text-blue-600" />
-                      <span className="font-medium text-blue-800">💡 Dica</span>
-                    </div>
-                    <p className="text-blue-700 text-sm">
-                      Para uma experiência mais guiada, vá para a aba "Consultoria" e digite "gerar petição". 
-                      O chat irá te fazer perguntas passo a passo!
-                    </p>
-                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="nome">Nome Completo *</Label>

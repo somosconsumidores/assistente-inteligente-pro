@@ -68,8 +68,8 @@ const Financas = () => {
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-600">R$ 4.500</div>
-                <p className="text-xs text-muted-foreground">+12% em relação ao mês anterior</p>
+                <div className="text-2xl font-bold text-green-600">R$ 0,00</div>
+                <p className="text-xs text-muted-foreground">Nenhuma renda cadastrada</p>
               </CardContent>
             </Card>
 
@@ -79,8 +79,8 @@ const Financas = () => {
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-red-600">R$ 3.200</div>
-                <p className="text-xs text-muted-foreground">71% da renda</p>
+                <div className="text-2xl font-bold text-red-600">R$ 0,00</div>
+                <p className="text-xs text-muted-foreground">Nenhum gasto registrado</p>
               </CardContent>
             </Card>
 
@@ -90,8 +90,8 @@ const Financas = () => {
                 <PiggyBank className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-blue-600">R$ 1.300</div>
-                <p className="text-xs text-muted-foreground">29% da renda poupada</p>
+                <div className="text-2xl font-bold text-blue-600">R$ 0,00</div>
+                <p className="text-xs text-muted-foreground">Nenhuma economia acumulada</p>
               </CardContent>
             </Card>
 
@@ -101,8 +101,8 @@ const Financas = () => {
                 <Target className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">87%</div>
-                <p className="text-xs text-muted-foreground">R$ 1.740 de R$ 2.000</p>
+                <div className="text-2xl font-bold">0%</div>
+                <p className="text-xs text-muted-foreground">Nenhuma meta definida</p>
               </CardContent>
             </Card>
           </div>
@@ -145,17 +145,9 @@ const Financas = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex justify-between items-center p-4 bg-green-50 rounded-lg">
-                    <span className="font-medium">1. Quite dívidas do cartão de crédito</span>
-                    <span className="text-green-600 font-bold">Prioridade Alta</span>
-                  </div>
-                  <div className="flex justify-between items-center p-4 bg-yellow-50 rounded-lg">
-                    <span className="font-medium">2. Crie reserva de emergência</span>
-                    <span className="text-yellow-600 font-bold">Prioridade Média</span>
-                  </div>
-                  <div className="flex justify-between items-center p-4 bg-blue-50 rounded-lg">
-                    <span className="font-medium">3. Invista 20% da renda</span>
-                    <span className="text-blue-600 font-bold">Prioridade Baixa</span>
+                  <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                    <span className="font-medium">Configure seus dados acima para gerar um plano personalizado</span>
+                    <span className="text-gray-500 font-bold">Aguardando dados</span>
                   </div>
                 </div>
               </CardContent>
@@ -172,39 +164,12 @@ const Financas = () => {
                 <CardDescription>Acompanhe o progresso das suas metas financeiras</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="font-medium">Reserva de Emergência</span>
-                      <span className="text-sm text-gray-600">R$ 8.500 / R$ 15.000</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-blue-600 h-2 rounded-full" style={{ width: '57%' }}></div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="font-medium">Viagem para Europa</span>
-                      <span className="text-sm text-gray-600">R$ 3.200 / R$ 12.000</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-green-600 h-2 rounded-full" style={{ width: '27%' }}></div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="font-medium">Entrada do Apartamento</span>
-                      <span className="text-sm text-gray-600">R$ 15.000 / R$ 50.000</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-purple-600 h-2 rounded-full" style={{ width: '30%' }}></div>
-                    </div>
-                  </div>
+                <div className="text-center py-8">
+                  <PiggyBank className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhuma meta cadastrada</h3>
+                  <p className="text-gray-500 mb-4">Comece definindo suas primeiras metas financeiras</p>
+                  <Button>Adicionar Nova Meta</Button>
                 </div>
-
-                <Button className="w-full" variant="outline">Adicionar Nova Meta</Button>
               </CardContent>
             </Card>
           </div>

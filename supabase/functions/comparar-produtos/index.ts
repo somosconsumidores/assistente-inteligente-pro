@@ -46,9 +46,10 @@ Você também oferece a opção de o usuário enviar uma foto do código de barr
 
 Mantenha um tom conversacional e amigável, mas sempre profissional e técnico. Responda de forma natural como se fosse uma conversa real.
 
-IMPORTANTE: Ao final de sua análise, SEMPRE forneça os dados estruturados dos produtos avaliados no seguinte formato JSON:
+IMPORTANTE: Ao final de sua análise, SEMPRE forneça os dados estruturados dos produtos avaliados no seguinte formato JSON exato. Use EXATAMENTE este formato, sem variações:
 
-PRODUTOS_ESTRUTURADOS: {
+PRODUTOS_ESTRUTURADOS:
+{
   "produtos": [
     {
       "name": "Nome limpo do produto",
@@ -87,66 +88,208 @@ const detectCategory = (query: string): string => {
 };
 
 const extractStructuredProducts = (text: string): any[] => {
+  console.log('=== DEBUG: Texto completo da resposta da IA ===');
+  console.log(text);
+  console.log('=== FIM DO TEXTO ===');
+
   try {
-    const regex = /PRODUTOS_ESTRUTURADOS:\s*({[\s\S]*?})\s*(?=\n\n|\n$|$)/;
-    const match = text.match(regex);
-    
-    if (match) {
-      const jsonStr = match[1];
-      const data = JSON.parse(jsonStr);
-      return data.produtos || [];
+    // Múltiplas tentativas de extração com diferentes padrões
+    const patterns = [
+      /PRODUTOS_ESTRUTURADOS:\s*({[\s\S]*?})\s*(?=\n\n|\n$|$)/,
+      /PRODUTOS_ESTRUTURADOS:\s*\n\s*({[\s\S]*?})\s*(?=\n\n|\n$|$)/,
+      /PRODUTOS_ESTRUTURADOS:?\s*```json\s*({[\s\S]*?})\s*```/,
+      /PRODUTOS_ESTRUTURADOS:?\s*```\s*({[\s\S]*?})\s*```/,
+      /"produtos":\s*\[[\s\S]*?\]/
+    ];
+
+    for (let i = 0; i < patterns.length; i++) {
+      console.log(`Tentativa ${i + 1} com padrão:`, patterns[i]);
+      const match = text.match(patterns[i]);
+      
+      if (match) {
+        console.log('Match encontrado:', match[1] || match[0]);
+        
+        try {
+          let jsonStr = match[1] || match[0];
+          
+          // Se capturou apenas o array de produtos, envolver em objeto
+          if (jsonStr.startsWith('"produtos":')) {
+            jsonStr = `{${jsonStr}}`;
+          }
+          
+          const data = JSON.parse(jsonStr);
+          console.log('JSON parseado com sucesso:', data);
+          
+          if (data.produtos && Array.isArray(data.produtos)) {
+            console.log(`Produtos extraídos: ${data.produtos.length}`);
+            return data.produtos;
+          }
+        } catch (parseError) {
+          console.log(`Erro no parsing da tentativa ${i + 1}:`, parseError);
+          continue;
+        }
+      }
     }
+
+    // Tentativa de parsing manual se JSON estruturado falhar
+    console.log('Tentando parsing manual...');
+    const manualProducts = tryManualExtraction(text);
+    if (manualProducts.length > 0) {
+      console.log('Parsing manual bem-sucedido:', manualProducts);
+      return manualProducts;
+    }
+
   } catch (error) {
-    console.log('Erro ao extrair produtos estruturados:', error);
+    console.log('Erro geral na extração:', error);
   }
   
+  console.log('Nenhum produto extraído - retornando array vazio');
   return [];
+};
+
+const tryManualExtraction = (text: string): any[] => {
+  // Buscar por padrões específicos no texto
+  const products: any[] = [];
+  
+  // Buscar por menções de produtos com preços e scores
+  const lines = text.split('\n');
+  let currentProduct: any = {};
+  
+  for (const line of lines) {
+    const trimmed = line.trim();
+    
+    // Detectar nomes de produtos (linhas com marcas conhecidas ou padrões)
+    if (trimmed.includes('Score Mestre') || trimmed.includes('R$')) {
+      // Tentar extrair informações básicas da linha
+      const priceMatch = trimmed.match(/R\$\s*(\d+[.,]\d{2})/);
+      const scoreMatch = trimmed.match(/(\d+[.,]\d+)\/10/);
+      
+      if (priceMatch || scoreMatch) {
+        if (Object.keys(currentProduct).length > 0) {
+          products.push(currentProduct);
+        }
+        
+        currentProduct = {
+          name: extractProductName(trimmed),
+          price_average: priceMatch ? parseFloat(priceMatch[1].replace(',', '.')) : null,
+          score_mestre: scoreMatch ? parseFloat(scoreMatch[1].replace(',', '.')) : 8.0,
+          seal_type: 'recomendacao',
+          category: 'geral',
+          brand: extractBrand(trimmed),
+          description: trimmed.substring(0, 100),
+          image_url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center'
+        };
+      }
+    }
+  }
+  
+  if (Object.keys(currentProduct).length > 0) {
+    products.push(currentProduct);
+  }
+  
+  return products;
+};
+
+const extractProductName = (text: string): string => {
+  // Remover preços e scores para tentar extrair o nome
+  let cleaned = text.replace(/R\$\s*\d+[.,]\d{2}/g, '');
+  cleaned = cleaned.replace(/\d+[.,]\d+\/10/g, '');
+  cleaned = cleaned.replace(/Score Mestre/gi, '');
+  cleaned = cleaned.trim();
+  
+  // Pegar as primeiras palavras significativas
+  const words = cleaned.split(' ').filter(word => word.length > 2);
+  return words.slice(0, 4).join(' ') || 'Produto Analisado';
+};
+
+const extractBrand = (text: string): string => {
+  const brands = ['Samsung', 'Apple', 'Xiaomi', 'Motorola', 'Sony', 'JBL', 'Beats', 'Dell', 'HP', 'Lenovo', 'Asus', 'Acer'];
+  for (const brand of brands) {
+    if (text.toLowerCase().includes(brand.toLowerCase())) {
+      return brand;
+    }
+  }
+  return 'Marca';
+};
+
+const validateProduct = (product: any): boolean => {
+  // Validações básicas
+  if (!product.name || typeof product.name !== 'string' || product.name.length < 3) {
+    console.log('Produto inválido - nome:', product.name);
+    return false;
+  }
+  
+  if (!product.seal_type || !['melhor', 'barato', 'recomendacao'].includes(product.seal_type)) {
+    console.log('Produto inválido - seal_type:', product.seal_type);
+    return false;
+  }
+  
+  if (product.score_mestre && (product.score_mestre < 1 || product.score_mestre > 10)) {
+    console.log('Produto inválido - score_mestre:', product.score_mestre);
+    return false;
+  }
+  
+  return true;
 };
 
 const saveProductsToDatabase = async (products: any[], category: string, supabase: any) => {
   const savedProductIds: string[] = [];
   
+  console.log(`Tentando salvar ${products.length} produtos na categoria ${category}`);
+  
   for (const product of products) {
     try {
-      // Set default image if not provided
-      const imageUrl = product.image_url || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center';
+      // Validar produto antes de salvar
+      if (!validateProduct(product)) {
+        console.log('Produto inválido ignorado:', product);
+        continue;
+      }
+      
+      // Garantir valores padrão
+      const productData = {
+        name: product.name,
+        category: product.category || category,
+        price_average: product.price_average || null,
+        score_mestre: product.score_mestre || 8.0,
+        seal_type: product.seal_type,
+        brand: product.brand || 'Marca',
+        description: product.description || `Produto da categoria ${category}`,
+        image_url: product.image_url || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center',
+        store_link: product.store_link || null,
+        analysis_context: {
+          query_category: category,
+          created_by: 'ai_analysis',
+          extraction_method: 'structured'
+        }
+      };
+      
+      console.log('Inserindo produto:', productData);
       
       const { data, error } = await supabase
         .from('featured_products')
-        .insert({
-          name: product.name,
-          category: product.category || category,
-          price_average: product.price_average,
-          score_mestre: product.score_mestre,
-          seal_type: product.seal_type,
-          brand: product.brand,
-          description: product.description,
-          image_url: imageUrl,
-          store_link: product.store_link,
-          analysis_context: {
-            query_category: category,
-            created_by: 'ai_analysis'
-          }
-        })
+        .insert(productData)
         .select('id')
         .single();
       
       if (error) {
         console.error('Erro ao salvar produto:', error);
+        console.error('Dados do produto:', productData);
       } else if (data) {
         savedProductIds.push(data.id);
-        console.log('Produto salvo com sucesso:', product.name);
+        console.log('Produto salvo com sucesso:', product.name, 'ID:', data.id);
       }
     } catch (err) {
       console.error('Erro ao processar produto:', err);
+      console.error('Produto que causou erro:', product);
     }
   }
   
+  console.log(`Total de produtos salvos: ${savedProductIds.length}`);
   return savedProductIds;
 };
 
 serve(async (req) => {
-  console.log('Comparar produtos function called');
+  console.log('=== Comparar produtos function called ===');
   
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -184,6 +327,7 @@ serve(async (req) => {
       messages.push({ role: 'user', content: query });
     }
 
+    console.log('Calling OpenAI API...');
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -213,12 +357,14 @@ serve(async (req) => {
 
     // Extract and save structured products
     const structuredProducts = extractStructuredProducts(analysis);
-    console.log('Extracted structured products:', structuredProducts);
+    console.log('Produtos estruturados extraídos:', structuredProducts.length);
     
     let productIds: string[] = [];
     if (structuredProducts.length > 0) {
       productIds = await saveProductsToDatabase(structuredProducts, category, supabase);
-      console.log('Saved product IDs:', productIds);
+      console.log('IDs dos produtos salvos:', productIds);
+    } else {
+      console.log('Nenhum produto extraído - não será salvo nada no banco');
     }
 
     return new Response(JSON.stringify({ 

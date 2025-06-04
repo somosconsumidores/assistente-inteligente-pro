@@ -13,9 +13,10 @@ import AssistantCards from '@/components/AssistantCards';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useNavigate } from 'react-router-dom';
 import { LayoutDashboard } from 'lucide-react';
-
 const Dashboard: React.FC = () => {
-  const { profile } = useAuth();
+  const {
+    profile
+  } = useAuth();
   const navigate = useNavigate();
   const {
     petitions,
@@ -25,11 +26,9 @@ const Dashboard: React.FC = () => {
     isLoading,
     refetch
   } = useDashboardData();
-
   const handleUpgrade = () => {
     console.log('Upgrade para premium');
   };
-
   if (isLoading) {
     return <DashboardLayout>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -45,10 +44,8 @@ const Dashboard: React.FC = () => {
         </div>
       </DashboardLayout>;
   }
-
-  return (
-    <DashboardLayout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  return <DashboardLayout>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-zinc-800">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
@@ -57,8 +54,8 @@ const Dashboard: React.FC = () => {
                 <LayoutDashboard className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Meu Painel</h1>
-                <p className="text-gray-600">
+                <h1 className="text-3xl font-bold text-slate-50">Meu Painel</h1>
+                <p className="text-slate-50">
                   Bem-vindo, {profile?.name || 'Usuário'}! Aqui está o resumo das suas atividades.
                 </p>
               </div>
@@ -87,13 +84,11 @@ const Dashboard: React.FC = () => {
             <FinancialSummaryCard financialData={financialData} onViewDashboard={() => navigate('/financas')} />
             
             <RecentTravelCard travelPlans={savedItineraries} onViewAll={() => {
-              navigate('/viagens?tab=saved');
-            }} />
+            navigate('/viagens?tab=saved');
+          }} />
           </div>
         </div>
       </div>
-    </DashboardLayout>
-  );
+    </DashboardLayout>;
 };
-
 export default Dashboard;

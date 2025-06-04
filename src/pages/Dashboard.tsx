@@ -10,6 +10,7 @@ import SavedRecommendationsCard from '@/components/dashboard/SavedRecommendation
 import FinancialSummaryCard from '@/components/dashboard/FinancialSummaryCard';
 import RecentTravelCard from '@/components/dashboard/RecentTravelCard';
 import SelectedAssistantCard from '@/components/dashboard/SelectedAssistantCard';
+import AssistantCards from '@/components/AssistantCards';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useNavigate } from 'react-router-dom';
 import { LayoutDashboard } from 'lucide-react';
@@ -92,6 +93,19 @@ const Dashboard: React.FC = () => {
             
             <RecentTravelCard travelPlans={travelPlans} onViewAll={() => navigate('/viagens')} />
           </div>
+        </div>
+
+        {/* Assistants Section */}
+        <div className="mt-12">
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Meus Assistentes</h2>
+            <p className="text-gray-600">Escolha um assistente para começar a usar</p>
+          </div>
+          
+          <AssistantCards 
+            userPlan={profile?.plan || 'free'} 
+            onUpgrade={handleUpgrade}
+          />
         </div>
       </div>
     </DashboardLayout>

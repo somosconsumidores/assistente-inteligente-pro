@@ -6,6 +6,169 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Função para limpar e reparar JSON
+const cleanAndRepairJSON = (content: string): string => {
+  console.log('=== INÍCIO DA LIMPEZA DO JSON ===')
+  console.log('Conteúdo original (primeiros 500 chars):', content.substring(0, 500))
+  console.log('Tamanho total do conteúdo:', content.length)
+  
+  // Etapa 1: Limpeza básica
+  let cleaned = content.trim()
+  
+  // Remover markdown se houver
+  if (cleaned.includes('```json')) {
+    console.log('Removendo marcadores markdown...')
+    cleaned = cleaned.replace(/```json\s*/g, '').replace(/```\s*$/g, '')
+  }
+  
+  // Etapa 2: Encontrar início e fim do JSON
+  const jsonStart = cleaned.indexOf('{')
+  const jsonEnd = cleaned.lastIndexOf('}')
+  
+  console.log('Posição início JSON:', jsonStart)
+  console.log('Posição fim JSON:', jsonEnd)
+  
+  if (jsonStart === -1 || jsonEnd === -1 || jsonEnd <= jsonStart) {
+    console.log('ERRO: Não foi possível encontrar delimitadores JSON válidos')
+    throw new Error('JSON delimiters not found')
+  }
+  
+  // Extrair apenas a parte JSON
+  cleaned = cleaned.substring(jsonStart, jsonEnd + 1)
+  console.log('JSON extraído (primeiros 300 chars):', cleaned.substring(0, 300))
+  
+  // Etapa 3: Validar balanceamento de chaves
+  let braceCount = 0
+  let bracketCount = 0
+  
+  for (const char of cleaned) {
+    if (char === '{') braceCount++
+    if (char === '}') braceCount--
+    if (char === '[') bracketCount++
+    if (char === ']') bracketCount--
+  }
+  
+  console.log('Balanço de chaves {}:', braceCount)
+  console.log('Balanço de colchetes []:', bracketCount)
+  
+  // Etapa 4: Tentativas de reparo simples
+  if (braceCount > 0) {
+    console.log('Adicionando chaves de fechamento faltantes...')
+    cleaned += '}'.repeat(braceCount)
+  }
+  
+  if (bracketCount > 0) {
+    console.log('Adicionando colchetes de fechamento faltantes...')
+    cleaned += ']'.repeat(bracketCount)
+  }
+  
+  console.log('JSON após reparo (primeiros 300 chars):', cleaned.substring(0, 300))
+  console.log('=== FIM DA LIMPEZA DO JSON ===')
+  
+  return cleaned
+}
+
+// Função para validar estrutura do JSON
+const validateItineraryStructure = (data: any): boolean => {
+  console.log('=== VALIDAÇÃO DA ESTRUTURA ===')
+  
+  const requiredFields = ['titulo', 'dias']
+  const missingFields = requiredFields.filter(field => !data[field])
+  
+  if (missingFields.length > 0) {
+    console.log('Campos obrigatórios faltando:', missingFields)
+    return false
+  }
+  
+  if (!Array.isArray(data.dias)) {
+    console.log('Campo "dias" não é um array')
+    return false
+  }
+  
+  // Validar cada dia
+  for (let i = 0; i < data.dias.length; i++) {
+    const dia = data.dias[i]
+    if (!dia.atividades || !Array.isArray(dia.atividades)) {
+      console.log(`Dia ${i + 1} não possui atividades válidas`)
+      return false
+    }
+    
+    if (dia.atividades.length === 0) {
+      console.log(`Dia ${i + 1} não possui atividades`)
+      return false
+    }
+  }
+  
+  console.log('Estrutura validada com sucesso')
+  console.log('=== FIM DA VALIDAÇÃO ===')
+  return true
+}
+
+// Função para parsing progressivo
+const progressiveJSONParse = (content: string): any => {
+  console.log('=== INÍCIO DO PARSING PROGRESSIVO ===')
+  
+  const strategies = [
+    // Estratégia 1: Parse direto
+    () => {
+      console.log('Tentativa 1: Parse direto')
+      return JSON.parse(content)
+    },
+    
+    // Estratégia 2: Limpeza básica + parse
+    () => {
+      console.log('Tentativa 2: Limpeza básica + parse')
+      const cleaned = cleanAndRepairJSON(content)
+      return JSON.parse(cleaned)
+    },
+    
+    // Estratégia 3: Remover caracteres problemáticos
+    () => {
+      console.log('Tentativa 3: Remoção de caracteres problemáticos')
+      const cleaned = cleanAndRepairJSON(content)
+      // Remover quebras de linha dentro de strings que podem causar problemas
+      const fixed = cleaned.replace(/\n/g, ' ').replace(/\r/g, ' ').replace(/\t/g, ' ')
+      return JSON.parse(fixed)
+    },
+    
+    // Estratégia 4: Parse de partes válidas
+    () => {
+      console.log('Tentativa 4: Parse de partes válidas')
+      const cleaned = cleanAndRepairJSON(content)
+      
+      // Tentar extrair pelo menos titulo e criar estrutura básica
+      const titleMatch = cleaned.match(/"titulo":\s*"([^"]*)"/)
+      const resumoMatch = cleaned.match(/"resumo":\s*"([^"]*)"/)
+      
+      if (titleMatch) {
+        console.log('Título encontrado, criando estrutura mínima')
+        return {
+          titulo: titleMatch[1],
+          resumo: resumoMatch ? resumoMatch[1] : 'Roteiro personalizado',
+          custoEstimado: 'R$ 0',
+          dicas: ['Estrutura básica criada devido a erro de parsing'],
+          dias: []
+        }
+      }
+      
+      throw new Error('Não foi possível extrair informações básicas')
+    }
+  ]
+  
+  for (let i = 0; i < strategies.length; i++) {
+    try {
+      const result = strategies[i]()
+      console.log(`Estratégia ${i + 1} bem-sucedida`)
+      return result
+    } catch (error) {
+      console.log(`Estratégia ${i + 1} falhou:`, error.message)
+      if (i === strategies.length - 1) {
+        throw error
+      }
+    }
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -46,9 +209,8 @@ serve(async (req) => {
       console.log(`Limitando roteiro de ${days} dias para ${maxDays} dias para evitar resposta muito longa`)
     }
 
-    // Função para gerar prompt personalizado baseado no destino
-    const generatePersonalizedPrompt = (destination: string, days: number, budget: string, travelersCount: number, travelStyle: string, preferences: string) => {
-      // Identificar se é um país grande que precisa de múltiplas cidades/regiões
+    // Função para gerar prompt melhorado
+    const generateOptimizedPrompt = (destination: string, days: number, budget: string, travelersCount: number, travelStyle: string, preferences: string) => {
       const largeCountries = ['china', 'brasil', 'estados unidos', 'eua', 'russia', 'india', 'canada', 'australia', 'argentina']
       const isLargeCountry = largeCountries.some(country => destination.toLowerCase().includes(country))
       
@@ -67,10 +229,10 @@ serve(async (req) => {
 IMPORTANTE: Como ${destination} é um destino extenso e você tem ${days} dias, distribua o roteiro entre 2-4 cidades/regiões principais. 
 - Inclua informações sobre deslocamento entre cidades (tempo e meio de transporte)
 - Dedique 3-5 dias para cada região principal
-- Escolha regiões com características diferentes (ex: China: Beijing/Pequim histórica, Shanghai moderna, Guilin paisagens naturais)`
+- Escolha regiões com características diferentes`
       }
 
-      return `Você é um especialista em viagens com conhecimento profundo sobre ${destination}. Crie um roteiro ÚNICO e PERSONALIZADO de ${days} dias.
+      return `Você é um especialista em viagens. Crie um roteiro ÚNICO de ${days} dias para ${destination}.
 
 DADOS DA VIAGEM:
 - Destino: ${destination}
@@ -81,51 +243,49 @@ DADOS DA VIAGEM:
 
 ${regionInstructions}
 
-INSTRUÇÕES CRÍTICAS:
-1. Crie atividades ESPECÍFICAS E REAIS para ${destination} - nada genérico
-2. Use nomes reais de restaurantes, atrações, bairros e locais
-3. Varie as atividades: cultural, gastronômica, natural, local
-4. Inclua horários realistas e tempos de deslocamento
-5. Custos condizentes com o estilo escolhido
-6. Pelo menos 3-4 atividades diferentes por dia
-7. Inclua experiências únicas/imperdíveis de ${destination}
+FORMATO OBRIGATÓRIO - RESPONDA APENAS COM ESTE JSON VÁLIDO (sem markdown, sem texto adicional):
 
-RESPONDA APENAS com este JSON exato:
 {
   "titulo": "Roteiro ${days} dias - ${destination}",
-  "resumo": "Descrição atrativa específica do roteiro (máx 80 chars)",
-  "custoEstimado": "R$ [valor realista baseado no estilo]",
+  "resumo": "Descrição em 60 caracteres",
+  "custoEstimado": "R$ [valor]",
   "dicas": [
-    "Dica prática específica de ${destination}",
-    "Dica cultural/comportamental local", 
-    "Dica de economia/logística",
-    "Dica sobre melhor época/clima"
+    "Dica 1 específica",
+    "Dica 2 específica",
+    "Dica 3 específica"
   ],
   "dias": [
     {
       "dia": 1,
-      "titulo": "Dia 1 - [Nome específico do que farão]",
+      "titulo": "Dia 1 - Chegada e primeiros passos",
       "atividades": [
         {
           "horario": "09:00",
-          "atividade": "Nome específico da atividade",
-          "descricao": "Descrição detalhada com informações práticas",
+          "atividade": "Nome específico",
+          "descricao": "Descrição detalhada",
           "custoEstimado": "R$ XX",
-          "localizacao": "Nome exato do local/endereço"
+          "localizacao": "Local específico"
+        },
+        {
+          "horario": "14:00",
+          "atividade": "Nome específico",
+          "descricao": "Descrição detalhada",
+          "custoEstimado": "R$ XX",
+          "localizacao": "Local específico"
         }
       ]
     }
   ]
 }
 
-CRUCIAL: Use informações reais e específicas de ${destination}. Não crie um roteiro genérico!`
+CRÍTICO: Use informações reais de ${destination}. Retorne APENAS JSON válido sem formatação markdown.`
     }
 
     // Função para fazer chamada à OpenAI com retry
     const callOpenAIWithRetry = async (prompt: string, retries = 2) => {
       for (let attempt = 1; attempt <= retries + 1; attempt++) {
         try {
-          console.log(`Tentativa ${attempt} - Chamando OpenAI...`)
+          console.log(`=== TENTATIVA ${attempt} OPENAI ===`)
 
           const response = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
@@ -138,15 +298,15 @@ CRUCIAL: Use informações reais e específicas de ${destination}. Não crie um 
               messages: [
                 {
                   role: 'system',
-                  content: `Você é um especialista em viagens com amplo conhecimento mundial. Crie roteiros únicos e personalizados baseados em locais reais e específicos. NUNCA use informações genéricas. Responda APENAS com JSON válido, sem texto adicional. O roteiro deve ter exatamente ${maxDays} dias conforme solicitado.`
+                  content: `Você é um especialista em viagens. Responda APENAS com JSON válido, sem markdown ou texto adicional. O JSON deve ter exatamente ${maxDays} dias de roteiro.`
                 },
                 {
                   role: 'user',
                   content: prompt
                 }
               ],
-              temperature: 0.8, // Aumentar criatividade
-              max_tokens: maxDays <= 7 ? 3500 : maxDays <= 14 ? 5000 : 6000, // Tokens baseados na duração
+              temperature: 0.7,
+              max_tokens: maxDays <= 7 ? 3500 : maxDays <= 14 ? 5000 : 6000,
               top_p: 0.9
             })
           })
@@ -160,7 +320,8 @@ CRUCIAL: Use informações reais e específicas de ${destination}. Não crie um 
           }
 
           const openaiData = await response.json()
-          console.log(`Resposta da OpenAI recebida na tentativa ${attempt}`)
+          console.log(`Resposta OpenAI recebida na tentativa ${attempt}`)
+          console.log('Tamanho da resposta:', openaiData.choices[0].message.content.length)
           
           return openaiData.choices[0].message.content
         } catch (error) {
@@ -174,60 +335,35 @@ CRUCIAL: Use informações reais e específicas de ${destination}. Não crie um 
       }
     }
 
-    // Gerar prompt personalizado
-    const prompt = generatePersonalizedPrompt(destination, maxDays, budget, travelersCount, travelStyle, additionalPreferences)
+    // Gerar prompt otimizado
+    const prompt = generateOptimizedPrompt(destination, maxDays, budget, travelersCount, travelStyle, additionalPreferences)
     
     // Chamar OpenAI com retry
     let itineraryContent = await callOpenAIWithRetry(prompt)
     
-    console.log('Conteúdo bruto (primeiros 300 chars):', itineraryContent.substring(0, 300))
+    console.log('=== RESPOSTA COMPLETA DA OPENAI ===')
+    console.log('Tamanho total:', itineraryContent.length)
+    console.log('Conteúdo completo:', itineraryContent)
+    console.log('=== FIM DA RESPOSTA ===')
 
-    // Limpeza mais robusta do conteúdo
-    itineraryContent = itineraryContent.trim()
-    
-    // Remover markdown se houver
-    if (itineraryContent.includes('```json')) {
-      itineraryContent = itineraryContent.replace(/```json\s*/g, '').replace(/```\s*$/g, '')
-    }
-    
-    // Remover texto antes do JSON
-    const jsonStart = itineraryContent.indexOf('{')
-    if (jsonStart > 0) {
-      itineraryContent = itineraryContent.substring(jsonStart)
-    }
-    
-    // Remover texto após o JSON
-    const jsonEnd = itineraryContent.lastIndexOf('}')
-    if (jsonEnd > 0 && jsonEnd < itineraryContent.length - 1) {
-      itineraryContent = itineraryContent.substring(0, jsonEnd + 1)
-    }
-
-    console.log('JSON limpo (primeiros 300 chars):', itineraryContent.substring(0, 300))
-
-    // Parse com validação mais rigorosa
+    // Parse com sistema melhorado
     let itineraryData
     try {
-      itineraryData = JSON.parse(itineraryContent)
+      itineraryData = progressiveJSONParse(itineraryContent)
       
       // Validação da estrutura
-      if (!itineraryData.titulo || !itineraryData.dias || !Array.isArray(itineraryData.dias)) {
-        throw new Error('Estrutura JSON inválida - campos obrigatórios ausentes')
-      }
-      
-      // Validar se cada dia tem atividades
-      for (let i = 0; i < itineraryData.dias.length; i++) {
-        const dia = itineraryData.dias[i]
-        if (!dia.atividades || !Array.isArray(dia.atividades) || dia.atividades.length === 0) {
-          throw new Error(`Dia ${i + 1} não possui atividades válidas`)
-        }
+      if (!validateItineraryStructure(itineraryData)) {
+        throw new Error('Estrutura JSON inválida após parsing')
       }
       
     } catch (parseError) {
-      console.error('Erro no parse JSON:', parseError)
-      console.error('Conteúdo que causou erro (primeiros 500 chars):', itineraryContent.substring(0, 500))
+      console.error('=== ERRO CRÍTICO NO PARSING ===')
+      console.error('Erro:', parseError)
+      console.error('Conteúdo que causou erro:', itineraryContent)
+      console.error('=== FIM DO ERRO ===')
       
-      // Fallback melhorado com informações específicas do destino
-      console.log('Criando roteiro fallback personalizado para', destination)
+      // Fallback inteligente melhorado
+      console.log('Criando fallback inteligente para', destination)
       
       const isAsianCountry = ['china', 'japao', 'tailandia', 'coreia', 'vietnam'].some(country => destination.toLowerCase().includes(country))
       const isEuropeanCountry = ['franca', 'italia', 'espanha', 'alemanha', 'portugal', 'holanda'].some(country => destination.toLowerCase().includes(country))
@@ -251,7 +387,6 @@ CRUCIAL: Use informações reais e específicas de ${destination}. Não crie um 
           { horario: '19:00', atividade: 'Jantar típico', descricao: 'Jante em restaurante tradicional com especialidades regionais', custoEstimado: 'R$ 85', localizacao: 'Restaurante tradicional' }
         ]
       } else {
-        // Atividades genéricas para outros destinos
         fallbackActivities = [
           { horario: '09:00', atividade: 'Café da manhã local', descricao: 'Experimente sabores típicos da região', custoEstimado: 'R$ 30', localizacao: destination },
           { horario: '11:00', atividade: 'Atração principal', descricao: 'Visite o ponto turístico mais importante', custoEstimado: 'R$ 50', localizacao: destination },
@@ -269,8 +404,7 @@ CRUCIAL: Use informações reais e específicas de ${destination}. Não crie um 
           `Pesquise sobre a cultura local de ${destination} antes da viagem`,
           'Verifique a documentação necessária e vacinas recomendadas',
           'Reserve acomodações com antecedência, especialmente na alta temporada',
-          'Mantenha sempre um plano B para atividades dependentes do clima',
-          'Aprenda algumas palavras básicas do idioma local'
+          'Mantenha sempre um plano B para atividades dependentes do clima'
         ],
         dias: Array.from({ length: maxDays }, (_, i) => ({
           dia: i + 1,
@@ -278,7 +412,7 @@ CRUCIAL: Use informações reais e específicas de ${destination}. Não crie um 
           atividades: fallbackActivities
         }))
       }
-      console.log('Usando roteiro fallback personalizado')
+      console.log('Fallback criado com sucesso')
     }
 
     // Garantir que o número de dias está correto
@@ -286,26 +420,25 @@ CRUCIAL: Use informações reais e específicas de ${destination}. Não crie um 
       console.log(`Ajustando número de dias de ${itineraryData.dias.length} para ${maxDays}`)
       
       if (itineraryData.dias.length < maxDays) {
-        // Adicionar dias faltantes com atividades variadas
+        // Adicionar dias faltantes
         for (let i = itineraryData.dias.length; i < maxDays; i++) {
           const dayNumber = i + 1
-          const isWeekend = dayNumber % 7 === 0 || dayNumber % 7 === 6
           
           itineraryData.dias.push({
             dia: dayNumber,
-            titulo: `Dia ${dayNumber} - ${isWeekend ? 'Relaxamento e descobertas' : 'Exploração contínua'} em ${destination}`,
+            titulo: `Dia ${dayNumber} - Continuando a exploração de ${destination}`,
             atividades: [
               {
                 horario: '09:00',
-                atividade: isWeekend ? 'Café da manhã tardio' : 'Café da manhã energético',
-                descricao: isWeekend ? 'Relaxe com um café da manhã mais demorado' : 'Comece o dia com energia para novas aventuras',
+                atividade: 'Café da manhã local',
+                descricao: 'Comece o dia com energia para novas aventuras',
                 custoEstimado: 'R$ 35',
                 localizacao: destination
               },
               {
                 horario: '11:00',
-                atividade: `Atividade ${dayNumber % 3 === 0 ? 'cultural' : dayNumber % 3 === 1 ? 'gastronômica' : 'de natureza'}`,
-                descricao: `Explore uma faceta diferente de ${destination}`,
+                atividade: 'Atividade cultural',
+                descricao: 'Explore uma faceta diferente da região',
                 custoEstimado: 'R$ 60',
                 localizacao: destination
               },
@@ -318,7 +451,7 @@ CRUCIAL: Use informações reais e específicas de ${destination}. Não crie um 
               },
               {
                 horario: '16:30',
-                atividade: 'Experiência local única',
+                atividade: 'Experiência local',
                 descricao: 'Participe de uma atividade típica da região',
                 custoEstimado: 'R$ 45',
                 localizacao: destination
@@ -326,7 +459,7 @@ CRUCIAL: Use informações reais e específicas de ${destination}. Não crie um 
               {
                 horario: '19:00',
                 atividade: 'Jantar especial',
-                descricao: 'Celebre mais um dia de descobertas com um jantar memorável',
+                descricao: 'Celebre mais um dia de descobertas',
                 custoEstimado: 'R$ 75',
                 localizacao: destination
               }

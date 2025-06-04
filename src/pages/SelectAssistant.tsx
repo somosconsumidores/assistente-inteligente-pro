@@ -1,21 +1,12 @@
 
-import React, { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import { Crown } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import AssistantPanel from '@/components/AssistantPanel';
 
 const SelectAssistant = () => {
-  const { profile } = useAuth();
-  const location = useLocation();
-  const [isFirstAccess, setIsFirstAccess] = useState(false);
-
-  useEffect(() => {
-    // Check if user is coming from registration
-    const searchParams = new URLSearchParams(location.search);
-    const fromRegistration = searchParams.get('from') === 'register';
-    setIsFirstAccess(fromRegistration);
-  }, [location]);
+  const { profile, updateSelectedAssistant } = useAuth();
 
   const handleUpgrade = () => {
     // Aqui seria a lógica para upgrade do plano
@@ -44,43 +35,30 @@ const SelectAssistant = () => {
       </header>
 
       <div className="container mx-auto px-4 py-12 max-w-7xl">
-        {/* Welcome Message for First Access */}
-        {isFirstAccess && (
-          <div className="bg-gradient-to-r from-blue-100 to-purple-100 border border-blue-200 rounded-xl p-6 mb-8">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-blue-900 mb-2">
-                🎉 Bem-vindo à Biblioteca AI!
-              </h2>
-              <p className="text-blue-700 text-lg mb-4">
-                Sua conta foi criada com sucesso! Agora escolha seu assistente especializado para começar.
-              </p>
-              <div className="bg-white/50 rounded-lg p-4 inline-block">
-                <p className="text-sm text-blue-600 font-medium">
-                  💡 Como usuário gratuito, você tem acesso ao <strong>Mestre do Direito do Consumidor</strong>
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Title Section */}
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            {isFirstAccess ? 'Escolha seu ' : 'Painel de '}
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              {isFirstAccess ? 'Assistente' : 'Assistentes Especializados'}
+            Painel de <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Assistentes Especializados
             </span>
           </h1>
           <p className="text-lg text-gray-600 mb-6 max-w-3xl mx-auto">
-            {profile?.plan === 'premium' 
-              ? 'Como usuário premium, você tem acesso completo a todos os 5 assistentes especializados!'
-              : isFirstAccess 
-                ? 'No plano gratuito, você pode acessar o Mestre do Direito do Consumidor. Clique no assistente que deseja usar para começar!'
-                : 'No plano gratuito, você tem acesso ao Mestre do Direito do Consumidor. Faça upgrade para acessar todos os assistentes.'
-            }
+            {(() => {
+              let descriptionText = '';
+              if (profile?.plan === 'premium') {
+                descriptionText = 'Como usuário premium, você tem acesso completo a todos os 5 assistentes especializados!';
+              } else if (profile?.selected_assistant_id) {
+                descriptionText = 'Você já selecionou seu assistente gratuito. Utilize-o abaixo ou faça upgrade para ter acesso a todos!';
+                // TODO: Potentially display the name of the selected assistant if easily available.
+                // For now, this generic message is fine.
+              } else {
+                descriptionText = 'No plano gratuito, você tem direito a escolher UM assistente especializado. Faça sua escolha abaixo.';
+              }
+              return descriptionText;
+            })()}
           </p>
           
-          {profile?.plan !== 'premium' && !isFirstAccess && (
+          {profile?.plan !== 'premium' && (
             <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-100 to-red-100 text-orange-800 rounded-xl border border-orange-200">
               <Crown className="w-5 h-5 mr-2" />
               <span className="font-medium">Quer acesso a todos os 5 assistentes? </span>
@@ -98,7 +76,8 @@ const SelectAssistant = () => {
         <AssistantPanel 
           userPlan={profile?.plan as 'free' | 'premium' || 'free'} 
           onUpgrade={handleUpgrade}
-          isFirstAccess={isFirstAccess}
+          selectedAssistantId={profile?.selected_assistant_id} 
+          onSelectAssistant={updateSelectedAssistant} 
         />
 
         {/* Bottom Info */}
@@ -106,9 +85,7 @@ const SelectAssistant = () => {
           <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 rounded-full text-sm font-medium">
             {profile?.plan === 'premium' 
               ? '🚀 Você tem acesso completo a todos os assistentes!' 
-              : isFirstAccess
-                ? '🎯 Escolha o assistente que deseja usar para começar!'
-                : '⭐ Upgrade para Premium e desbloqueie todos os assistentes'
+              : '⭐ Upgrade para Premium e desbloqueie todos os assistentes'
             }
           </div>
         </div>

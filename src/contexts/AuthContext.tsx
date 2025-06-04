@@ -8,6 +8,7 @@ interface UserProfile {
   name: string;
   email: string;
   plan: 'free' | 'premium';
+  selected_assistant_id?: string | null; // Add this line
 }
 
 interface AuthContextType {
@@ -18,6 +19,7 @@ interface AuthContextType {
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   isLoading: boolean;
+  updateSelectedAssistant: (assistantId: string) => Promise<void>; // Add this line
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -90,7 +92,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           id: data.id,
           name: data.name,
           email: data.email,
-          plan: data.plan as 'free' | 'premium'
+          plan: data.plan as 'free' | 'premium',
+          selected_assistant_id: data.selected_assistant_id // Add this line
         });
       }
     } catch (error) {
@@ -154,6 +157,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Add this function within AuthProvider, similar to login, register, logout
+  const updateSelectedAssistant = async (assistantId: string) => {
+    if (!user) {
+      throw new Error("User not authenticated");
+    }
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({ selected_assistant_id: assistantId })
+        .eq('id', user.id)
+        .select() // Important to select to get the updated row back for confirmation if needed
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        // Update local profile state
+        setProfile(prevProfile => prevProfile ? { ...prevProfile, selected_assistant_id: assistantId } : null);
+      }
+    } catch (error: any) {
+      console.error('Error updating selected assistant:', error);
+      throw new Error(error.message || 'Erro ao salvar escolha do assistente');
+    }
+  };
+
   return (
     <AuthContext.Provider value={{ 
       user, 
@@ -162,7 +192,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       login, 
       register, 
       logout, 
-      isLoading 
+      isLoading,
+      updateSelectedAssistant // Add this line
     }}>
       {children}
     </AuthContext.Provider>

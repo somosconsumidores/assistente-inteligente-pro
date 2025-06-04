@@ -14,6 +14,7 @@ interface PeticaoData {
 export const useGerarPeticao = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [peticaoGerada, setPeticaoGerada] = useState<string | null>(null);
+  const [dadosFormulario, setDadosFormulario] = useState<PeticaoData | null>(null);
   const { toast } = useToast();
 
   const gerarPeticao = async (data: PeticaoData) => {
@@ -44,6 +45,7 @@ export const useGerarPeticao = () => {
 
       if (response.success) {
         setPeticaoGerada(response.peticao);
+        setDadosFormulario(data);
         toast({
           title: "Sucesso!",
           description: "Petição gerada com sucesso"
@@ -67,12 +69,14 @@ export const useGerarPeticao = () => {
 
   const limparPeticao = () => {
     setPeticaoGerada(null);
+    setDadosFormulario(null);
   };
 
   return {
     gerarPeticao,
     isLoading,
     peticaoGerada,
+    dadosFormulario,
     limparPeticao
   };
 };

@@ -4,11 +4,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, MessageSquare, FileText, Scale, AlertCircle, Send, Database, Download, RotateCcw } from 'lucide-react';
+import { ArrowLeft, MessageSquare, FileText, Scale, AlertCircle, Send, Database, Download, RotateCcw, Save } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useDireitoChat } from '@/hooks/useDireitoChat';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGerarPeticao } from '@/hooks/useGerarPeticao';
+import { useSalvarPeticao } from '@/hooks/useSalvarPeticao';
 import KnowledgeBase from '@/components/KnowledgeBase';
 
 const DireitoConsumidor = () => {
@@ -16,7 +17,8 @@ const DireitoConsumidor = () => {
   const [chatMessage, setChatMessage] = useState('');
   const { messages, sendMessage, isLoading } = useDireitoChat();
   const { user } = useAuth();
-  const { gerarPeticao, isLoading: isGeneratingPetition, peticaoGerada, limparPeticao } = useGerarPeticao();
+  const { gerarPeticao, isLoading: isGeneratingPetition, peticaoGerada, dadosFormulario, limparPeticao } = useGerarPeticao();
+  const { salvarPeticao, isSaving } = useSalvarPeticao();
 
   // Form states for petition
   const [formData, setFormData] = useState({
@@ -55,6 +57,15 @@ const DireitoConsumidor = () => {
     await gerarPeticao(formData);
   };
 
+  const handleSalvarPeticao = async () => {
+    if (peticaoGerada && dadosFormulario) {
+      const sucesso = await salvarPeticao(peticaoGerada, dadosFormulario);
+      if (sucesso) {
+        // Petição salva com sucesso, mantém a visualização
+      }
+    }
+  };
+
   const handleNovaConsulta = () => {
     setFormData({
       nome: '',
@@ -84,7 +95,7 @@ const DireitoConsumidor = () => {
       <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <Link to="/" className="flex items-center space-x-2 text-gray-600 hover:text-blue-600">
+            <Link to="/dashboard" className="flex items-center space-x-2 text-gray-600 hover:text-blue-600">
               <ArrowLeft className="w-5 h-5" />
               <span>Voltar</span>
             </Link>
@@ -285,7 +296,11 @@ const DireitoConsumidor = () => {
                       <pre className="whitespace-pre-wrap text-sm leading-relaxed">{peticaoGerada}</pre>
                     </div>
                     <div className="flex space-x-4 mt-6">
-                      <Button onClick={handleDownloadPeticao} className="flex items-center space-x-2">
+                      <Button onClick={handleSalvarPeticao} disabled={isSaving} className="flex items-center space-x-2">
+                        <Save className="w-4 h-4" />
+                        <span>{isSaving ? 'Salvando...' : 'Salvar Petição'}</span>
+                      </Button>
+                      <Button onClick={handleDownloadPeticao} variant="outline" className="flex items-center space-x-2">
                         <Download className="w-4 h-4" />
                         <span>Baixar Petição</span>
                       </Button>

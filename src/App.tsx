@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
-import { ThemeProvider } from "./components/theme-provider"
+import { ThemeProvider } from "./components/ThemeProvider"
 
 import Home from './pages/Index';
 import Login from './pages/Login';

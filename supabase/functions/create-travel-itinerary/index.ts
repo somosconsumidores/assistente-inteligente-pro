@@ -32,49 +32,53 @@ serve(async (req) => {
 
     console.log('Número de dias calculado:', days)
 
-    // Criar prompt para IA
+    // Limitar o número de dias para evitar JSONs muito grandes
+    const maxDays = Math.min(days, 10)
+
+    // Criar prompt mais conciso para IA
     const prompt = `
-Crie um roteiro detalhado de viagem para:
+Crie um roteiro de viagem para ${maxDays} dias em ${destination}.
 
-Destino: ${destination}
-Orçamento: ${budget ? `R$ ${budget}` : 'Não especificado'}
-Data de ida: ${departureDate}
-Data de volta: ${returnDate}
-Duração: ${days} dias
-Número de pessoas: ${travelersCount}
-Estilo de viagem: ${travelStyle}
-${additionalPreferences ? `Preferências adicionais: ${additionalPreferences}` : ''}
+Parâmetros:
+- Orçamento: ${budget ? `R$ ${budget}` : 'Flexível'}
+- Pessoas: ${travelersCount}
+- Estilo: ${travelStyle}
+${additionalPreferences ? `- Preferências: ${additionalPreferences}` : ''}
 
-IMPORTANTE: Responda APENAS com um JSON válido, sem texto adicional antes ou depois. Use exatamente esta estrutura:
+IMPORTANTE: Responda APENAS com JSON válido. Use esta estrutura EXATA:
 
 {
-  "titulo": "Nome do roteiro",
-  "resumo": "Breve descrição do roteiro",
-  "custoEstimado": "Custo total estimado em reais",
+  "titulo": "Roteiro de ${maxDays} dias em ${destination}",
+  "resumo": "Breve descrição (máximo 100 caracteres)",
+  "custoEstimado": "R$ XXXX",
   "dicas": ["dica1", "dica2", "dica3"],
   "dias": [
     {
       "dia": 1,
-      "titulo": "Título do dia",
+      "titulo": "Nome do dia",
       "atividades": [
         {
           "horario": "09:00",
           "atividade": "Nome da atividade",
-          "descricao": "Descrição detalhada",
-          "custoEstimado": "R$ 50",
-          "localizacao": "Endereço ou localização"
+          "descricao": "Descrição concisa (máximo 80 caracteres)",
+          "custoEstimado": "R$ XX",
+          "localizacao": "Local"
         }
       ]
     }
   ]
 }
 
-Seja específico com horários, custos realistas em reais, e inclua atividades variadas. Considere refeições, transporte, atrações e tempo livre.
+Regras:
+- Máximo 4 atividades por dia
+- Descrições concisas
+- Preços realistas em reais
+- Inclua apenas o JSON, sem texto adicional
 `
 
     console.log('Chamando OpenAI...')
 
-    // Chamar OpenAI
+    // Chamar OpenAI com limite de tokens
     const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -86,7 +90,7 @@ Seja específico com horários, custos realistas em reais, e inclua atividades v
         messages: [
           {
             role: 'system',
-            content: 'Você é um especialista em turismo e planejamento de viagens. Crie roteiros detalhados e realistas com base nas informações fornecidas. Sempre responda apenas com JSON válido, sem texto adicional.'
+            content: 'Você é um especialista em turismo. Crie roteiros práticos e concisos. Responda APENAS com JSON válido, sem texto adicional antes ou depois.'
           },
           {
             role: 'user',
@@ -94,7 +98,7 @@ Seja específico com horários, custos realistas em reais, e inclua atividades v
           }
         ],
         temperature: 0.7,
-        max_tokens: 3000
+        max_tokens: 2000
       })
     })
 
@@ -107,28 +111,42 @@ Seja específico com horários, custos realistas em reais, e inclua atividades v
     console.log('Resposta da OpenAI recebida')
     
     const itineraryContent = openaiData.choices[0].message.content
-    console.log('Conteúdo do roteiro:', itineraryContent.substring(0, 200) + '...')
+    console.log('Conteúdo do roteiro (primeiros 500 chars):', itineraryContent.substring(0, 500))
 
-    // Parse do JSON retornado pela IA com melhor tratamento de erro
+    // Parse do JSON com melhor tratamento de erro
     let itineraryData
     try {
-      // Limpar possível texto extra antes e depois do JSON
+      // Limpar possível texto extra e encontrar o JSON
       const cleanContent = itineraryContent.trim()
-      const jsonStart = cleanContent.indexOf('{')
-      const jsonEnd = cleanContent.lastIndexOf('}') + 1
       
-      if (jsonStart === -1 || jsonEnd === 0) {
-        throw new Error('JSON não encontrado na resposta')
+      // Encontrar início e fim do JSON
+      let jsonStart = cleanContent.indexOf('{')
+      let jsonEnd = cleanContent.lastIndexOf('}') + 1
+      
+      // Se não encontrar chaves, tentar com markdown
+      if (jsonStart === -1) {
+        jsonStart = cleanContent.indexOf('```json') + 7
+        jsonEnd = cleanContent.indexOf('```', jsonStart)
+      }
+      
+      if (jsonStart === -1 || jsonEnd <= jsonStart) {
+        throw new Error('Formato JSON não encontrado na resposta')
       }
       
       const jsonString = cleanContent.substring(jsonStart, jsonEnd)
-      console.log('JSON extraído:', jsonString.substring(0, 200) + '...')
+      console.log('JSON extraído (primeiros 300 chars):', jsonString.substring(0, 300))
       
       itineraryData = JSON.parse(jsonString)
+      
+      // Validar estrutura básica
+      if (!itineraryData.titulo || !itineraryData.dias || !Array.isArray(itineraryData.dias)) {
+        throw new Error('Estrutura do JSON inválida')
+      }
+      
       console.log('JSON parseado com sucesso')
     } catch (e) {
       console.error('Erro ao fazer parse do JSON:', e)
-      console.error('Conteúdo original:', itineraryContent)
+      console.error('Conteúdo completo:', itineraryContent)
       throw new Error('Erro ao processar resposta da IA: ' + e.message)
     }
 

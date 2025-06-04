@@ -17,6 +17,8 @@ const ProductChat = () => {
     isLoading,
     error,
     featuredProducts,
+    lastQuery,
+    lastRecommendations,
     sendMessage,
     startChat,
     clearChat
@@ -174,7 +176,11 @@ const ProductChat = () => {
       {/* Featured Products Section - Only shows when AI response is complete */}
       {shouldShowFeaturedProducts && (
         <div className="max-w-4xl mx-auto">
-          <FeaturedProducts products={featuredProducts} />
+          <FeaturedProducts 
+            products={featuredProducts} 
+            query={lastQuery}
+            recommendations={lastRecommendations}
+          />
         </div>
       )}
     </div>

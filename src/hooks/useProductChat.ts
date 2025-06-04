@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -23,6 +24,8 @@ export const useProductChat = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([]);
+  const [lastQuery, setLastQuery] = useState<string>('');
+  const [lastRecommendations, setLastRecommendations] = useState<any>(null);
 
   const addMessage = useCallback((content: string, type: 'user' | 'assistant') => {
     const newMessage: Message = {
@@ -97,6 +100,7 @@ export const useProductChat = () => {
     addMessage(userMessage, 'user');
     setIsLoading(true);
     setError(null);
+    setLastQuery(userMessage);
 
     try {
       const conversationHistory = messages.map(msg => ({
@@ -122,6 +126,7 @@ export const useProductChat = () => {
 
       if (data?.analysis) {
         addMessage(data.analysis, 'assistant');
+        setLastRecommendations(data);
         
         const products = await fetchProductsFromDatabase(data.productIds, data.category);
         console.log('Setting featured products from database:', products);
@@ -162,6 +167,8 @@ Sobre qual produto você gostaria de conversar hoje?`;
     setMessages([]);
     setError(null);
     setFeaturedProducts([]);
+    setLastQuery('');
+    setLastRecommendations(null);
   }, []);
 
   return {
@@ -169,6 +176,8 @@ Sobre qual produto você gostaria de conversar hoje?`;
     isLoading,
     error,
     featuredProducts,
+    lastQuery,
+    lastRecommendations,
     sendMessage,
     startChat,
     clearChat

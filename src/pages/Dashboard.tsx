@@ -15,7 +15,7 @@ import { ArrowLeft, LayoutDashboard } from 'lucide-react';
 const Dashboard: React.FC = () => {
   const { profile } = useAuth();
   const navigate = useNavigate();
-  const { petitions, productRecommendations, financialData, travelPlans, isLoading } = useDashboardData();
+  const { petitions, productRecommendations, financialData, travelPlans, isLoading, refetch } = useDashboardData();
 
   const handleUpgrade = () => {
     console.log('Upgrade para premium');
@@ -94,6 +94,7 @@ const Dashboard: React.FC = () => {
             <SavedRecommendationsCard
               recommendations={productRecommendations}
               onViewAll={() => navigate('/produtos')}
+              onUpdate={refetch}
             />
           </div>
 

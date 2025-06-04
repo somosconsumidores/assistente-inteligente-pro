@@ -2,19 +2,31 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, Calendar, Package } from 'lucide-react';
+import { ShoppingCart, Calendar, Package, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useSaveRecommendation } from '@/hooks/useSaveRecommendation';
 
 interface SavedRecommendationsCardProps {
   recommendations: any[];
   onViewAll: () => void;
+  onUpdate?: () => void;
 }
 
 const SavedRecommendationsCard: React.FC<SavedRecommendationsCardProps> = ({ 
   recommendations, 
-  onViewAll 
+  onViewAll,
+  onUpdate 
 }) => {
+  const { deleteRecommendation, isLoading } = useSaveRecommendation();
+
+  const handleDelete = async (id: string) => {
+    const success = await deleteRecommendation(id);
+    if (success && onUpdate) {
+      onUpdate();
+    }
+  };
+
   if (recommendations.length === 0) {
     return (
       <Card>
@@ -49,19 +61,32 @@ const SavedRecommendationsCard: React.FC<SavedRecommendationsCardProps> = ({
       <CardContent className="space-y-3">
         {recommendations.slice(0, 3).map((rec) => (
           <div key={rec.id} className="p-3 bg-gray-50 rounded-lg">
-            <h4 className="font-medium text-gray-900 mb-1 truncate">
-              {rec.query}
-            </h4>
-            <div className="flex items-center gap-4 text-sm text-gray-600">
-              <span className="flex items-center gap-1">
-                <Calendar className="w-3 h-3" />
-                {format(new Date(rec.created_at), "dd 'de' MMM", { locale: ptBR })}
-              </span>
-              {rec.featured_products && (
-                <span className="text-green-600">
-                  {Array.isArray(rec.featured_products) ? rec.featured_products.length : 0} produtos
-                </span>
-              )}
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h4 className="font-medium text-gray-900 mb-1 truncate">
+                  {rec.query}
+                </h4>
+                <div className="flex items-center gap-4 text-sm text-gray-600">
+                  <span className="flex items-center gap-1">
+                    <Calendar className="w-3 h-3" />
+                    {format(new Date(rec.created_at), "dd 'de' MMM", { locale: ptBR })}
+                  </span>
+                  {rec.featured_products && (
+                    <span className="text-green-600">
+                      {Array.isArray(rec.featured_products) ? rec.featured_products.length : 0} produtos
+                    </span>
+                  )}
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleDelete(rec.id)}
+                disabled={isLoading}
+                className="text-red-500 hover:text-red-700 hover:bg-red-50"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
             </div>
           </div>
         ))}

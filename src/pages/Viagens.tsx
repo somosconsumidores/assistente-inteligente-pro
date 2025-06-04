@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,9 +9,12 @@ import { useTravelItinerary } from '@/hooks/useTravelItinerary';
 import { useSavedItineraries } from '@/hooks/useSavedItineraries';
 import GeneratedItinerary from '@/components/GeneratedItinerary';
 import SavedItinerariesList from '@/components/SavedItinerariesList';
+import { useSearchParams } from 'react-router-dom';
 
 const Viagens = () => {
-  const [activeTab, setActiveTab] = useState('planner');
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') || 'planner';
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [viewingSavedItinerary, setViewingSavedItinerary] = useState(null);
   const [formData, setFormData] = useState({
     destination: '',
@@ -22,6 +25,12 @@ const Viagens = () => {
     travelStyle: 'Econômica',
     additionalPreferences: ''
   });
+
+  // Update active tab when URL changes
+  useEffect(() => {
+    const tab = searchParams.get('tab') || 'planner';
+    setActiveTab(tab);
+  }, [searchParams]);
 
   const { generateItinerary, isGenerating, generatedItinerary, clearItinerary } = useTravelItinerary();
   const { savedItineraries, isLoading: isLoadingSaved, saveItinerary, deleteItinerary } = useSavedItineraries();

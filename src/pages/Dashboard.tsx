@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDashboardData } from '@/hooks/useDashboardData';
@@ -88,7 +87,7 @@ const Dashboard: React.FC = () => {
           <div className="space-y-6">
             <SavedPetitionsCard
               petitions={petitions}
-              onViewAll={() => navigate('/direito-consumidor')}
+              onViewAll={() => navigate('/peticoes-salvas')}
             />
             
             <SavedRecommendationsCard

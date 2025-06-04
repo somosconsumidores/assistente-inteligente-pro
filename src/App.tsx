@@ -1,44 +1,42 @@
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { Toaster } from 'sonner';
+import { ThemeProvider } from "@/components/theme-provider"
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { ThemeProvider } from "@/components/ThemeProvider";
-import ProtectedRoute from "@/components/ProtectedRoute";
-import Index from "./pages/Index";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import NotFound from "./pages/NotFound";
-import SelectAssistant from "./pages/SelectAssistant";
-import Dashboard from "./pages/Dashboard";
-import DireitoConsumidor from "./pages/DireitoConsumidor";
-import Financas from "./pages/Financas";
-import Produtos from "./pages/Produtos";
-import Viagens from "./pages/Viagens";
-import Supermercado from "./pages/Supermercado";
-import SavedRecommendations from "./pages/SavedRecommendations";
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
+import ConsumerLaw from './pages/ConsumerLaw';
+import SavedRecommendations from './pages/SavedRecommendations';
+import Finances from './pages/Finances';
+import Travel from './pages/Travel';
+import Assistants from './pages/Assistants';
+import SavedPetitions from '@/pages/SavedPetitions';
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider defaultTheme="system" storageKey="biblioteca-ai-theme">
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
+function App() {
+  const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+    const { user } = useAuth();
+    if (!user) {
+      return <Navigate to="/login" />;
+    }
+
+    return <>{children}</>;
+  };
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
         <AuthProvider>
-          <BrowserRouter>
+          <ThemeProvider>
             <Routes>
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route path="/select-assistant" element={
-                <ProtectedRoute>
-                  <SelectAssistant />
-                </ProtectedRoute>
-              } />
               <Route path="/dashboard" element={
                 <ProtectedRoute>
                   <Dashboard />
@@ -46,17 +44,7 @@ const App = () => (
               } />
               <Route path="/direito-consumidor" element={
                 <ProtectedRoute>
-                  <DireitoConsumidor />
-                </ProtectedRoute>
-              } />
-              <Route path="/financas" element={
-                <ProtectedRoute>
-                  <Financas />
-                </ProtectedRoute>
-              } />
-              <Route path="/produtos" element={
-                <ProtectedRoute>
-                  <Produtos />
+                  <ConsumerLaw />
                 </ProtectedRoute>
               } />
               <Route path="/recomendacoes-salvas" element={
@@ -64,23 +52,33 @@ const App = () => (
                   <SavedRecommendations />
                 </ProtectedRoute>
               } />
+              <Route path="/financas" element={
+                <ProtectedRoute>
+                  <Finances />
+                </ProtectedRoute>
+              } />
               <Route path="/viagens" element={
                 <ProtectedRoute>
-                  <Viagens />
+                  <Travel />
                 </ProtectedRoute>
               } />
-              <Route path="/supermercado" element={
+               <Route path="/assistentes" element={
                 <ProtectedRoute>
-                  <Supermercado />
+                  <Assistants />
                 </ProtectedRoute>
               } />
-              <Route path="*" element={<NotFound />} />
+              <Route path="/peticoes-salvas" element={
+                <ProtectedRoute>
+                  <SavedPetitions />
+                </ProtectedRoute>
+              } />
             </Routes>
-          </BrowserRouter>
+            <Toaster />
+          </ThemeProvider>
         </AuthProvider>
-      </TooltipProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
-);
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
+}
 
 export default App;

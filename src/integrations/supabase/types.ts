@@ -293,51 +293,6 @@ export type Database = {
         }
         Relationships: []
       }
-      travel_itineraries: {
-        Row: {
-          additional_preferences: string | null
-          budget: number | null
-          created_at: string
-          departure_date: string | null
-          destination: string
-          id: string
-          itinerary_data: Json
-          return_date: string | null
-          travel_style: string
-          travelers_count: number
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          additional_preferences?: string | null
-          budget?: number | null
-          created_at?: string
-          departure_date?: string | null
-          destination: string
-          id?: string
-          itinerary_data: Json
-          return_date?: string | null
-          travel_style: string
-          travelers_count?: number
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          additional_preferences?: string | null
-          budget?: number | null
-          created_at?: string
-          departure_date?: string | null
-          destination?: string
-          id?: string
-          itinerary_data?: Json
-          return_date?: string | null
-          travel_style?: string
-          travelers_count?: number
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       user_financial_data: {
         Row: {
           created_at: string

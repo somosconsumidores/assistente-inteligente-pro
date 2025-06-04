@@ -8,7 +8,6 @@ interface DashboardData {
   petitions: any[];
   productRecommendations: any[];
   financialData: any;
-  travelPlans: any[];
   savedItineraries: any[];
   isLoading: boolean;
 }
@@ -20,7 +19,6 @@ export const useDashboardData = () => {
     petitions: [],
     productRecommendations: [],
     financialData: null,
-    travelPlans: [],
     savedItineraries: [],
     isLoading: true
   });
@@ -54,15 +52,7 @@ export const useDashboardData = () => {
         .eq('user_id', user.id)
         .single();
 
-      // Buscar planos de viagem (deprecated table)
-      const { data: travelPlans } = await supabase
-        .from('saved_travel_plans')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(3);
-
-      // Buscar roteiros salvos (nova tabela)
+      // Buscar roteiros salvos (tabela unificada)
       const { data: savedItineraries } = await supabase
         .from('saved_itineraries')
         .select('*')
@@ -74,7 +64,6 @@ export const useDashboardData = () => {
         petitions: petitions || [],
         productRecommendations: productRecommendations || [],
         financialData: financialData,
-        travelPlans: travelPlans || [],
         savedItineraries: savedItineraries || [],
         isLoading: false
       });

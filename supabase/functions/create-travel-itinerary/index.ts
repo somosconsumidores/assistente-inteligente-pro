@@ -1,6 +1,5 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -181,52 +180,10 @@ Máximo 3 atividades por dia. Descrições de máximo 50 caracteres.`
 
     console.log('Roteiro processado com sucesso')
 
-    // Obter usuário autenticado
-    const authHeader = req.headers.get('Authorization')!
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } }
-    )
-
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return new Response(
-        JSON.stringify({ error: 'Usuário não autenticado' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    console.log('Salvando roteiro no banco de dados...')
-
-    // Salvar roteiro na tabela travel_itineraries
-    const { data: savedItinerary, error: saveError } = await supabase
-      .from('travel_itineraries')
-      .insert({
-        user_id: user.id,
-        destination,
-        budget: budget ? parseFloat(budget.toString()) : null,
-        departure_date: departureDate,
-        return_date: returnDate,
-        travelers_count: parseInt(travelersCount.toString()),
-        travel_style: travelStyle,
-        additional_preferences: additionalPreferences,
-        itinerary_data: itineraryData
-      })
-      .select()
-      .single()
-
-    if (saveError) {
-      console.error('Erro ao salvar roteiro:', saveError)
-      throw new Error('Erro ao salvar roteiro no banco de dados: ' + saveError.message)
-    }
-
-    console.log('Roteiro salvo com sucesso:', savedItinerary.id)
-
+    // Retornar apenas o roteiro gerado (sem salvar automaticamente)
     return new Response(
       JSON.stringify({ 
         success: true, 
-        itinerary: savedItinerary,
         itineraryData 
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

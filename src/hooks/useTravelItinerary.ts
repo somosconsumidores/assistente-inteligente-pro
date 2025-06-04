@@ -83,7 +83,7 @@ export const useTravelItinerary = () => {
 
       toast({
         title: "Roteiro gerado com sucesso!",
-        description: "Seu roteiro personalizado foi criado e salvo.",
+        description: "Seu roteiro personalizado foi criado. Use o botão 'Salvar Roteiro' para salvar.",
       });
 
       return itineraryData;
@@ -97,8 +97,6 @@ export const useTravelItinerary = () => {
           errorMessage = "Erro na geração do roteiro pela IA. Tente novamente.";
         } else if (error.message.includes('autenticação')) {
           errorMessage = "Erro de autenticação. Faça login novamente.";
-        } else if (error.message.includes('banco de dados')) {
-          errorMessage = "Erro ao salvar o roteiro. Tente novamente.";
         } else {
           errorMessage = error.message;
         }

@@ -1,31 +1,31 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, ShoppingCart } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Package } from 'lucide-react';
 import ProductChat from '@/components/ProductChat';
+import { DashboardLayout } from '@/components/DashboardLayout';
 
 const Produtos = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Link to="/dashboard" className="flex items-center space-x-2 text-gray-600 hover:text-orange-600">
-              <ArrowLeft className="w-5 h-5" />
-              <span>Voltar</span>
-            </Link>
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-orange-600 to-red-600 rounded-lg flex items-center justify-center">
-                <ShoppingCart className="w-5 h-5 text-white" />
+    <DashboardLayout>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-r from-orange-500 to-red-600 rounded-lg">
+                <Package className="w-6 h-6 text-white" />
               </div>
-              <span className="font-bold text-xl text-gray-900">Mestre dos Produtos</span>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">Mestre dos Produtos</h1>
+                <p className="text-gray-600">
+                  Compare produtos, encontre as melhores ofertas e receba recomendações personalizadas
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </header>
 
-      <div className="container mx-auto px-4 py-8">
         {/* Chat Section */}
         <Card className="mb-8">
           <CardHeader>
@@ -65,7 +65,7 @@ const Produtos = () => {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

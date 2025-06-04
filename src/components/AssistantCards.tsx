@@ -16,8 +16,8 @@ import {
 } from 'lucide-react';
 
 interface AssistantCardsProps {
-  userPlan: 'free' | 'premium';
-  onUpgrade: () => void;
+  userPlan?: 'free' | 'premium';
+  onUpgrade?: () => void;
   isFirstAccess?: boolean;
 }
 
@@ -79,7 +79,7 @@ const AssistantCards = ({ userPlan, onUpgrade, isFirstAccess = false }: Assistan
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {assistants.map((assistant) => {
         const Icon = assistant.icon;
-        const isAvailable = assistant.available;
+        const isAvailable = userPlan ? assistant.available : true; // Show all as available on landing page
         const shouldHighlight = isFirstAccess && assistant.highlight;
         
         return (
@@ -97,7 +97,7 @@ const AssistantCards = ({ userPlan, onUpgrade, isFirstAccess = false }: Assistan
             <div className={`absolute inset-0 bg-gradient-to-br ${assistant.gradient} opacity-5`} />
             
             {/* Premium Badge */}
-            {!isAvailable && (
+            {userPlan && !isAvailable && (
               <div className="absolute top-4 right-4 z-10">
                 <Badge variant="secondary" className="bg-orange-100 text-orange-800 border-orange-200">
                   <Crown className="w-3 h-3 mr-1" />
@@ -131,25 +131,37 @@ const AssistantCards = ({ userPlan, onUpgrade, isFirstAccess = false }: Assistan
             </CardHeader>
             
             <CardContent className="relative z-10">
-              {isAvailable ? (
-                <Link to={assistant.path}>
+              {userPlan ? (
+                // Authenticated user view
+                isAvailable ? (
+                  <Link to={assistant.path}>
+                    <Button 
+                      className={`w-full bg-gradient-to-r ${assistant.gradient} hover:opacity-90 text-white font-medium py-2 transition-all duration-200 ${
+                        shouldHighlight ? 'ring-2 ring-green-400 ring-offset-2 shadow-lg' : ''
+                      }`}
+                    >
+                      {shouldHighlight ? '🎯 Começar Agora!' : 'Acessar Assistente'}
+                    </Button>
+                  </Link>
+                ) : (
                   <Button 
-                    className={`w-full bg-gradient-to-r ${assistant.gradient} hover:opacity-90 text-white font-medium py-2 transition-all duration-200 ${
-                      shouldHighlight ? 'ring-2 ring-green-400 ring-offset-2 shadow-lg' : ''
-                    }`}
+                    onClick={onUpgrade}
+                    variant="outline" 
+                    className="w-full border-2 border-orange-200 text-orange-700 hover:bg-orange-50 font-medium py-2 transition-all duration-200"
                   >
-                    {shouldHighlight ? '🎯 Começar Agora!' : 'Acessar Assistente'}
+                    <Lock className="w-4 h-4 mr-2" />
+                    Fazer Upgrade
+                  </Button>
+                )
+              ) : (
+                // Landing page view
+                <Link to="/login">
+                  <Button 
+                    className={`w-full bg-gradient-to-r ${assistant.gradient} hover:opacity-90 text-white font-medium py-2 transition-all duration-200`}
+                  >
+                    Começar Agora
                   </Button>
                 </Link>
-              ) : (
-                <Button 
-                  onClick={onUpgrade}
-                  variant="outline" 
-                  className="w-full border-2 border-orange-200 text-orange-700 hover:bg-orange-50 font-medium py-2 transition-all duration-200"
-                >
-                  <Lock className="w-4 h-4 mr-2" />
-                  Fazer Upgrade
-                </Button>
               )}
             </CardContent>
           </Card>

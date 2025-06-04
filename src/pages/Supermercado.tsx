@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Camera, Search, Star, ShoppingBasket, Upload, Loader2, ImageIcon } from 'lucide-react';
+import { Camera, Search, Star, ShoppingBasket, Upload, Loader2, ImageIcon, Zap } from 'lucide-react';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import ProductComparison from '@/components/ProductComparison';
 
 const Supermercado = () => {
   const [activeTab, setActiveTab] = useState('scanner');
@@ -111,6 +112,14 @@ const Supermercado = () => {
           >
             <Camera className="w-4 h-4" />
             <span>Scanner</span>
+          </Button>
+          <Button 
+            variant={activeTab === 'compare' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('compare')}
+            className="flex items-center space-x-2"
+          >
+            <Zap className="w-4 h-4" />
+            <span>Comparar</span>
           </Button>
           <Button 
             variant={activeTab === 'search' ? 'default' : 'outline'}
@@ -266,6 +275,9 @@ const Supermercado = () => {
             </Card>
           </div>
         )}
+
+        {/* Compare Tab */}
+        {activeTab === 'compare' && <ProductComparison />}
 
         {/* Search Tab */}
         {activeTab === 'search' && (

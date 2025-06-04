@@ -155,6 +155,51 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_itineraries: {
+        Row: {
+          budget: number | null
+          created_at: string
+          departure_date: string | null
+          destination: string
+          id: string
+          itinerary_data: Json
+          return_date: string | null
+          title: string
+          travel_style: string
+          travelers_count: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          budget?: number | null
+          created_at?: string
+          departure_date?: string | null
+          destination: string
+          id?: string
+          itinerary_data: Json
+          return_date?: string | null
+          title: string
+          travel_style: string
+          travelers_count?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          budget?: number | null
+          created_at?: string
+          departure_date?: string | null
+          destination?: string
+          id?: string
+          itinerary_data?: Json
+          return_date?: string | null
+          title?: string
+          travel_style?: string
+          travelers_count?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       saved_petitions: {
         Row: {
           case_details: Json | null

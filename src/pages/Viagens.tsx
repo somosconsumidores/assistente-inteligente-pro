@@ -3,13 +3,16 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { MapPin, Calendar, Plane, Loader2 } from 'lucide-react';
+import { MapPin, Calendar, Plane, Loader2, BookOpen } from 'lucide-react';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useTravelItinerary } from '@/hooks/useTravelItinerary';
+import { useSavedItineraries } from '@/hooks/useSavedItineraries';
 import GeneratedItinerary from '@/components/GeneratedItinerary';
+import SavedItinerariesList from '@/components/SavedItinerariesList';
 
 const Viagens = () => {
   const [activeTab, setActiveTab] = useState('planner');
+  const [viewingSavedItinerary, setViewingSavedItinerary] = useState(null);
   const [formData, setFormData] = useState({
     destination: '',
     budget: '',
@@ -21,6 +24,7 @@ const Viagens = () => {
   });
 
   const { generateItinerary, isGenerating, generatedItinerary, clearItinerary } = useTravelItinerary();
+  const { savedItineraries, isLoading: isLoadingSaved, saveItinerary, deleteItinerary } = useSavedItineraries();
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -42,8 +46,15 @@ const Viagens = () => {
     });
   };
 
+  const handleSaveItinerary = async () => {
+    if (generatedItinerary) {
+      await saveItinerary(generatedItinerary, formData);
+    }
+  };
+
   const handleBackToPlanner = () => {
     clearItinerary();
+    setViewingSavedItinerary(null);
     setFormData({
       destination: '',
       budget: '',
@@ -53,6 +64,18 @@ const Viagens = () => {
       travelStyle: 'Econômica',
       additionalPreferences: ''
     });
+    setActiveTab('planner');
+  };
+
+  const handleViewSavedItinerary = (itinerary: any) => {
+    setViewingSavedItinerary(itinerary);
+    setActiveTab('viewing');
+  };
+
+  const handleDeleteItinerary = async (id: string) => {
+    if (confirm('Tem certeza que deseja excluir este roteiro?')) {
+      await deleteItinerary(id);
+    }
   };
 
   return (
@@ -75,11 +98,18 @@ const Viagens = () => {
           </div>
         </div>
 
-        {/* Mostrar roteiro gerado ou interface de planejamento */}
+        {/* Mostrar roteiro gerado, roteiro salvo ou interface de planejamento */}
         {generatedItinerary ? (
           <GeneratedItinerary 
             itinerary={generatedItinerary}
             onBackToPlanner={handleBackToPlanner}
+            onSave={handleSaveItinerary}
+          />
+        ) : viewingSavedItinerary ? (
+          <GeneratedItinerary 
+            itinerary={viewingSavedItinerary.itinerary_data}
+            onBackToPlanner={handleBackToPlanner}
+            isSaved={true}
           />
         ) : (
           <>
@@ -94,12 +124,20 @@ const Viagens = () => {
                 <span>Planejador</span>
               </Button>
               <Button 
+                variant={activeTab === 'saved' ? 'default' : 'outline'}
+                onClick={() => setActiveTab('saved')}
+                className="flex items-center space-x-2"
+              >
+                <BookOpen className="w-4 h-4" />
+                <span>Roteiros Salvos</span>
+              </Button>
+              <Button 
                 variant={activeTab === 'itinerary' ? 'default' : 'outline'}
                 onClick={() => setActiveTab('itinerary')}
                 className="flex items-center space-x-2"
               >
                 <Calendar className="w-4 h-4" />
-                <span>Roteiro</span>
+                <span>Exemplo</span>
               </Button>
             </div>
 
@@ -235,7 +273,36 @@ const Viagens = () => {
               </div>
             )}
 
-            {/* Itinerary Tab */}
+            {/* Saved Itineraries Tab */}
+            {activeTab === 'saved' && (
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Seus Roteiros Salvos</CardTitle>
+                    <CardDescription>
+                      Acesse e gerencie todos os roteiros que você salvou
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+
+                {isLoadingSaved ? (
+                  <Card>
+                    <CardContent className="p-8 text-center">
+                      <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+                      <p>Carregando roteiros salvos...</p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <SavedItinerariesList
+                    itineraries={savedItineraries}
+                    onDelete={handleDeleteItinerary}
+                    onView={handleViewSavedItinerary}
+                  />
+                )}
+              </div>
+            )}
+
+            {/* Itinerary Tab - keep existing static example */}
             {activeTab === 'itinerary' && (
               <div className="space-y-6">
                 {/* Static Itinerary Example */}

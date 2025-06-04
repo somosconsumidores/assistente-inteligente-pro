@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MapPin, Clock, DollarSign, Lightbulb, Calendar } from 'lucide-react';
+import { MapPin, Clock, DollarSign, Lightbulb, Calendar, Save } from 'lucide-react';
 
 interface ItineraryActivity {
   horario: string;
@@ -29,11 +29,15 @@ interface ItineraryData {
 interface GeneratedItineraryProps {
   itinerary: ItineraryData;
   onBackToPlanner: () => void;
+  onSave?: () => void;
+  isSaved?: boolean;
 }
 
 const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({ 
   itinerary, 
-  onBackToPlanner 
+  onBackToPlanner,
+  onSave,
+  isSaved = false
 }) => {
   return (
     <div className="space-y-6">
@@ -45,9 +49,17 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
               <CardTitle className="text-2xl">{itinerary.titulo}</CardTitle>
               <p className="text-gray-600 mt-2">{itinerary.resumo}</p>
             </div>
-            <Button variant="outline" onClick={onBackToPlanner}>
-              Criar Novo Roteiro
-            </Button>
+            <div className="flex items-center gap-2">
+              {onSave && !isSaved && (
+                <Button variant="default" onClick={onSave}>
+                  <Save className="w-4 h-4 mr-2" />
+                  Salvar Roteiro
+                </Button>
+              )}
+              <Button variant="outline" onClick={onBackToPlanner}>
+                Criar Novo Roteiro
+              </Button>
+            </div>
           </div>
           <div className="flex items-center gap-4 mt-4 text-sm">
             <div className="flex items-center gap-2">

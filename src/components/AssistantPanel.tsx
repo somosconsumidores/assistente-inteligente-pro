@@ -139,19 +139,24 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade, se
             } bg-gradient-to-br ${assistant.bgColor}`}
             onClick={() => isClickable && handleAssistantClick(assistant)}
           >
-            {/* Premium Badge */}
-            {assistant.isPremium && (
-              <div className="absolute top-4 right-4 z-10">
+            {/* Badge do assistente */}
+            <div className="absolute top-4 right-4 z-10">
+              {isSelected && userPlan === 'free' ? (
+                <div className="flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-green-400 to-blue-400 text-white">
+                  <CheckCircle className="w-3 h-3" />
+                  <span>Plano Gratuito</span>
+                </div>
+              ) : assistant.isPremium ? (
                 <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${
-                  (userPlan === 'premium' || isSelected)
+                  userPlan === 'premium'
                     ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-white' 
                     : 'bg-gray-200 text-gray-600'
                 }`}>
                   <Crown className="w-3 h-3" />
                   <span>Premium</span>
                 </div>
-              </div>
-            )}
+              ) : null}
+            </div>
 
             {/* Lock Overlay para assistentes bloqueados */}
             {isLocked && (

@@ -17,6 +17,7 @@ import Financas from "./pages/Financas";
 import Produtos from "./pages/Produtos";
 import Viagens from "./pages/Viagens";
 import Supermercado from "./pages/Supermercado";
+import SavedRecommendations from "./pages/SavedRecommendations";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,11 @@ const App = () => (
             <Route path="/produtos" element={
               <ProtectedRoute>
                 <Produtos />
+              </ProtectedRoute>
+            } />
+            <Route path="/recomendacoes-salvas" element={
+              <ProtectedRoute>
+                <SavedRecommendations />
               </ProtectedRoute>
             } />
             <Route path="/viagens" element={

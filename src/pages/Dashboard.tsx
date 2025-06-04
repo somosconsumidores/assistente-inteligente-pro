@@ -93,7 +93,7 @@ const Dashboard: React.FC = () => {
             
             <SavedRecommendationsCard
               recommendations={productRecommendations}
-              onViewAll={() => navigate('/produtos')}
+              onViewAll={() => navigate('/recomendacoes-salvas')}
               onUpdate={refetch}
             />
           </div>

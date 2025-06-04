@@ -1,138 +1,58 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { MessageSquare, Mail, Shield, FileText } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 
 const Footer = () => {
   return (
-    <footer className="bg-slate-900 border-t border-slate-800 py-16">
-      <div className="container mx-auto px-4 max-w-7xl">
+    <footer className="bg-gray-900 text-white py-16 px-4">
+      <div className="container mx-auto max-w-6xl">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
-          {/* Logo and Description */}
-          <div className="md:col-span-1">
-            <Link to="/" className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-lg">BI</span>
+          <div className="col-span-1 md:col-span-2">
+            <div className="flex items-center space-x-2 mb-4">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">BI</span>
               </div>
-              <span className="font-bold text-xl text-white">Biblioteca AI</span>
-            </Link>
-            <p className="text-slate-400 text-sm leading-relaxed mb-6">
-              Seus copilotos inteligentes para resolver problemas do dia a dia com tecnologia de IA avançada.
+              <span className="font-bold text-xl">Biblioteca AI</span>
+            </div>
+            <p className="text-gray-300 leading-relaxed max-w-md">
+              Transforme sua rotina com 5 assistentes de IA especializados. 
+              Tome decisões mais inteligentes em direito, finanças, produtos, viagens e compras.
             </p>
-            <div className="flex space-x-4">
-              <a href="#" className="text-slate-400 hover:text-white transition-colors">
-                <MessageSquare className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-slate-400 hover:text-white transition-colors">
-                <Mail className="w-5 h-5" />
-              </a>
+            <div className="flex items-center space-x-2 mt-4">
+              <MessageSquare className="w-5 h-5 text-blue-400" />
+              <span className="text-gray-300">Disponível no WhatsApp</span>
             </div>
           </div>
-
-          {/* Assistentes */}
+          
           <div>
-            <h3 className="font-semibold text-white mb-4">Assistentes</h3>
-            <ul className="space-y-3">
-              <li>
-                <Link to="/direito-consumidor" className="text-slate-400 hover:text-white transition-colors text-sm">
-                  Direito do Consumidor
-                </Link>
-              </li>
-              <li>
-                <Link to="/financas" className="text-slate-400 hover:text-white transition-colors text-sm">
-                  Consultor Financeiro
-                </Link>
-              </li>
-              <li>
-                <Link to="/produtos" className="text-slate-400 hover:text-white transition-colors text-sm">
-                  Mestre dos Produtos
-                </Link>
-              </li>
-              <li>
-                <Link to="/viagens" className="text-slate-400 hover:text-white transition-colors text-sm">
-                  Consultor de Viagens
-                </Link>
-              </li>
-              <li>
-                <Link to="/supermercado" className="text-slate-400 hover:text-white transition-colors text-sm">
-                  Assistente de Compras
-                </Link>
-              </li>
+            <h4 className="font-semibold text-lg mb-4">Assistentes</h4>
+            <ul className="space-y-2 text-gray-300">
+              <li>👨‍⚖️ Direito do Consumidor</li>
+              <li>💰 Finanças Pessoais</li>
+              <li>🛍️ Produtos e Compras</li>
+              <li>✈️ Planejamento de Viagens</li>
+              <li>🛒 Supermercado</li>
             </ul>
           </div>
-
-          {/* Recursos */}
+          
           <div>
-            <h3 className="font-semibold text-white mb-4">Recursos</h3>
-            <ul className="space-y-3">
-              <li>
-                <Link to="/dashboard" className="text-slate-400 hover:text-white transition-colors text-sm">
-                  Painel de Controle
-                </Link>
-              </li>
-              <li>
-                <Link to="/recomendacoes-salvas" className="text-slate-400 hover:text-white transition-colors text-sm">
-                  Recomendações Salvas
-                </Link>
-              </li>
-              <li>
-                <Link to="/peticoes-salvas" className="text-slate-400 hover:text-white transition-colors text-sm">
-                  Petições Salvas
-                </Link>
-              </li>
-              <li>
-                <a href="#precos" className="text-slate-400 hover:text-white transition-colors text-sm">
-                  Planos e Preços
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Suporte */}
-          <div>
-            <h3 className="font-semibold text-white mb-4">Suporte</h3>
-            <ul className="space-y-3">
-              <li>
-                <a href="#" className="text-slate-400 hover:text-white transition-colors text-sm flex items-center">
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  WhatsApp
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-slate-400 hover:text-white transition-colors text-sm flex items-center">
-                  <Mail className="w-4 h-4 mr-2" />
-                  Email
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-slate-400 hover:text-white transition-colors text-sm flex items-center">
-                  <Shield className="w-4 h-4 mr-2" />
-                  Privacidade
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-slate-400 hover:text-white transition-colors text-sm flex items-center">
-                  <FileText className="w-4 h-4 mr-2" />
-                  Termos de Uso
-                </a>
-              </li>
+            <h4 className="font-semibold text-lg mb-4">Empresa</h4>
+            <ul className="space-y-2 text-gray-300">
+              <li><a href="#" className="hover:text-blue-400 transition-colors">Sobre Nós</a></li>
+              <li><a href="#" className="hover:text-blue-400 transition-colors">Contato</a></li>
+              <li><a href="#" className="hover:text-blue-400 transition-colors">Política de Privacidade</a></li>
+              <li><a href="#" className="hover:text-blue-400 transition-colors">Termos de Uso</a></li>
             </ul>
           </div>
         </div>
-
-        <div className="border-t border-slate-800 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-slate-400 text-sm mb-4 md:mb-0">
-              © 2024 Biblioteca AI. Todos os direitos reservados.
-            </p>
-            <div className="flex space-x-6">
-              <a href="#" className="text-slate-400 hover:text-white transition-colors text-sm">
-                Política de Privacidade
-              </a>
-              <a href="#" className="text-slate-400 hover:text-white transition-colors text-sm">
-                Termos de Serviço
-              </a>
-            </div>
+        
+        <div className="border-t border-gray-700 pt-8 flex flex-col md:flex-row items-center justify-between">
+          <p className="text-gray-400 text-sm">
+            © 2024 Biblioteca AI. Todos os direitos reservados.
+          </p>
+          <div className="flex items-center space-x-6 mt-4 md:mt-0">
+            <span className="text-gray-400 text-sm">🇧🇷 Feito no Brasil</span>
+            <span className="text-gray-400 text-sm">🤖 Powered by OpenAI</span>
           </div>
         </div>
       </div>

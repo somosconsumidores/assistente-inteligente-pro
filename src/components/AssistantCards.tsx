@@ -12,8 +12,7 @@ import {
   ShoppingCart, 
   Crown, 
   Lock,
-  Sparkles,
-  ArrowRight
+  Sparkles
 } from 'lucide-react';
 
 interface AssistantCardsProps {
@@ -30,8 +29,7 @@ const AssistantCards = ({ userPlan, onUpgrade, isFirstAccess = false }: Assistan
       description: 'Especialista em defesa dos direitos do consumidor, análise de contratos e orientações legais.',
       icon: Scale,
       path: '/direito-consumidor',
-      gradient: 'gradient-blue-purple',
-      gradientClass: 'from-blue-500 to-purple-600',
+      gradient: 'from-blue-500 to-blue-700',
       available: true,
       isFree: true
     },
@@ -41,8 +39,7 @@ const AssistantCards = ({ userPlan, onUpgrade, isFirstAccess = false }: Assistan
       description: 'Gestão financeira pessoal, investimentos e planejamento econômico inteligente.',
       icon: Calculator,
       path: '/financas',
-      gradient: 'gradient-green-blue',
-      gradientClass: 'from-emerald-500 to-blue-600',
+      gradient: 'from-green-500 to-green-700',
       available: userPlan === 'premium',
       isFree: false
     },
@@ -52,8 +49,7 @@ const AssistantCards = ({ userPlan, onUpgrade, isFirstAccess = false }: Assistan
       description: 'Comparação de produtos, análise de custo-benefício e recomendações personalizadas.',
       icon: Package,
       path: '/produtos',
-      gradient: 'gradient-purple-pink',
-      gradientClass: 'from-violet-500 to-pink-600',
+      gradient: 'from-purple-500 to-purple-700',
       available: userPlan === 'premium',
       isFree: false
     },
@@ -63,8 +59,7 @@ const AssistantCards = ({ userPlan, onUpgrade, isFirstAccess = false }: Assistan
       description: 'Planejamento de viagens, dicas de destinos e otimização de roteiros turísticos.',
       icon: MapPin,
       path: '/viagens',
-      gradient: 'gradient-orange-red',
-      gradientClass: 'from-orange-500 to-red-600',
+      gradient: 'from-orange-500 to-orange-700',
       available: userPlan === 'premium',
       isFree: false
     },
@@ -74,35 +69,34 @@ const AssistantCards = ({ userPlan, onUpgrade, isFirstAccess = false }: Assistan
       description: 'Listas inteligentes de compras, comparação de preços e economia doméstica.',
       icon: ShoppingCart,
       path: '/supermercado',
-      gradient: 'gradient-indigo-purple',
-      gradientClass: 'from-indigo-500 to-purple-600',
+      gradient: 'from-red-500 to-red-700',
       available: userPlan === 'premium',
       isFree: false
     }
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {assistants.map((assistant) => {
         const Icon = assistant.icon;
-        const isAvailable = userPlan ? assistant.available : true;
+        const isAvailable = userPlan ? assistant.available : true; // Show all as available on landing page
         
         return (
           <Card 
             key={assistant.id} 
-            className={`relative overflow-hidden transition-all duration-300 group ${
+            className={`relative overflow-hidden transition-all duration-300 hover:shadow-xl group ${
               isAvailable 
-                ? 'hover:scale-105 cursor-pointer hover:shadow-2xl hover:shadow-violet-500/20' 
+                ? 'hover:scale-105 cursor-pointer' 
                 : 'opacity-60'
-            } bg-slate-800 border-slate-700 rounded-2xl`}
+            } bg-white`}
           >
-            {/* Background Gradient Overlay */}
-            <div className={`absolute inset-0 bg-gradient-to-br ${assistant.gradientClass} opacity-10 group-hover:opacity-20 transition-opacity duration-300`} />
+            {/* Background Gradient */}
+            <div className={`absolute inset-0 bg-gradient-to-br ${assistant.gradient} opacity-5`} />
             
             {/* Premium Badge */}
             {userPlan && !isAvailable && (
               <div className="absolute top-4 right-4 z-10">
-                <Badge variant="secondary" className="bg-orange-500/20 text-orange-300 border-orange-500/30">
+                <Badge variant="secondary" className="bg-orange-100 text-orange-800 border-orange-200">
                   <Crown className="w-3 h-3 mr-1" />
                   Premium
                 </Badge>
@@ -112,46 +106,43 @@ const AssistantCards = ({ userPlan, onUpgrade, isFirstAccess = false }: Assistan
             {/* Free Badge */}
             {userPlan === 'free' && assistant.isFree && (
               <div className="absolute top-4 right-4 z-10">
-                <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
+                <Badge className="bg-green-500 text-white border-green-600">
                   <Sparkles className="w-3 h-3 mr-1" />
                   Gratuito
                 </Badge>
               </div>
             )}
             
-            <CardHeader className="relative z-10 pb-4">
-              <div className="flex items-center gap-4 mb-4">
-                <div className={`p-4 rounded-2xl bg-gradient-to-br ${assistant.gradientClass} shadow-lg`}>
-                  <Icon className="w-8 h-8 text-white" />
+            <CardHeader className="relative z-10">
+              <div className="flex items-center gap-3 mb-2">
+                <div className={`p-3 rounded-lg bg-gradient-to-br ${assistant.gradient} text-white shadow-lg`}>
+                  <Icon className="w-6 h-6" />
                 </div>
-                <div className="flex-1">
-                  <CardTitle className="text-xl font-bold text-white mb-1">
-                    {assistant.title}
-                  </CardTitle>
-                </div>
+                <CardTitle className="text-xl text-gray-900">
+                  {assistant.title}
+                </CardTitle>
               </div>
-              <CardDescription className="text-sm leading-relaxed text-slate-400">
+              <CardDescription className="text-sm leading-relaxed text-gray-600">
                 {assistant.description}
               </CardDescription>
             </CardHeader>
             
-            <CardContent className="relative z-10 pt-0">
+            <CardContent className="relative z-10">
               {userPlan ? (
                 // Authenticated user view
                 isAvailable ? (
                   <Link to={assistant.path}>
                     <Button 
-                      className={`w-full bg-gradient-to-r ${assistant.gradientClass} hover:opacity-90 text-white font-medium py-3 transition-all duration-200 rounded-xl shadow-lg group`}
+                      className={`w-full bg-gradient-to-r ${assistant.gradient} hover:opacity-90 text-white font-medium py-2 transition-all duration-200`}
                     >
-                      <span>Acessar Assistente</span>
-                      <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      Acessar Assistente
                     </Button>
                   </Link>
                 ) : (
                   <Button 
                     onClick={onUpgrade}
                     variant="outline" 
-                    className="w-full border-2 border-orange-500/30 text-orange-300 hover:bg-orange-500/10 font-medium py-3 transition-all duration-200 rounded-xl"
+                    className="w-full border-2 border-orange-200 text-orange-700 hover:bg-orange-50 font-medium py-2 transition-all duration-200"
                   >
                     <Lock className="w-4 h-4 mr-2" />
                     Fazer Upgrade
@@ -161,10 +152,9 @@ const AssistantCards = ({ userPlan, onUpgrade, isFirstAccess = false }: Assistan
                 // Landing page view
                 <Link to="/login">
                   <Button 
-                    className={`w-full bg-gradient-to-r ${assistant.gradientClass} hover:opacity-90 text-white font-medium py-3 transition-all duration-200 rounded-xl shadow-lg group`}
+                    className={`w-full bg-gradient-to-r ${assistant.gradient} hover:opacity-90 text-white font-medium py-2 transition-all duration-200`}
                   >
-                    <span>Começar Agora</span>
-                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                    Começar Agora
                   </Button>
                 </Link>
               )}

@@ -55,7 +55,7 @@ const Register = () => {
         title: "Sucesso!",
         description: "Conta criada com sucesso"
       });
-      navigate('/select-assistant');
+      navigate('/select-assistant?from=register');
     } catch (error) {
       toast({
         title: "Erro",

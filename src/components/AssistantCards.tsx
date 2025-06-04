@@ -1,129 +1,161 @@
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Scale, DollarSign, ShoppingCart, Plane, ShoppingBasket } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { 
+  Scale, 
+  Calculator, 
+  Package, 
+  MapPin, 
+  ShoppingCart, 
+  Crown, 
+  Lock,
+  Sparkles
+} from 'lucide-react';
 
-const AssistantCards = () => {
+interface AssistantCardsProps {
+  userPlan: 'free' | 'premium';
+  onUpgrade: () => void;
+  isFirstAccess?: boolean;
+}
+
+const AssistantCards = ({ userPlan, onUpgrade, isFirstAccess = false }: AssistantCardsProps) => {
   const assistants = [
     {
-      id: 'direito',
+      id: 'direito-consumidor',
       title: 'Mestre do Direito do Consumidor',
-      description: 'Seu advogado pessoal para questões de consumo. Redige petições, orienta sobre direitos e te guia no processo judicial.',
+      description: 'Especialista em defesa dos direitos do consumidor, análise de contratos e orientações legais.',
       icon: Scale,
-      color: 'from-blue-600 to-purple-600',
-      bgColor: 'from-blue-50 to-purple-50',
-      features: ['Consultoria jurídica 24/7', 'Geração de petições', 'Guia passo a passo para JEC'],
-      path: '/direito-consumidor'
+      path: '/direito-consumidor',
+      gradient: 'from-blue-500 to-blue-700',
+      available: true,
+      highlight: userPlan === 'free'
     },
     {
       id: 'financas',
-      title: 'Mestre das Finanças',
-      description: 'Planejador financeiro pessoal que cria planos de recuperação, dashboards e metas personalizadas.',
-      icon: DollarSign,
-      color: 'from-green-600 to-blue-600',
-      bgColor: 'from-green-50 to-blue-50',
-      features: ['Plano financeiro personalizado', 'Dashboard de acompanhamento', 'Metas e alertas'],
-      path: '/financas'
+      title: 'Consultor Financeiro',
+      description: 'Gestão financeira pessoal, investimentos e planejamento econômico inteligente.',
+      icon: Calculator,
+      path: '/financas',
+      gradient: 'from-green-500 to-green-700',
+      available: userPlan === 'premium',
+      highlight: false
     },
     {
       id: 'produtos',
       title: 'Mestre dos Produtos',
-      description: 'Consultor de compras que compara produtos, analisa custo-benefício e recomenda a melhor escolha.',
-      icon: ShoppingCart,
-      color: 'from-orange-600 to-red-600',
-      bgColor: 'from-orange-50 to-red-50',
-      features: ['Comparação inteligente', 'Análise de custo-benefício', 'Recomendações personalizadas'],
-      path: '/produtos'
+      description: 'Comparação de produtos, análise de custo-benefício e recomendações personalizadas.',
+      icon: Package,
+      path: '/produtos',
+      gradient: 'from-purple-500 to-purple-700',
+      available: userPlan === 'premium',
+      highlight: false
     },
     {
       id: 'viagens',
-      title: 'Mestre das Viagens',
-      description: 'Planejador completo que cria roteiros personalizados com base no seu perfil, orçamento e estilo.',
-      icon: Plane,
-      color: 'from-sky-600 to-indigo-600',
-      bgColor: 'from-sky-50 to-indigo-50',
-      features: ['Roteiros personalizados', 'Sugestões de hospedagem', 'Integração com reservas'],
-      path: '/viagens'
+      title: 'Consultor de Viagens',
+      description: 'Planejamento de viagens, dicas de destinos e otimização de roteiros turísticos.',
+      icon: MapPin,
+      path: '/viagens',
+      gradient: 'from-orange-500 to-orange-700',
+      available: userPlan === 'premium',
+      highlight: false
     },
     {
       id: 'supermercado',
-      title: 'Mestre do Supermercado',
-      description: 'Avaliador de produtos de supermercado que compara qualidade, preço e recomenda as melhores opções.',
-      icon: ShoppingBasket,
-      color: 'from-emerald-600 to-green-600',
-      bgColor: 'from-emerald-50 to-green-50',
-      features: ['Scanner de produtos', 'Comparação de qualidade', 'Escolhas inteligentes'],
-      path: '/supermercado'
+      title: 'Assistente de Compras',
+      description: 'Listas inteligentes de compras, comparação de preços e economia doméstica.',
+      icon: ShoppingCart,
+      path: '/supermercado',
+      gradient: 'from-red-500 to-red-700',
+      available: userPlan === 'premium',
+      highlight: false
     }
   ];
 
   return (
-    <section id="assistentes" className="py-20 px-4">
-      <div className="container mx-auto max-w-6xl">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-            Conheça Seus <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              5 Assistentes Especializados
-            </span>
-          </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Cada assistente é um especialista em sua área, pronto para resolver seus problemas específicos 
-            com inteligência artificial avançada.
-          </p>
-        </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {assistants.map((assistant) => {
+        const Icon = assistant.icon;
+        const isAvailable = assistant.available;
+        const shouldHighlight = isFirstAccess && assistant.highlight;
+        
+        return (
+          <Card 
+            key={assistant.id} 
+            className={`relative overflow-hidden transition-all duration-300 hover:shadow-xl group ${
+              shouldHighlight 
+                ? 'ring-4 ring-green-400 ring-opacity-75 shadow-2xl scale-105 animate-pulse' 
+                : isAvailable 
+                  ? 'hover:scale-105 cursor-pointer' 
+                  : 'opacity-60'
+            } ${shouldHighlight ? 'bg-gradient-to-br from-green-50 to-blue-50' : 'bg-white'}`}
+          >
+            {/* Background Gradient */}
+            <div className={`absolute inset-0 bg-gradient-to-br ${assistant.gradient} opacity-5`} />
+            
+            {/* Premium Badge */}
+            {!isAvailable && (
+              <div className="absolute top-4 right-4 z-10">
+                <Badge variant="secondary" className="bg-orange-100 text-orange-800 border-orange-200">
+                  <Crown className="w-3 h-3 mr-1" />
+                  Premium
+                </Badge>
+              </div>
+            )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {assistants.map((assistant) => {
-            const IconComponent = assistant.icon;
-            return (
-              <Card 
-                key={assistant.id} 
-                className={`relative overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 bg-gradient-to-br ${assistant.bgColor} border-0`}
-              >
-                <CardHeader className="pb-4">
-                  <div className={`w-12 h-12 bg-gradient-to-br ${assistant.color} rounded-lg flex items-center justify-center mb-4`}>
-                    <IconComponent className="w-6 h-6 text-white" />
-                  </div>
-                  <CardTitle className="text-xl font-bold text-gray-900">
-                    {assistant.title}
-                  </CardTitle>
-                  <CardDescription className="text-gray-600 leading-relaxed">
-                    {assistant.description}
-                  </CardDescription>
-                </CardHeader>
-                
-                <CardContent className="pt-0">
-                  <div className="space-y-3 mb-6">
-                    {assistant.features.map((feature, index) => (
-                      <div key={index} className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span className="text-sm text-gray-700">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <Link to={assistant.path}>
-                    <Button 
-                      className={`w-full bg-gradient-to-r ${assistant.color} hover:opacity-90 transition-opacity`}
-                    >
-                      Usar Assistente
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-
-        <div className="text-center mt-16">
-          <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 rounded-full text-sm font-medium">
-            🚀 Todos os assistentes disponíveis em uma única plataforma
-          </div>
-        </div>
-      </div>
-    </section>
+            {/* First Access Highlight Badge */}
+            {shouldHighlight && (
+              <div className="absolute top-4 right-4 z-10">
+                <Badge className="bg-green-500 text-white border-green-600">
+                  <Sparkles className="w-3 h-3 mr-1" />
+                  Seu Assistente!
+                </Badge>
+              </div>
+            )}
+            
+            <CardHeader className="relative z-10">
+              <div className="flex items-center gap-3 mb-2">
+                <div className={`p-3 rounded-lg bg-gradient-to-br ${assistant.gradient} text-white shadow-lg`}>
+                  <Icon className="w-6 h-6" />
+                </div>
+                <CardTitle className={`text-xl ${shouldHighlight ? 'text-green-700 font-bold' : 'text-gray-900'}`}>
+                  {assistant.title}
+                </CardTitle>
+              </div>
+              <CardDescription className={`text-sm leading-relaxed ${shouldHighlight ? 'text-green-600' : 'text-gray-600'}`}>
+                {assistant.description}
+              </CardDescription>
+            </CardHeader>
+            
+            <CardContent className="relative z-10">
+              {isAvailable ? (
+                <Link to={assistant.path}>
+                  <Button 
+                    className={`w-full bg-gradient-to-r ${assistant.gradient} hover:opacity-90 text-white font-medium py-2 transition-all duration-200 ${
+                      shouldHighlight ? 'ring-2 ring-green-400 ring-offset-2 shadow-lg' : ''
+                    }`}
+                  >
+                    {shouldHighlight ? '🎯 Começar Agora!' : 'Acessar Assistente'}
+                  </Button>
+                </Link>
+              ) : (
+                <Button 
+                  onClick={onUpgrade}
+                  variant="outline" 
+                  className="w-full border-2 border-orange-200 text-orange-700 hover:bg-orange-50 font-medium py-2 transition-all duration-200"
+                >
+                  <Lock className="w-4 h-4 mr-2" />
+                  Fazer Upgrade
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        );
+      })}
+    </div>
   );
 };
 

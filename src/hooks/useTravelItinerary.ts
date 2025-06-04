@@ -42,6 +42,8 @@ export const useTravelItinerary = () => {
     setIsGenerating(true);
     
     try {
+      console.log('Iniciando geração de roteiro com parâmetros:', params);
+      
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
@@ -53,15 +55,30 @@ export const useTravelItinerary = () => {
         return;
       }
 
+      console.log('Usuário autenticado, chamando edge function...');
+
       const response = await supabase.functions.invoke('create-travel-itinerary', {
         body: params,
       });
 
+      console.log('Resposta da edge function:', response);
+
       if (response.error) {
-        throw new Error(response.error.message);
+        console.error('Erro na edge function:', response.error);
+        throw new Error(response.error.message || 'Erro desconhecido na geração do roteiro');
+      }
+
+      if (!response.data) {
+        throw new Error('Nenhum dado retornado pela função');
       }
 
       const { itineraryData } = response.data;
+      
+      if (!itineraryData) {
+        throw new Error('Dados do roteiro não encontrados na resposta');
+      }
+
+      console.log('Roteiro gerado com sucesso:', itineraryData);
       setGeneratedItinerary(itineraryData);
 
       toast({
@@ -72,9 +89,24 @@ export const useTravelItinerary = () => {
       return itineraryData;
     } catch (error) {
       console.error('Erro ao gerar roteiro:', error);
+      
+      let errorMessage = "Tente novamente em alguns instantes";
+      
+      if (error instanceof Error) {
+        if (error.message.includes('OpenAI')) {
+          errorMessage = "Erro na geração do roteiro pela IA. Tente novamente.";
+        } else if (error.message.includes('autenticação')) {
+          errorMessage = "Erro de autenticação. Faça login novamente.";
+        } else if (error.message.includes('banco de dados')) {
+          errorMessage = "Erro ao salvar o roteiro. Tente novamente.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       toast({
         title: "Erro ao gerar roteiro",
-        description: error instanceof Error ? error.message : "Tente novamente em alguns instantes",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

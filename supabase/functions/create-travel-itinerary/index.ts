@@ -15,6 +15,8 @@ serve(async (req) => {
   try {
     const { destination, budget, departureDate, returnDate, travelersCount, travelStyle, additionalPreferences } = await req.json()
 
+    console.log('Dados recebidos:', { destination, budget, departureDate, returnDate, travelersCount, travelStyle, additionalPreferences })
+
     // Validar dados obrigatórios
     if (!destination || !travelStyle || !travelersCount) {
       return new Response(
@@ -27,6 +29,8 @@ serve(async (req) => {
     const start = new Date(departureDate)
     const end = new Date(returnDate)
     const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+
+    console.log('Número de dias calculado:', days)
 
     // Criar prompt para IA
     const prompt = `
@@ -41,7 +45,8 @@ Número de pessoas: ${travelersCount}
 Estilo de viagem: ${travelStyle}
 ${additionalPreferences ? `Preferências adicionais: ${additionalPreferences}` : ''}
 
-Por favor, crie um roteiro completo em formato JSON com a seguinte estrutura:
+IMPORTANTE: Responda APENAS com um JSON válido, sem texto adicional antes ou depois. Use exatamente esta estrutura:
+
 {
   "titulo": "Nome do roteiro",
   "resumo": "Breve descrição do roteiro",
@@ -64,8 +69,10 @@ Por favor, crie um roteiro completo em formato JSON com a seguinte estrutura:
   ]
 }
 
-Seja específico com horários, custos realistas, e inclua atividades variadas. Considere refeições, transporte, atrações e tempo livre.
+Seja específico com horários, custos realistas em reais, e inclua atividades variadas. Considere refeições, transporte, atrações e tempo livre.
 `
+
+    console.log('Chamando OpenAI...')
 
     // Chamar OpenAI
     const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -75,11 +82,11 @@ Seja específico com horários, custos realistas, e inclua atividades variadas. 
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
-            content: 'Você é um especialista em turismo e planejamento de viagens. Crie roteiros detalhados e realistas com base nas informações fornecidas. Sempre responda apenas com JSON válido.'
+            content: 'Você é um especialista em turismo e planejamento de viagens. Crie roteiros detalhados e realistas com base nas informações fornecidas. Sempre responda apenas com JSON válido, sem texto adicional.'
           },
           {
             role: 'user',
@@ -92,18 +99,37 @@ Seja específico com horários, custos realistas, e inclua atividades variadas. 
     })
 
     if (!openaiResponse.ok) {
+      console.error('Erro na OpenAI API:', openaiResponse.status, openaiResponse.statusText)
       throw new Error(`OpenAI API error: ${openaiResponse.statusText}`)
     }
 
     const openaiData = await openaiResponse.json()
+    console.log('Resposta da OpenAI recebida')
+    
     const itineraryContent = openaiData.choices[0].message.content
+    console.log('Conteúdo do roteiro:', itineraryContent.substring(0, 200) + '...')
 
-    // Parse do JSON retornado pela IA
+    // Parse do JSON retornado pela IA com melhor tratamento de erro
     let itineraryData
     try {
-      itineraryData = JSON.parse(itineraryContent)
+      // Limpar possível texto extra antes e depois do JSON
+      const cleanContent = itineraryContent.trim()
+      const jsonStart = cleanContent.indexOf('{')
+      const jsonEnd = cleanContent.lastIndexOf('}') + 1
+      
+      if (jsonStart === -1 || jsonEnd === 0) {
+        throw new Error('JSON não encontrado na resposta')
+      }
+      
+      const jsonString = cleanContent.substring(jsonStart, jsonEnd)
+      console.log('JSON extraído:', jsonString.substring(0, 200) + '...')
+      
+      itineraryData = JSON.parse(jsonString)
+      console.log('JSON parseado com sucesso')
     } catch (e) {
-      throw new Error('Erro ao processar resposta da IA')
+      console.error('Erro ao fazer parse do JSON:', e)
+      console.error('Conteúdo original:', itineraryContent)
+      throw new Error('Erro ao processar resposta da IA: ' + e.message)
     }
 
     // Obter usuário autenticado
@@ -121,6 +147,8 @@ Seja específico com horários, custos realistas, e inclua atividades variadas. 
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+
+    console.log('Salvando roteiro no banco de dados...')
 
     // Salvar roteiro na tabela travel_itineraries
     const { data: savedItinerary, error: saveError } = await supabase
@@ -141,8 +169,10 @@ Seja específico com horários, custos realistas, e inclua atividades variadas. 
 
     if (saveError) {
       console.error('Erro ao salvar roteiro:', saveError)
-      throw new Error('Erro ao salvar roteiro no banco de dados')
+      throw new Error('Erro ao salvar roteiro no banco de dados: ' + saveError.message)
     }
+
+    console.log('Roteiro salvo com sucesso:', savedItinerary.id)
 
     return new Response(
       JSON.stringify({ 

@@ -8,8 +8,8 @@ import { useNavigate } from 'react-router-dom';
 interface AssistantPanelProps {
   userPlan: 'free' | 'premium';
   onUpgrade: () => void;
-  selectedAssistantId?: string | null; // Add this
-  onSelectAssistant?: (assistantId: string) => Promise<void>; // Add this
+  selectedAssistantId?: string | null;
+  onSelectAssistant?: (assistantId: string) => Promise<void>;
 }
 
 const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade, selectedAssistantId, onSelectAssistant }) => {
@@ -74,30 +74,28 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade, se
   ];
 
   const handleAssistantClick = (assistant: typeof assistants[0]) => {
-    const currentIsActuallyPremium = assistant.isPremium;
-    let currentIsLocked = currentIsActuallyPremium && userPlan === 'free';
-    let currentIsCardSelectableForFreeUser = false;
-
-    if (userPlan === 'free') {
-      if (selectedAssistantId) { 
-        if (assistant.id !== selectedAssistantId) currentIsLocked = true;
-        else currentIsLocked = false; 
-      } else { 
-        if (!currentIsActuallyPremium) {
-          currentIsCardSelectableForFreeUser = true;
-          currentIsLocked = false;
-        }
-      }
-    }
-    if (userPlan === 'premium') currentIsLocked = false;
-    
-    if (userPlan === 'free' && !selectedAssistantId && !currentIsActuallyPremium && onSelectAssistant) {
-      onSelectAssistant(assistant.id);
-      return; 
-    }
-
-    if (!currentIsLocked) {
+    // Se é usuário premium, pode acessar qualquer assistente
+    if (userPlan === 'premium') {
       navigate(assistant.path);
+      return;
+    }
+
+    // Se é usuário gratuito
+    if (userPlan === 'free') {
+      // Se ainda não selecionou um assistente, pode escolher qualquer um
+      if (!selectedAssistantId && onSelectAssistant) {
+        onSelectAssistant(assistant.id);
+        return;
+      }
+      
+      // Se já selecionou um assistente, só pode acessar o selecionado
+      if (selectedAssistantId === assistant.id) {
+        navigate(assistant.path);
+        return;
+      }
+      
+      // Se clicou em um assistente diferente do selecionado, não faz nada (está bloqueado)
+      return;
     }
   };
 
@@ -105,43 +103,47 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade, se
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {assistants.map((assistant) => {
         const IconComponent = assistant.icon;
-        const isActuallyPremium = assistant.isPremium;
-        let isCardSelectableForFreeUser = false;
-        let isCardSelectedByFreeUser = false;
+        
+        // Lógica para determinar o estado do card
+        let isLocked = false;
+        let isSelected = false;
         let cardActionText = "Usar Assistente";
-        let isLocked = isActuallyPremium && userPlan === 'free';
+        let isClickable = true;
 
         if (userPlan === 'free') {
           if (selectedAssistantId) {
+            // Usuário já escolheu um assistente
             if (assistant.id === selectedAssistantId) {
-              isCardSelectedByFreeUser = true;
-              isLocked = false; 
+              isSelected = true;
+              cardActionText = "Usar Assistente";
             } else {
-              isLocked = true; 
+              isLocked = true;
+              isClickable = false;
             }
-          } else { 
-            if (!isActuallyPremium) {
-              isCardSelectableForFreeUser = true;
-              isLocked = false;
-              cardActionText = "Selecionar Assistente";
-            }
+          } else {
+            // Primeiro acesso - pode escolher qualquer assistente
+            cardActionText = "Selecionar Assistente";
           }
         }
-        if (userPlan === 'premium') isLocked = false;
-
-        const isEffectivelyAccessible = !isLocked || isCardSelectedByFreeUser || (userPlan === 'premium' && !isActuallyPremium) || (userPlan === 'premium' && isActuallyPremium);
+        // Usuários premium podem acessar tudo
         
         return (
           <Card 
             key={assistant.id} 
-            className={`relative overflow-hidden transition-all duration-300 ${isCardSelectedByFreeUser ? 'border-2 border-green-500 shadow-lg' : (isEffectivelyAccessible ? 'hover:shadow-xl hover:-translate-y-1 cursor-pointer' : '')} bg-gradient-to-br ${assistant.bgColor} ${!isCardSelectedByFreeUser && !isEffectivelyAccessible ? 'border-2 border-gray-200' : 'border-0'}`}
-            onClick={() => handleAssistantClick(assistant)}
+            className={`relative overflow-hidden transition-all duration-300 ${
+              isSelected 
+                ? 'border-2 border-green-500 shadow-lg' 
+                : isClickable 
+                  ? 'hover:shadow-xl hover:-translate-y-1 cursor-pointer' 
+                  : 'border-2 border-gray-200'
+            } bg-gradient-to-br ${assistant.bgColor}`}
+            onClick={() => isClickable && handleAssistantClick(assistant)}
           >
             {/* Premium Badge */}
             {assistant.isPremium && (
               <div className="absolute top-4 right-4 z-10">
                 <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${
-                  (userPlan === 'premium' || isCardSelectedByFreeUser) // Show green if premium user or if it's the selected free one (though free ones aren't premium)
+                  (userPlan === 'premium' || isSelected)
                     ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-white' 
                     : 'bg-gray-200 text-gray-600'
                 }`}>
@@ -151,8 +153,8 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade, se
               </div>
             )}
 
-            {/* Lock Overlay for Blocked Assistants */}
-            {(isLocked && !isCardSelectedByFreeUser && !(userPlan === 'free' && !selectedAssistantId && !assistant.isPremium)) && (
+            {/* Lock Overlay para assistentes bloqueados */}
+            {isLocked && (
               <div className="absolute inset-0 bg-white/20 backdrop-blur-sm flex items-center justify-center z-20">
                 <div className="text-center p-6">
                   <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -162,10 +164,7 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade, se
                     {assistant.title}
                   </h3>
                   <p className="text-sm text-gray-600 mb-4 font-medium">
-                    { userPlan === 'free' && selectedAssistantId && assistant.id !== selectedAssistantId 
-                      ? "Você já selecionou outro assistente gratuito."
-                      : "Este assistente requer plano Premium ou uma seleção (plano gratuito)."
-                    }
+                    Você já selecionou outro assistente gratuito.
                   </p>
                   <Button 
                     onClick={(e) => {
@@ -175,7 +174,7 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade, se
                     size="sm"
                     className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
                   >
-                    Faça Upgrade para Acessar Todos
+                    Upgrade para Premium
                   </Button>
                 </div>
               </div>
@@ -205,7 +204,7 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade, se
                 ))}
               </div>
               
-              { !isLocked && (
+              {!isLocked && (
                 <Button 
                   className={`w-full bg-gradient-to-r ${assistant.color} hover:opacity-90 transition-opacity`}
                 >

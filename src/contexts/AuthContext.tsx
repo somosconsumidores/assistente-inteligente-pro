@@ -8,7 +8,7 @@ interface UserProfile {
   name: string;
   email: string;
   plan: 'free' | 'premium';
-  selected_assistant_id?: string | null; // Add this line
+  selected_assistant_id?: string | null;
 }
 
 interface AuthContextType {
@@ -19,7 +19,7 @@ interface AuthContextType {
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   isLoading: boolean;
-  updateSelectedAssistant: (assistantId: string) => Promise<void>; // Add this line
+  updateSelectedAssistant: (assistantId: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -93,7 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           name: data.name,
           email: data.email,
           plan: data.plan as 'free' | 'premium',
-          selected_assistant_id: data.selected_assistant_id // Add this line
+          selected_assistant_id: data.selected_assistant_id
         });
       }
     } catch (error) {
@@ -157,7 +157,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Add this function within AuthProvider, similar to login, register, logout
   const updateSelectedAssistant = async (assistantId: string) => {
     if (!user) {
       throw new Error("User not authenticated");
@@ -167,7 +166,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .from('profiles')
         .update({ selected_assistant_id: assistantId })
         .eq('id', user.id)
-        .select() // Important to select to get the updated row back for confirmation if needed
+        .select()
         .single();
 
       if (error) {
@@ -193,7 +192,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       register, 
       logout, 
       isLoading,
-      updateSelectedAssistant // Add this line
+      updateSelectedAssistant
     }}>
       {children}
     </AuthContext.Provider>

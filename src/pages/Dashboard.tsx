@@ -9,6 +9,7 @@ import SavedPetitionsCard from '@/components/dashboard/SavedPetitionsCard';
 import SavedRecommendationsCard from '@/components/dashboard/SavedRecommendationsCard';
 import FinancialSummaryCard from '@/components/dashboard/FinancialSummaryCard';
 import RecentTravelCard from '@/components/dashboard/RecentTravelCard';
+import SelectedAssistantCard from '@/components/dashboard/SelectedAssistantCard';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, LayoutDashboard } from 'lucide-react';
 
@@ -70,7 +71,7 @@ const Dashboard: React.FC = () => {
 
         {/* Dashboard Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Coluna 1 - Informações do usuário */}
+          {/* Coluna 1 - Informações do usuário e assistente */}
           <div className="space-y-6">
             <UserPlanCard
               userPlan={profile?.plan || 'free'}
@@ -78,9 +79,8 @@ const Dashboard: React.FC = () => {
               onUpgrade={handleUpgrade}
             />
             
-            <FinancialSummaryCard
-              financialData={financialData}
-              onViewDashboard={() => navigate('/financas')}
+            <SelectedAssistantCard
+              selectedAssistantId={profile?.selected_assistant_id}
             />
           </div>
 
@@ -98,8 +98,13 @@ const Dashboard: React.FC = () => {
             />
           </div>
 
-          {/* Coluna 3 - Viagens */}
+          {/* Coluna 3 - Finanças e Viagens */}
           <div className="space-y-6">
+            <FinancialSummaryCard
+              financialData={financialData}
+              onViewDashboard={() => navigate('/financas')}
+            />
+            
             <RecentTravelCard
               travelPlans={travelPlans}
               onViewAll={() => navigate('/viagens')}

@@ -12,12 +12,13 @@ import { useSaveRecommendation } from '@/hooks/useSaveRecommendation';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import ProductCard from '@/components/product/ProductCard';
+import type { Json } from '@/integrations/supabase/types';
 
 interface SavedRecommendation {
   id: string;
   query: string;
-  recommendations: any;
-  featured_products: any[];
+  recommendations: Json;
+  featured_products: Json;
   created_at: string;
 }
 
@@ -62,6 +63,14 @@ const SavedRecommendations: React.FC = () => {
     if (success) {
       setRecommendations(prev => prev.filter(rec => rec.id !== id));
     }
+  };
+
+  // Helper function to safely parse featured_products
+  const getFeaturedProducts = (featuredProducts: Json): any[] => {
+    if (Array.isArray(featuredProducts)) {
+      return featuredProducts;
+    }
+    return [];
   };
 
   if (isLoading) {
@@ -133,73 +142,77 @@ const SavedRecommendations: React.FC = () => {
           </Card>
         ) : (
           <div className="space-y-8">
-            {recommendations.map((rec) => (
-              <Card key={rec.id} className="overflow-hidden">
-                <CardHeader className="bg-gray-50">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-xl text-gray-900 mb-2">
-                        {rec.query}
-                      </CardTitle>
-                      <div className="flex items-center gap-4 text-sm text-gray-600">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4" />
-                          {format(new Date(rec.created_at), "dd 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR })}
-                        </span>
-                        {rec.featured_products && Array.isArray(rec.featured_products) && (
-                          <span className="text-green-600 font-medium">
-                            {rec.featured_products.length} {rec.featured_products.length === 1 ? 'produto' : 'produtos'}
+            {recommendations.map((rec) => {
+              const featuredProducts = getFeaturedProducts(rec.featured_products);
+              
+              return (
+                <Card key={rec.id} className="overflow-hidden">
+                  <CardHeader className="bg-gray-50">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="text-xl text-gray-900 mb-2">
+                          {rec.query}
+                        </CardTitle>
+                        <div className="flex items-center gap-4 text-sm text-gray-600">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-4 h-4" />
+                            {format(new Date(rec.created_at), "dd 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR })}
                           </span>
-                        )}
+                          {featuredProducts.length > 0 && (
+                            <span className="text-green-600 font-medium">
+                              {featuredProducts.length} {featuredProducts.length === 1 ? 'produto' : 'produtos'}
+                            </span>
+                          )}
+                        </div>
                       </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(rec.id)}
+                        disabled={deleteLoading}
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(rec.id)}
-                      disabled={deleteLoading}
-                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="p-6">
-                  {rec.featured_products && Array.isArray(rec.featured_products) && rec.featured_products.length > 0 ? (
-                    <div>
-                      <h4 className="font-semibold text-gray-900 mb-4">Produtos Recomendados</h4>
-                      <div className={`grid gap-6 ${
-                        rec.featured_products.length === 1 ? 'md:grid-cols-1 max-w-md' :
-                        rec.featured_products.length === 2 ? 'md:grid-cols-2' : 
-                        'md:grid-cols-3'
-                      }`}>
-                        {rec.featured_products.map((product, index) => (
-                          <div key={`${rec.id}-${index}`} className="border rounded-lg p-4 bg-white">
-                            <ProductCard
-                              product={{
-                                id: product.id || `${rec.id}-${index}`,
-                                name: product.name || 'Produto sem nome',
-                                image: product.image || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center',
-                                price: product.price || 'Consulte',
-                                scoreMestre: product.scoreMestre || 8.0,
-                                seal: product.seal || 'recomendacao',
-                                link: product.link
-                              }}
-                            />
-                          </div>
-                        ))}
+                  </CardHeader>
+                  
+                  <CardContent className="p-6">
+                    {featuredProducts.length > 0 ? (
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-4">Produtos Recomendados</h4>
+                        <div className={`grid gap-6 ${
+                          featuredProducts.length === 1 ? 'md:grid-cols-1 max-w-md' :
+                          featuredProducts.length === 2 ? 'md:grid-cols-2' : 
+                          'md:grid-cols-3'
+                        }`}>
+                          {featuredProducts.map((product, index) => (
+                            <div key={`${rec.id}-${index}`} className="border rounded-lg p-4 bg-white">
+                              <ProductCard
+                                product={{
+                                  id: product.id || `${rec.id}-${index}`,
+                                  name: product.name || 'Produto sem nome',
+                                  image: product.image || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center',
+                                  price: product.price || 'Consulte',
+                                  scoreMestre: product.scoreMestre || 8.0,
+                                  seal: product.seal || 'recomendacao',
+                                  link: product.link
+                                }}
+                              />
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <Package className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                      <p>Nenhum produto salvo nesta recomendação</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <Package className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                        <p>Nenhum produto salvo nesta recomendação</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         )}
       </div>

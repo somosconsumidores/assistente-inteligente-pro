@@ -32,36 +32,31 @@ serve(async (req) => {
 
     console.log('Número de dias calculado:', days)
 
-    // Limitar o número de dias para evitar JSONs muito grandes
-    const maxDays = Math.min(days, 10)
+    // Limitar ainda mais o número de dias para evitar JSONs muito grandes
+    const maxDays = Math.min(days, 5)
 
-    // Criar prompt mais conciso para IA
-    const prompt = `
-Crie um roteiro de viagem para ${maxDays} dias em ${destination}.
+    // Prompt muito mais simples e direto
+    const prompt = `Crie um roteiro de ${maxDays} dias para ${destination}.
+Orçamento: ${budget ? `R$ ${budget}` : 'Flexível'}
+Pessoas: ${travelersCount}
+Estilo: ${travelStyle}
 
-Parâmetros:
-- Orçamento: ${budget ? `R$ ${budget}` : 'Flexível'}
-- Pessoas: ${travelersCount}
-- Estilo: ${travelStyle}
-${additionalPreferences ? `- Preferências: ${additionalPreferences}` : ''}
-
-IMPORTANTE: Responda APENAS com JSON válido. Use esta estrutura EXATA:
-
+RESPONDA APENAS com este JSON exato:
 {
-  "titulo": "Roteiro de ${maxDays} dias em ${destination}",
-  "resumo": "Breve descrição (máximo 100 caracteres)",
-  "custoEstimado": "R$ XXXX",
-  "dicas": ["dica1", "dica2", "dica3"],
+  "titulo": "Roteiro ${maxDays} dias - ${destination}",
+  "resumo": "Resumo em 50 caracteres",
+  "custoEstimado": "R$ 0000",
+  "dicas": ["dica1", "dica2"],
   "dias": [
     {
       "dia": 1,
-      "titulo": "Nome do dia",
+      "titulo": "Dia 1",
       "atividades": [
         {
           "horario": "09:00",
-          "atividade": "Nome da atividade",
-          "descricao": "Descrição concisa (máximo 80 caracteres)",
-          "custoEstimado": "R$ XX",
+          "atividade": "Atividade",
+          "descricao": "Descrição curta",
+          "custoEstimado": "R$ 0",
           "localizacao": "Local"
         }
       ]
@@ -69,16 +64,11 @@ IMPORTANTE: Responda APENAS com JSON válido. Use esta estrutura EXATA:
   ]
 }
 
-Regras:
-- Máximo 4 atividades por dia
-- Descrições concisas
-- Preços realistas em reais
-- Inclua apenas o JSON, sem texto adicional
-`
+Máximo 3 atividades por dia. Descrições de máximo 50 caracteres.`
 
     console.log('Chamando OpenAI...')
 
-    // Chamar OpenAI com limite de tokens
+    // Chamar OpenAI com limite muito restrito
     const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -90,15 +80,15 @@ Regras:
         messages: [
           {
             role: 'system',
-            content: 'Você é um especialista em turismo. Crie roteiros práticos e concisos. Responda APENAS com JSON válido, sem texto adicional antes ou depois.'
+            content: 'Você é um assistente que responde APENAS com JSON válido. Não adicione texto antes ou depois do JSON.'
           },
           {
             role: 'user',
             content: prompt
           }
         ],
-        temperature: 0.7,
-        max_tokens: 2000
+        temperature: 0.3,
+        max_tokens: 1500
       })
     })
 
@@ -110,45 +100,86 @@ Regras:
     const openaiData = await openaiResponse.json()
     console.log('Resposta da OpenAI recebida')
     
-    const itineraryContent = openaiData.choices[0].message.content
-    console.log('Conteúdo do roteiro (primeiros 500 chars):', itineraryContent.substring(0, 500))
+    let itineraryContent = openaiData.choices[0].message.content
+    console.log('Conteúdo bruto:', itineraryContent.substring(0, 200))
 
-    // Parse do JSON com melhor tratamento de erro
+    // Limpeza mais agressiva do conteúdo
+    itineraryContent = itineraryContent.trim()
+    
+    // Remover markdown se houver
+    if (itineraryContent.includes('```json')) {
+      itineraryContent = itineraryContent.replace(/```json\s*/g, '').replace(/```\s*$/g, '')
+    }
+    
+    // Remover qualquer texto antes do primeiro {
+    const jsonStart = itineraryContent.indexOf('{')
+    if (jsonStart > 0) {
+      itineraryContent = itineraryContent.substring(jsonStart)
+    }
+    
+    // Remover qualquer texto após o último }
+    const jsonEnd = itineraryContent.lastIndexOf('}')
+    if (jsonEnd > 0 && jsonEnd < itineraryContent.length - 1) {
+      itineraryContent = itineraryContent.substring(0, jsonEnd + 1)
+    }
+
+    console.log('JSON limpo (primeiros 200 chars):', itineraryContent.substring(0, 200))
+
+    // Parse com tratamento de erro robusto
     let itineraryData
     try {
-      // Limpar possível texto extra e encontrar o JSON
-      const cleanContent = itineraryContent.trim()
+      itineraryData = JSON.parse(itineraryContent)
+    } catch (parseError) {
+      console.error('Erro no parse JSON:', parseError)
+      console.error('Conteúdo que causou erro:', itineraryContent)
       
-      // Encontrar início e fim do JSON
-      let jsonStart = cleanContent.indexOf('{')
-      let jsonEnd = cleanContent.lastIndexOf('}') + 1
-      
-      // Se não encontrar chaves, tentar com markdown
-      if (jsonStart === -1) {
-        jsonStart = cleanContent.indexOf('```json') + 7
-        jsonEnd = cleanContent.indexOf('```', jsonStart)
+      // Fallback: criar um roteiro simples manualmente
+      itineraryData = {
+        titulo: `Roteiro ${maxDays} dias - ${destination}`,
+        resumo: `Viagem ${travelStyle.toLowerCase()} para ${destination}`,
+        custoEstimado: budget ? `R$ ${budget}` : 'R$ 5000',
+        dicas: [
+          'Pesquise sobre a cultura local',
+          'Verifique a documentação necessária',
+          'Reserve acomodações com antecedência'
+        ],
+        dias: Array.from({ length: maxDays }, (_, i) => ({
+          dia: i + 1,
+          titulo: `Dia ${i + 1} em ${destination}`,
+          atividades: [
+            {
+              horario: '09:00',
+              atividade: 'Café da manhã local',
+              descricao: 'Explore a gastronomia da região',
+              custoEstimado: 'R$ 50',
+              localizacao: destination
+            },
+            {
+              horario: '14:00',
+              atividade: 'Atração principal',
+              descricao: 'Visite pontos turísticos importantes',
+              custoEstimado: 'R$ 100',
+              localizacao: destination
+            },
+            {
+              horario: '19:00',
+              atividade: 'Jantar',
+              descricao: 'Desfrute da culinária local',
+              custoEstimado: 'R$ 80',
+              localizacao: destination
+            }
+          ]
+        }))
       }
-      
-      if (jsonStart === -1 || jsonEnd <= jsonStart) {
-        throw new Error('Formato JSON não encontrado na resposta')
-      }
-      
-      const jsonString = cleanContent.substring(jsonStart, jsonEnd)
-      console.log('JSON extraído (primeiros 300 chars):', jsonString.substring(0, 300))
-      
-      itineraryData = JSON.parse(jsonString)
-      
-      // Validar estrutura básica
-      if (!itineraryData.titulo || !itineraryData.dias || !Array.isArray(itineraryData.dias)) {
-        throw new Error('Estrutura do JSON inválida')
-      }
-      
-      console.log('JSON parseado com sucesso')
-    } catch (e) {
-      console.error('Erro ao fazer parse do JSON:', e)
-      console.error('Conteúdo completo:', itineraryContent)
-      throw new Error('Erro ao processar resposta da IA: ' + e.message)
+      console.log('Usando roteiro fallback')
     }
+
+    // Validar estrutura
+    if (!itineraryData.titulo || !itineraryData.dias || !Array.isArray(itineraryData.dias)) {
+      throw new Error('Estrutura do roteiro inválida')
+    }
+
+    console.log('Roteiro processado com sucesso')
 
     // Obter usuário autenticado
     const authHeader = req.headers.get('Authorization')!

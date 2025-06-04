@@ -35,13 +35,24 @@ export const useSaveRecommendation = () => {
 
     setIsLoading(true);
     try {
+      // Convert FeaturedProduct[] to JSON-compatible format
+      const featuredProductsJson = featuredProducts.map(product => ({
+        id: product.id,
+        name: product.name,
+        image: product.image,
+        price: product.price,
+        scoreMestre: product.scoreMestre,
+        seal: product.seal,
+        link: product.link || null
+      }));
+
       const { error } = await supabase
         .from('saved_product_recommendations')
         .insert({
           user_id: user.id,
           query,
-          recommendations,
-          featured_products: featuredProducts
+          recommendations: recommendations as any,
+          featured_products: featuredProductsJson as any
         });
 
       if (error) throw error;

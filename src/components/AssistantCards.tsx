@@ -31,7 +31,7 @@ const AssistantCards = ({ userPlan, onUpgrade, isFirstAccess = false }: Assistan
       path: '/direito-consumidor',
       gradient: 'from-blue-500 to-blue-700',
       available: true,
-      highlight: userPlan === 'free'
+      isFree: true
     },
     {
       id: 'financas',
@@ -41,7 +41,7 @@ const AssistantCards = ({ userPlan, onUpgrade, isFirstAccess = false }: Assistan
       path: '/financas',
       gradient: 'from-green-500 to-green-700',
       available: userPlan === 'premium',
-      highlight: false
+      isFree: false
     },
     {
       id: 'produtos',
@@ -51,7 +51,7 @@ const AssistantCards = ({ userPlan, onUpgrade, isFirstAccess = false }: Assistan
       path: '/produtos',
       gradient: 'from-purple-500 to-purple-700',
       available: userPlan === 'premium',
-      highlight: false
+      isFree: false
     },
     {
       id: 'viagens',
@@ -61,7 +61,7 @@ const AssistantCards = ({ userPlan, onUpgrade, isFirstAccess = false }: Assistan
       path: '/viagens',
       gradient: 'from-orange-500 to-orange-700',
       available: userPlan === 'premium',
-      highlight: false
+      isFree: false
     },
     {
       id: 'supermercado',
@@ -71,7 +71,7 @@ const AssistantCards = ({ userPlan, onUpgrade, isFirstAccess = false }: Assistan
       path: '/supermercado',
       gradient: 'from-red-500 to-red-700',
       available: userPlan === 'premium',
-      highlight: false
+      isFree: false
     }
   ];
 
@@ -80,18 +80,15 @@ const AssistantCards = ({ userPlan, onUpgrade, isFirstAccess = false }: Assistan
       {assistants.map((assistant) => {
         const Icon = assistant.icon;
         const isAvailable = userPlan ? assistant.available : true; // Show all as available on landing page
-        const shouldHighlight = isFirstAccess && assistant.highlight;
         
         return (
           <Card 
             key={assistant.id} 
             className={`relative overflow-hidden transition-all duration-300 hover:shadow-xl group ${
-              shouldHighlight 
-                ? 'ring-4 ring-green-400 ring-opacity-75 shadow-2xl scale-105 animate-pulse' 
-                : isAvailable 
-                  ? 'hover:scale-105 cursor-pointer' 
-                  : 'opacity-60'
-            } ${shouldHighlight ? 'bg-gradient-to-br from-green-50 to-blue-50' : 'bg-white'}`}
+              isAvailable 
+                ? 'hover:scale-105 cursor-pointer' 
+                : 'opacity-60'
+            } bg-white`}
           >
             {/* Background Gradient */}
             <div className={`absolute inset-0 bg-gradient-to-br ${assistant.gradient} opacity-5`} />
@@ -106,12 +103,12 @@ const AssistantCards = ({ userPlan, onUpgrade, isFirstAccess = false }: Assistan
               </div>
             )}
 
-            {/* First Access Highlight Badge */}
-            {shouldHighlight && (
+            {/* Free Badge */}
+            {userPlan === 'free' && assistant.isFree && (
               <div className="absolute top-4 right-4 z-10">
                 <Badge className="bg-green-500 text-white border-green-600">
                   <Sparkles className="w-3 h-3 mr-1" />
-                  Seu Assistente!
+                  Gratuito
                 </Badge>
               </div>
             )}
@@ -121,11 +118,11 @@ const AssistantCards = ({ userPlan, onUpgrade, isFirstAccess = false }: Assistan
                 <div className={`p-3 rounded-lg bg-gradient-to-br ${assistant.gradient} text-white shadow-lg`}>
                   <Icon className="w-6 h-6" />
                 </div>
-                <CardTitle className={`text-xl ${shouldHighlight ? 'text-green-700 font-bold' : 'text-gray-900'}`}>
+                <CardTitle className="text-xl text-gray-900">
                   {assistant.title}
                 </CardTitle>
               </div>
-              <CardDescription className={`text-sm leading-relaxed ${shouldHighlight ? 'text-green-600' : 'text-gray-600'}`}>
+              <CardDescription className="text-sm leading-relaxed text-gray-600">
                 {assistant.description}
               </CardDescription>
             </CardHeader>
@@ -136,11 +133,9 @@ const AssistantCards = ({ userPlan, onUpgrade, isFirstAccess = false }: Assistan
                 isAvailable ? (
                   <Link to={assistant.path}>
                     <Button 
-                      className={`w-full bg-gradient-to-r ${assistant.gradient} hover:opacity-90 text-white font-medium py-2 transition-all duration-200 ${
-                        shouldHighlight ? 'ring-2 ring-green-400 ring-offset-2 shadow-lg' : ''
-                      }`}
+                      className={`w-full bg-gradient-to-r ${assistant.gradient} hover:opacity-90 text-white font-medium py-2 transition-all duration-200`}
                     >
-                      {shouldHighlight ? '🎯 Começar Agora!' : 'Acessar Assistente'}
+                      Acessar Assistente
                     </Button>
                   </Link>
                 ) : (

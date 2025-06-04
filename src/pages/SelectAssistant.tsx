@@ -52,7 +52,7 @@ const SelectAssistant = () => {
                 🎉 Bem-vindo à Biblioteca AI!
               </h2>
               <p className="text-blue-700 text-lg mb-4">
-                Sua conta foi criada com sucesso! Agora escolha seu primeiro assistente especializado para começar.
+                Sua conta foi criada com sucesso! Agora escolha seu assistente especializado para começar.
               </p>
               <div className="bg-white/50 rounded-lg p-4 inline-block">
                 <p className="text-sm text-blue-600 font-medium">
@@ -68,14 +68,14 @@ const SelectAssistant = () => {
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             {isFirstAccess ? 'Escolha seu ' : 'Painel de '}
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              {isFirstAccess ? 'Primeiro Assistente' : 'Assistentes Especializados'}
+              {isFirstAccess ? 'Assistente' : 'Assistentes Especializados'}
             </span>
           </h1>
           <p className="text-lg text-gray-600 mb-6 max-w-3xl mx-auto">
             {profile?.plan === 'premium' 
               ? 'Como usuário premium, você tem acesso completo a todos os 5 assistentes especializados!'
               : isFirstAccess 
-                ? 'No plano gratuito, você pode acessar o Mestre do Direito do Consumidor. Clique nele abaixo para começar!'
+                ? 'No plano gratuito, você pode acessar o Mestre do Direito do Consumidor. Clique no assistente que deseja usar para começar!'
                 : 'No plano gratuito, você tem acesso ao Mestre do Direito do Consumidor. Faça upgrade para acessar todos os assistentes.'
             }
           </p>
@@ -107,7 +107,7 @@ const SelectAssistant = () => {
             {profile?.plan === 'premium' 
               ? '🚀 Você tem acesso completo a todos os assistentes!' 
               : isFirstAccess
-                ? '🎯 Clique no Mestre do Direito do Consumidor para começar!'
+                ? '🎯 Escolha o assistente que deseja usar para começar!'
                 : '⭐ Upgrade para Premium e desbloqueie todos os assistentes'
             }
           </div>

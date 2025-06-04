@@ -11,15 +11,15 @@ interface AssistantPanelProps {
 const AssistantPanel = ({ userPlan, onUpgrade, isFirstAccess = false }: AssistantPanelProps) => {
   return (
     <div className="w-full">
-      {/* Show special message for first access */}
+      {/* Show message for first access */}
       {isFirstAccess && userPlan === 'free' && (
         <div className="mb-8 text-center">
-          <div className="inline-block bg-gradient-to-r from-green-100 to-blue-100 border-2 border-green-300 rounded-xl p-4">
-            <p className="text-green-700 font-semibold mb-2">
-              👇 Seu assistente gratuito está destacado abaixo
+          <div className="inline-block bg-gradient-to-r from-blue-100 to-green-100 border-2 border-blue-300 rounded-xl p-4">
+            <p className="text-blue-700 font-semibold mb-2">
+              🎯 Escolha seu primeiro assistente
             </p>
-            <p className="text-sm text-green-600">
-              Clique no card verde para começar a usar o Mestre do Direito do Consumidor
+            <p className="text-sm text-blue-600">
+              Como usuário gratuito, você tem acesso ao <strong>Mestre do Direito do Consumidor</strong>. Para acessar todos os assistentes, faça upgrade para Premium.
             </p>
           </div>
         </div>

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, LogIn, UserPlus } from 'lucide-react';
+import { MessageSquare, LogIn, UserPlus, LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
@@ -58,15 +58,16 @@ const Header = () => {
           
           {user ? (
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-gray-600 hidden sm:block">
                 Olá, {profile?.name || user.email?.split('@')[0]}
               </span>
               <Button 
                 variant="outline" 
                 onClick={handleLogout}
-                className="text-red-600 border-red-300 hover:bg-red-50"
+                className="flex items-center space-x-1 text-red-600 border-red-300 hover:bg-red-50"
               >
-                Sair
+                <LogOut className="w-4 h-4" />
+                <span>Sair</span>
               </Button>
             </div>
           ) : (

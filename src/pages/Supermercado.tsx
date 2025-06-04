@@ -1,13 +1,18 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Camera, Search, Star, ShoppingBasket } from 'lucide-react';
+import { Camera, Search, Star, ShoppingBasket, Upload, Loader2, ImageIcon } from 'lucide-react';
 import { DashboardLayout } from '@/components/DashboardLayout';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const Supermercado = () => {
   const [activeTab, setActiveTab] = useState('scanner');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysis, setAnalysis] = useState<any>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const comparisons = [
     {
@@ -19,6 +24,63 @@ const Supermercado = () => {
       ]
     }
   ];
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+      setAnalysis(null);
+    }
+  };
+
+  const analyzeProduct = async () => {
+    if (!selectedFile) {
+      toast.error('Por favor, selecione uma foto primeiro');
+      return;
+    }
+
+    setIsAnalyzing(true);
+    
+    try {
+      // Convert file to base64
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64Image = e.target?.result as string;
+        
+        // Call the edge function to analyze the product
+        const { data, error } = await supabase.functions.invoke('analyze-product', {
+          body: {
+            image: base64Image,
+            type: 'barcode_analysis'
+          }
+        });
+
+        if (error) {
+          console.error('Error analyzing product:', error);
+          toast.error('Erro ao analisar produto');
+          return;
+        }
+
+        setAnalysis(data);
+        toast.success('Produto analisado com sucesso!');
+      };
+      
+      reader.readAsDataURL(selectedFile);
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Erro ao processar imagem');
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const clearAnalysis = () => {
+    setSelectedFile(null);
+    setPreviewUrl(null);
+    setAnalysis(null);
+  };
 
   return (
     <DashboardLayout>
@@ -66,23 +128,112 @@ const Supermercado = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Scanner de Produtos</CardTitle>
-                <CardDescription>Tire uma foto do produto na gôndola para comparar qualidade e preços</CardDescription>
+                <CardDescription>Tire uma foto do código de barras do produto para análise completa</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
-                  <Camera className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Fotografe o produto</h3>
-                  <p className="text-gray-600 mb-4">Aponte a câmera para o produto que você quer analisar</p>
-                  <Button>Abrir Câmera</Button>
-                </div>
-
-                <div className="text-center">
-                  <p className="text-sm text-gray-600 mb-2">ou</p>
-                  <Button variant="outline">Enviar Foto da Galeria</Button>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                  {previewUrl ? (
+                    <div className="space-y-4">
+                      <img 
+                        src={previewUrl} 
+                        alt="Preview" 
+                        className="max-w-full max-h-64 mx-auto rounded-lg shadow-md"
+                      />
+                      <div className="flex space-x-4 justify-center">
+                        <Button onClick={analyzeProduct} disabled={isAnalyzing}>
+                          {isAnalyzing ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Analisando...
+                            </>
+                          ) : (
+                            <>
+                              <Search className="w-4 h-4 mr-2" />
+                              Analisar Produto
+                            </>
+                          )}
+                        </Button>
+                        <Button variant="outline" onClick={clearAnalysis}>
+                          Nova Foto
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <ImageIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">Selecione uma foto</h3>
+                      <p className="text-gray-600 mb-4">Envie uma foto do código de barras do produto</p>
+                      <div className="flex flex-col space-y-4 items-center">
+                        <label htmlFor="file-upload" className="cursor-pointer">
+                          <div className="flex items-center space-x-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors">
+                            <Upload className="w-4 h-4" />
+                            <span>Enviar da Galeria</span>
+                          </div>
+                          <input
+                            id="file-upload"
+                            type="file"
+                            accept="image/*"
+                            onChange={handleFileSelect}
+                            className="hidden"
+                          />
+                        </label>
+                        <Button variant="outline">
+                          <Camera className="w-4 h-4 mr-2" />
+                          Abrir Câmera
+                        </Button>
+                      </div>
+                    </>
+                  )}
                 </div>
               </CardContent>
             </Card>
 
+            {/* Analysis Results */}
+            {analysis && (
+              <Card className="bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-200">
+                <CardHeader>
+                  <CardTitle className="text-emerald-800 flex items-center space-x-2">
+                    <Star className="w-5 h-5" />
+                    <span>Análise do Produto</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-semibold text-emerald-900">{analysis.productName || 'Produto Identificado'}</h4>
+                      <p className="text-emerald-700">{analysis.brand && `Marca: ${analysis.brand}`}</p>
+                    </div>
+                    
+                    {analysis.analysis && (
+                      <div className="bg-white p-4 rounded-lg border border-emerald-200">
+                        <h5 className="font-medium text-emerald-900 mb-2">💡 Análise Detalhada:</h5>
+                        <p className="text-emerald-800 whitespace-pre-wrap">{analysis.analysis}</p>
+                      </div>
+                    )}
+
+                    {analysis.price && (
+                      <div className="bg-white p-4 rounded-lg border border-emerald-200">
+                        <h5 className="font-medium text-emerald-900 mb-2">💰 Preço Estimado:</h5>
+                        <p className="text-lg font-bold text-green-600">{analysis.price}</p>
+                      </div>
+                    )}
+
+                    {analysis.recommendations && (
+                      <div className="bg-white p-4 rounded-lg border border-emerald-200">
+                        <h5 className="font-medium text-emerald-900 mb-2">⭐ Recomendações:</h5>
+                        <div className="space-y-2">
+                          {analysis.recommendations.map((rec: string, index: number) => (
+                            <p key={index} className="text-emerald-700">✓ {rec}</p>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* How it works */}
             <Card>
               <CardHeader>
                 <CardTitle>Como Funciona</CardTitle>
@@ -94,21 +245,21 @@ const Supermercado = () => {
                       <Camera className="w-6 h-6 text-emerald-600" />
                     </div>
                     <h4 className="font-medium mb-2">1. Fotografe</h4>
-                    <p className="text-sm text-gray-600">Tire uma foto do produto na prateleira</p>
+                    <p className="text-sm text-gray-600">Tire uma foto do código de barras do produto</p>
                   </div>
                   <div className="text-center p-4">
                     <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
                       <Search className="w-6 h-6 text-emerald-600" />
                     </div>
                     <h4 className="font-medium mb-2">2. Analisamos</h4>
-                    <p className="text-sm text-gray-600">Nossa IA identifica e compara o produto</p>
+                    <p className="text-sm text-gray-600">Nossa IA identifica e analisa o produto</p>
                   </div>
                   <div className="text-center p-4">
                     <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
                       <Star className="w-6 h-6 text-emerald-600" />
                     </div>
                     <h4 className="font-medium mb-2">3. Recomendamos</h4>
-                    <p className="text-sm text-gray-600">Receba a melhor recomendação</p>
+                    <p className="text-sm text-gray-600">Receba análise detalhada e recomendações</p>
                   </div>
                 </div>
               </CardContent>

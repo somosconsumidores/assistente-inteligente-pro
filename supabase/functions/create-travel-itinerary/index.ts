@@ -17,57 +17,75 @@ serve(async (req) => {
     console.log('Dados recebidos:', { destination, budget, departureDate, returnDate, travelersCount, travelStyle, additionalPreferences })
 
     // Validar dados obrigatórios
-    if (!destination || !travelStyle || !travelersCount) {
+    if (!destination || !travelStyle || !travelersCount || !departureDate || !returnDate) {
       return new Response(
         JSON.stringify({ error: 'Dados obrigatórios faltando' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Calcular número de dias
+    // Calcular número de dias baseado nas datas fornecidas
     const start = new Date(departureDate)
     const end = new Date(returnDate)
-    const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+    const timeDiff = end.getTime() - start.getTime()
+    const days = Math.ceil(timeDiff / (1000 * 60 * 60 * 24))
 
-    console.log('Número de dias calculado:', days)
+    console.log('Número de dias calculado baseado nas datas:', days)
 
-    // Limitar ainda mais o número de dias para evitar JSONs muito grandes
-    const maxDays = Math.min(days, 5)
+    // Validar se as datas fazem sentido
+    if (days <= 0) {
+      return new Response(
+        JSON.stringify({ error: 'A data de volta deve ser posterior à data de ida' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
 
-    // Prompt muito mais simples e direto
-    const prompt = `Você é um assistente especializado em criar roteiros de viagem personalizados. Você gera roteiros incríveis a partir do input do usuário : um roteiro diário de passeios, sugestões práticas de hospedagem (tendo o Booking.com como referência), passagens aéreas (tendo Decolar.com como referência) e atividades (via GetYourGuide, Civitatis). Você monta uma sugestão de viagem prática e completa, com estimativas de custo divididas (passagem, hospedagem, passeios, alimentação, extras), focando sempre em ser rápido, amigável e eficiente. Entrega o resultado de forma organizada. Seu tom é prático, acolhedor e objetivo. Você pode oferecer variações de roteiros caso o usuário queira. Sempre incentive decisões rápidas e práticas, focando na experiência do viajante.Com base nisso, crie um roteiro de ${maxDays} dias para ${destination}.
-Orçamento: ${budget ? `R$ ${budget}` : 'Flexível'}
-Pessoas: ${travelersCount}
-Estilo: ${travelStyle}
+    // Limitar o número máximo de dias para evitar respostas muito longas (máximo 14 dias)
+    const maxDays = Math.min(days, 14)
+    if (days > 14) {
+      console.log(`Limitando roteiro de ${days} dias para ${maxDays} dias para evitar resposta muito longa`)
+    }
+
+    // Prompt mais detalhado considerando o número real de dias
+    const prompt = `Você é um assistente especializado em criar roteiros de viagem personalizados. Crie um roteiro detalhado de ${maxDays} dias para ${destination}.
+
+Dados da viagem:
+- Destino: ${destination}
+- Orçamento: ${budget ? `R$ ${budget}` : 'Flexível'}
+- Pessoas: ${travelersCount}
+- Estilo: ${travelStyle}
+- Preferências: ${additionalPreferences || 'Nenhuma preferência específica'}
+
+IMPORTANTE: O roteiro deve ter EXATAMENTE ${maxDays} dias.
 
 RESPONDA APENAS com este JSON exato:
 {
   "titulo": "Roteiro ${maxDays} dias - ${destination}",
-  "resumo": "Resumo em 50 caracteres",
-  "custoEstimado": "R$ 0000",
-  "dicas": ["dica1", "dica2"],
+  "resumo": "Resumo atrativo em até 60 caracteres",
+  "custoEstimado": "R$ XXXX",
+  "dicas": ["dica prática 1", "dica prática 2", "dica prática 3"],
   "dias": [
     {
       "dia": 1,
-      "titulo": "Dia 1",
+      "titulo": "Dia 1 - Título do dia",
       "atividades": [
         {
           "horario": "09:00",
-          "atividade": "Atividade",
-          "descricao": "Descrição curta",
-          "custoEstimado": "R$ 0",
-          "localizacao": "Local"
+          "atividade": "Nome da atividade",
+          "descricao": "Descrição detalhada da atividade",
+          "custoEstimado": "R$ XX",
+          "localizacao": "Local específico"
         }
       ]
     }
   ]
 }
 
-Máximo 3 atividades por dia. Descrições de máximo 50 caracteres.`
+Crie atividades variadas para cada dia (3-4 atividades por dia). Inclua sugestões de café da manhã, almoço, jantar e atividades turísticas. Seja específico com locais e horários realistas.`
 
     console.log('Chamando OpenAI...')
 
-    // Chamar OpenAI com limite muito restrito
+    // Chamar OpenAI
     const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -79,15 +97,15 @@ Máximo 3 atividades por dia. Descrições de máximo 50 caracteres.`
         messages: [
           {
             role: 'system',
-            content: 'Você é um assistente que responde APENAS com JSON válido. Não adicione texto antes ou depois do JSON.'
+            content: `Você é um assistente especializado em roteiros de viagem. Responda APENAS com JSON válido, sem texto adicional antes ou depois. O roteiro deve ter exatamente ${maxDays} dias conforme solicitado.`
           },
           {
             role: 'user',
             content: prompt
           }
         ],
-        temperature: 0.3,
-        max_tokens: 1500
+        temperature: 0.7,
+        max_tokens: 3000
       })
     })
 
@@ -100,9 +118,9 @@ Máximo 3 atividades por dia. Descrições de máximo 50 caracteres.`
     console.log('Resposta da OpenAI recebida')
     
     let itineraryContent = openaiData.choices[0].message.content
-    console.log('Conteúdo bruto:', itineraryContent.substring(0, 200))
+    console.log('Conteúdo bruto (primeiros 200 chars):', itineraryContent.substring(0, 200))
 
-    // Limpeza mais agressiva do conteúdo
+    // Limpeza do conteúdo
     itineraryContent = itineraryContent.trim()
     
     // Remover markdown se houver
@@ -136,11 +154,12 @@ Máximo 3 atividades por dia. Descrições de máximo 50 caracteres.`
       itineraryData = {
         titulo: `Roteiro ${maxDays} dias - ${destination}`,
         resumo: `Viagem ${travelStyle.toLowerCase()} para ${destination}`,
-        custoEstimado: budget ? `R$ ${budget}` : 'R$ 5000',
+        custoEstimado: budget ? `R$ ${budget}` : 'R$ 3000',
         dicas: [
-          'Pesquise sobre a cultura local',
+          'Pesquise sobre a cultura local antes da viagem',
           'Verifique a documentação necessária',
-          'Reserve acomodações com antecedência'
+          'Reserve acomodações com antecedência',
+          'Tenha sempre um plano B para atividades ao ar livre'
         ],
         dias: Array.from({ length: maxDays }, (_, i) => ({
           dia: i + 1,
@@ -154,17 +173,24 @@ Máximo 3 atividades por dia. Descrições de máximo 50 caracteres.`
               localizacao: destination
             },
             {
-              horario: '14:00',
-              atividade: 'Atração principal',
+              horario: '11:00',
+              atividade: 'Atração turística principal',
               descricao: 'Visite pontos turísticos importantes',
               custoEstimado: 'R$ 100',
+              localizacao: destination
+            },
+            {
+              horario: '14:00',
+              atividade: 'Almoço',
+              descricao: 'Experimente pratos típicos da região',
+              custoEstimado: 'R$ 80',
               localizacao: destination
             },
             {
               horario: '19:00',
               atividade: 'Jantar',
               descricao: 'Desfrute da culinária local',
-              custoEstimado: 'R$ 80',
+              custoEstimado: 'R$ 120',
               localizacao: destination
             }
           ]
@@ -173,18 +199,60 @@ Máximo 3 atividades por dia. Descrições de máximo 50 caracteres.`
       console.log('Usando roteiro fallback')
     }
 
-    // Validar estrutura
+    // Validar estrutura básica
     if (!itineraryData.titulo || !itineraryData.dias || !Array.isArray(itineraryData.dias)) {
       throw new Error('Estrutura do roteiro inválida')
     }
 
-    console.log('Roteiro processado com sucesso')
+    // Garantir que o número de dias está correto
+    if (itineraryData.dias.length !== maxDays) {
+      console.log(`Ajustando número de dias de ${itineraryData.dias.length} para ${maxDays}`)
+      
+      if (itineraryData.dias.length < maxDays) {
+        // Adicionar dias faltantes
+        for (let i = itineraryData.dias.length; i < maxDays; i++) {
+          itineraryData.dias.push({
+            dia: i + 1,
+            titulo: `Dia ${i + 1} em ${destination}`,
+            atividades: [
+              {
+                horario: '09:00',
+                atividade: 'Café da manhã',
+                descricao: 'Comece o dia com energia',
+                custoEstimado: 'R$ 50',
+                localizacao: destination
+              },
+              {
+                horario: '14:00',
+                atividade: 'Atividade livre',
+                descricao: 'Explore por conta própria',
+                custoEstimado: 'R$ 100',
+                localizacao: destination
+              },
+              {
+                horario: '19:00',
+                atividade: 'Jantar',
+                descricao: 'Experimente a gastronomia local',
+                custoEstimado: 'R$ 120',
+                localizacao: destination
+              }
+            ]
+          })
+        }
+      } else {
+        // Remover dias extras
+        itineraryData.dias = itineraryData.dias.slice(0, maxDays)
+      }
+    }
 
-    // Retornar apenas o roteiro gerado (sem salvar automaticamente)
+    console.log(`Roteiro processado com sucesso - ${itineraryData.dias.length} dias`)
+
     return new Response(
       JSON.stringify({ 
         success: true, 
-        itineraryData 
+        itineraryData,
+        actualDays: days,
+        generatedDays: maxDays
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )

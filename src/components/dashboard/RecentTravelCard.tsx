@@ -61,9 +61,9 @@ const RecentTravelCard: React.FC<RecentTravelCardProps> = ({ travelPlans, onView
                   Criado em {format(new Date(mostRecentTravel.created_at), "dd 'de' MMM", { locale: ptBR })}
                 </span>
               </div>
-              {mostRecentTravel.travel_dates && (
+              {mostRecentTravel.departure_date && mostRecentTravel.return_date && (
                 <div className="text-sm text-sky-700 bg-sky-100 px-2 py-1 rounded inline-block">
-                  {mostRecentTravel.travel_dates.inicio} - {mostRecentTravel.travel_dates.fim}
+                  {format(new Date(mostRecentTravel.departure_date), 'dd/MM/yyyy')} - {format(new Date(mostRecentTravel.return_date), 'dd/MM/yyyy')}
                 </div>
               )}
             </div>

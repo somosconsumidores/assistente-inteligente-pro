@@ -86,7 +86,16 @@ const Dashboard: React.FC = () => {
           <div className="space-y-6">
             <FinancialSummaryCard financialData={financialData} onViewDashboard={() => navigate('/financas')} />
             
-            <RecentTravelCard travelPlans={savedItineraries} onViewAll={() => navigate('/viagens')} />
+            <RecentTravelCard travelPlans={savedItineraries} onViewAll={() => {
+              navigate('/viagens');
+              // Scroll to the saved itineraries section after navigation
+              setTimeout(() => {
+                const element = document.getElementById('roteiros-salvos');
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth' });
+                }
+              }, 100);
+            }} />
           </div>
         </div>
       </div>

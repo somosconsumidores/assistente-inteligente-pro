@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDashboardData } from '@/hooks/useDashboardData';
@@ -9,8 +10,10 @@ import SavedRecommendationsCard from '@/components/dashboard/SavedRecommendation
 import FinancialSummaryCard from '@/components/dashboard/FinancialSummaryCard';
 import RecentTravelCard from '@/components/dashboard/RecentTravelCard';
 import SelectedAssistantCard from '@/components/dashboard/SelectedAssistantCard';
+import { DashboardLayout } from '@/components/DashboardLayout';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, LayoutDashboard } from 'lucide-react';
+import { LayoutDashboard } from 'lucide-react';
+
 const Dashboard: React.FC = () => {
   const {
     profile
@@ -24,11 +27,14 @@ const Dashboard: React.FC = () => {
     isLoading,
     refetch
   } = useDashboardData();
+  
   const handleUpgrade = () => {
     console.log('Upgrade para premium');
   };
+  
   if (isLoading) {
-    return <div className="min-h-screen bg-gray-50">
+    return (
+      <DashboardLayout>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center gap-4 mb-8">
             <Skeleton className="h-8 w-8" />
@@ -40,14 +46,16 @@ const Dashboard: React.FC = () => {
           }).map((_, i) => <Skeleton key={i} className="h-64" />)}
           </div>
         </div>
-      </div>;
+      </DashboardLayout>
+    );
   }
-  return <div className="min-h-screen bg-gray-50">
+  
+  return (
+    <DashboardLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            
             <div className="flex items-center gap-3">
               <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg">
                 <LayoutDashboard className="w-6 h-6 text-white" />
@@ -86,6 +94,8 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>;
+    </DashboardLayout>
+  );
 };
+
 export default Dashboard;

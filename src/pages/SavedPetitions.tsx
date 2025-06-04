@@ -15,13 +15,7 @@ interface PeticaoSalva {
   id: string;
   title: string;
   content: string;
-  case_details: {
-    nome: string;
-    cpf: string;
-    empresa: string;
-    valor: string;
-    relato: string;
-  };
+  case_details: any;
   created_at: string;
 }
 
@@ -180,11 +174,13 @@ const SavedPetitions: React.FC = () => {
                         {format(new Date(petition.created_at), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
                       </span>
                     </div>
-                    <div className="space-y-1">
-                      <p><strong>Cliente:</strong> {petition.case_details.nome}</p>
-                      <p><strong>Empresa:</strong> {petition.case_details.empresa}</p>
-                      <p><strong>Valor:</strong> {petition.case_details.valor}</p>
-                    </div>
+                    {petition.case_details && (
+                      <div className="space-y-1">
+                        <p><strong>Cliente:</strong> {petition.case_details.nome || 'N/A'}</p>
+                        <p><strong>Empresa:</strong> {petition.case_details.empresa || 'N/A'}</p>
+                        <p><strong>Valor:</strong> {petition.case_details.valor || 'N/A'}</p>
+                      </div>
+                    )}
                   </div>
                   <Button
                     onClick={() => handleViewPetition(petition)}

@@ -1,20 +1,21 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
-import { ThemeProvider } from "@/components/theme-provider"
+import { ThemeProvider } from "./components/theme-provider"
 
-import Home from './pages/Home';
+import Home from './pages/Index';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
-import ConsumerLaw from './pages/ConsumerLaw';
+import ConsumerLaw from './pages/DireitoConsumidor';
 import SavedRecommendations from './pages/SavedRecommendations';
-import Finances from './pages/Finances';
-import Travel from './pages/Travel';
-import Assistants from './pages/Assistants';
-import SavedPetitions from '@/pages/SavedPetitions';
+import Finances from './pages/Financas';
+import Travel from './pages/Viagens';
+import Assistants from './pages/SelectAssistant';
+import SavedPetitions from './pages/SavedPetitions';
 
 const queryClient = new QueryClient();
 

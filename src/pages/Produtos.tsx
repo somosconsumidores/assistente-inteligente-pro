@@ -1,13 +1,10 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Package } from 'lucide-react';
 import ProductChat from '@/components/ProductChat';
 import { DashboardLayout } from '@/components/DashboardLayout';
-
 const Produtos = () => {
-  return (
-    <DashboardLayout>
+  return <DashboardLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -17,8 +14,8 @@ const Produtos = () => {
                 <Package className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Mestre dos Produtos</h1>
-                <p className="text-gray-600">
+                <h1 className="text-3xl font-bold text-slate-50">Mestre dos Produtos</h1>
+                <p className="text-slate-50">
                   Compare produtos, encontre as melhores ofertas e receba recomendações personalizadas
                 </p>
               </div>
@@ -65,8 +62,6 @@ const Produtos = () => {
           </CardContent>
         </Card>
       </div>
-    </DashboardLayout>
-  );
+    </DashboardLayout>;
 };
-
 export default Produtos;

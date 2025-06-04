@@ -17,6 +17,7 @@ import Travel from './pages/Viagens';
 import Assistants from './pages/SelectAssistant';
 import SavedPetitions from './pages/SavedPetitions';
 import Produtos from './pages/Produtos';
+import Supermercado from './pages/Supermercado';
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,11 @@ function App() {
               <Route path="/produtos" element={
                 <ProtectedRoute>
                   <Produtos />
+                </ProtectedRoute>
+              } />
+              <Route path="/supermercado" element={
+                <ProtectedRoute>
+                  <Supermercado />
                 </ProtectedRoute>
               } />
               <Route path="/recomendacoes-salvas" element={

@@ -4,33 +4,32 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, MapPin, Calendar, Users, Plane } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { MapPin, Calendar, Plane } from 'lucide-react';
+import { DashboardLayout } from '@/components/DashboardLayout';
 
 const Viagens = () => {
   const [activeTab, setActiveTab] = useState('planner');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 to-indigo-50">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Link to="/" className="flex items-center space-x-2 text-gray-600 hover:text-sky-600">
-              <ArrowLeft className="w-5 h-5" />
-              <span>Voltar</span>
-            </Link>
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-sky-600 to-indigo-600 rounded-lg flex items-center justify-center">
-                <Plane className="w-5 h-5 text-white" />
+    <DashboardLayout>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-r from-sky-500 to-indigo-600 rounded-lg">
+                <Plane className="w-6 h-6 text-white" />
               </div>
-              <span className="font-bold text-xl text-gray-900">Mestre das Viagens</span>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">Consultor de Viagens</h1>
+                <p className="text-gray-600">
+                  Planeje sua viagem perfeita com roteiros personalizados e dicas de especialista
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </header>
 
-      <div className="container mx-auto px-4 py-8">
         {/* Navigation Tabs */}
         <div className="flex space-x-4 mb-8">
           <Button 
@@ -191,7 +190,7 @@ const Viagens = () => {
           </div>
         )}
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

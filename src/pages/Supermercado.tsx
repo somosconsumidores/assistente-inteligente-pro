@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Camera, Search, Star, ShoppingBasket } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Camera, Search, Star, ShoppingBasket } from 'lucide-react';
+import { DashboardLayout } from '@/components/DashboardLayout';
 
 const Supermercado = () => {
   const [activeTab, setActiveTab] = useState('scanner');
@@ -21,26 +21,25 @@ const Supermercado = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Link to="/" className="flex items-center space-x-2 text-gray-600 hover:text-emerald-600">
-              <ArrowLeft className="w-5 h-5" />
-              <span>Voltar</span>
-            </Link>
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-emerald-600 to-green-600 rounded-lg flex items-center justify-center">
-                <ShoppingBasket className="w-5 h-5 text-white" />
+    <DashboardLayout>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-r from-emerald-500 to-green-600 rounded-lg">
+                <ShoppingBasket className="w-6 h-6 text-white" />
               </div>
-              <span className="font-bold text-xl text-gray-900">Mestre do Supermercado</span>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">Assistente de Compras no Supermercado</h1>
+                <p className="text-gray-600">
+                  Scanner de produtos, comparação de preços e recomendações inteligentes
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </header>
 
-      <div className="container mx-auto px-4 py-8">
         {/* Navigation Tabs */}
         <div className="flex space-x-4 mb-8">
           <Button 
@@ -199,7 +198,7 @@ const Supermercado = () => {
           </div>
         )}
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

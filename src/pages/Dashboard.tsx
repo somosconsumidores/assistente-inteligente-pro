@@ -13,22 +13,23 @@ import AssistantCards from '@/components/AssistantCards';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useNavigate } from 'react-router-dom';
 import { LayoutDashboard } from 'lucide-react';
+
 const Dashboard: React.FC = () => {
-  const {
-    profile
-  } = useAuth();
+  const { profile } = useAuth();
   const navigate = useNavigate();
   const {
     petitions,
     productRecommendations,
     financialData,
-    travelPlans,
+    savedItineraries,
     isLoading,
     refetch
   } = useDashboardData();
+
   const handleUpgrade = () => {
     console.log('Upgrade para premium');
   };
+
   if (isLoading) {
     return <DashboardLayout>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -44,7 +45,9 @@ const Dashboard: React.FC = () => {
         </div>
       </DashboardLayout>;
   }
-  return <DashboardLayout>
+
+  return (
+    <DashboardLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -83,13 +86,12 @@ const Dashboard: React.FC = () => {
           <div className="space-y-6">
             <FinancialSummaryCard financialData={financialData} onViewDashboard={() => navigate('/financas')} />
             
-            <RecentTravelCard travelPlans={travelPlans} onViewAll={() => navigate('/viagens')} />
+            <RecentTravelCard travelPlans={savedItineraries} onViewAll={() => navigate('/viagens')} />
           </div>
         </div>
-
-        {/* Assistants Section */}
-        
       </div>
-    </DashboardLayout>;
+    </DashboardLayout>
+  );
 };
+
 export default Dashboard;

@@ -71,10 +71,11 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { profile, logout } = useAuth();
-  const { collapsed } = useSidebar();
+  const { state } = useSidebar();
 
   const isActive = (path: string) => location.pathname === path;
   const isPremiumUser = profile?.plan === 'premium';
+  const isCollapsed = state === 'collapsed';
 
   const handleLogout = async () => {
     try {
@@ -111,7 +112,7 @@ export function AppSidebar() {
           <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
             <LayoutDashboard className="w-4 h-4 text-white" />
           </div>
-          {!collapsed && (
+          {!isCollapsed && (
             <div>
               <h2 className="text-lg font-bold text-white">AssistIA</h2>
               <p className="text-xs text-slate-400">Seus assistentes inteligentes</p>
@@ -123,7 +124,7 @@ export function AppSidebar() {
       <SidebarContent className="px-2">
         <SidebarGroup>
           <SidebarGroupLabel className="text-slate-400 text-xs font-medium uppercase tracking-wider mb-2">
-            {!collapsed && 'Navegação'}
+            {!isCollapsed && 'Navegação'}
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
@@ -141,7 +142,7 @@ export function AppSidebar() {
                     `}
                   >
                     <item.icon className="w-5 h-5 flex-shrink-0" />
-                    {!collapsed && (
+                    {!isCollapsed && (
                       <>
                         <span className="flex-1 text-left text-sm font-medium">
                           {item.title}
@@ -158,7 +159,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-4 border-t border-slate-700">
-        {!collapsed && profile && (
+        {!isCollapsed && profile && (
           <div className="mb-4 p-3 bg-slate-800 rounded-lg">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-blue-500 rounded-full flex items-center justify-center">
@@ -193,7 +194,7 @@ export function AppSidebar() {
           className="w-full justify-start gap-3 text-slate-300 hover:text-white hover:bg-slate-800"
         >
           <LogOut className="w-5 h-5" />
-          {!collapsed && <span>Sair</span>}
+          {!isCollapsed && <span>Sair</span>}
         </Button>
       </SidebarFooter>
     </Sidebar>

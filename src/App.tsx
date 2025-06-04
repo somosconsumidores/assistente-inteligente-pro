@@ -11,6 +11,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 import SelectAssistant from "./pages/SelectAssistant";
+import Dashboard from "./pages/Dashboard";
 import DireitoConsumidor from "./pages/DireitoConsumidor";
 import Financas from "./pages/Financas";
 import Produtos from "./pages/Produtos";
@@ -33,6 +34,11 @@ const App = () => (
             <Route path="/select-assistant" element={
               <ProtectedRoute>
                 <SelectAssistant />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Dashboard />
               </ProtectedRoute>
             } />
             <Route path="/direito-consumidor" element={

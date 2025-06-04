@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Scale, DollarSign, ShoppingCart, Plane, ShoppingBasket, Lock, Crown, CheckCircle } from 'lucide-react';
+import { Scale, DollarSign, ShoppingCart, Plane, ShoppingBasket, Lock, Crown, CheckCircle, LayoutDashboard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface AssistantPanelProps {
@@ -100,126 +99,140 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade, se
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {assistants.map((assistant) => {
-        const IconComponent = assistant.icon;
-        
-        // Lógica para determinar o estado do card
-        let isLocked = false;
-        let isSelected = false;
-        let cardActionText = "Usar Assistente";
-        let isClickable = true;
+    <div className="space-y-6">
+      {/* Botão para acessar o dashboard */}
+      <div className="flex justify-center">
+        <Button
+          onClick={() => navigate('/dashboard')}
+          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+          size="lg"
+        >
+          <LayoutDashboard className="w-5 h-5 mr-2" />
+          Acessar Meu Painel
+        </Button>
+      </div>
 
-        if (userPlan === 'free') {
-          if (selectedAssistantId) {
-            // Usuário já escolheu um assistente
-            if (assistant.id === selectedAssistantId) {
-              isSelected = true;
-              cardActionText = "Usar Assistente";
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {assistants.map((assistant) => {
+          const IconComponent = assistant.icon;
+          
+          // Lógica para determinar o estado do card
+          let isLocked = false;
+          let isSelected = false;
+          let cardActionText = "Usar Assistente";
+          let isClickable = true;
+
+          if (userPlan === 'free') {
+            if (selectedAssistantId) {
+              // Usuário já escolheu um assistente
+              if (assistant.id === selectedAssistantId) {
+                isSelected = true;
+                cardActionText = "Usar Assistente";
+              } else {
+                isLocked = true;
+                isClickable = false;
+              }
             } else {
-              isLocked = true;
-              isClickable = false;
+              // Primeiro acesso - pode escolher qualquer assistente
+              cardActionText = "Selecionar Assistente";
             }
-          } else {
-            // Primeiro acesso - pode escolher qualquer assistente
-            cardActionText = "Selecionar Assistente";
           }
-        }
-        // Usuários premium podem acessar tudo
+          // Usuários premium podem acessar tudo
         
-        return (
-          <Card 
-            key={assistant.id} 
-            className={`relative overflow-hidden transition-all duration-300 ${
-              isSelected 
-                ? 'border-2 border-green-500 shadow-lg' 
-                : isClickable 
-                  ? 'hover:shadow-xl hover:-translate-y-1 cursor-pointer' 
-                  : 'border-2 border-gray-200'
-            } bg-gradient-to-br ${assistant.bgColor}`}
-            onClick={() => isClickable && handleAssistantClick(assistant)}
-          >
-            {/* Badge do assistente */}
-            <div className="absolute top-4 right-4 z-10">
-              {isSelected && userPlan === 'free' ? (
-                <div className="flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-green-400 to-blue-400 text-white">
-                  <CheckCircle className="w-3 h-3" />
-                  <span>Plano Gratuito</span>
-                </div>
-              ) : assistant.isPremium ? (
-                <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${
-                  userPlan === 'premium'
-                    ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-white' 
-                    : 'bg-gray-200 text-gray-600'
-                }`}>
-                  <Crown className="w-3 h-3" />
-                  <span>Premium</span>
-                </div>
-              ) : null}
-            </div>
-
-            {/* Lock Overlay para assistentes bloqueados */}
-            {isLocked && (
-              <div className="absolute inset-0 bg-white/20 backdrop-blur-sm flex items-center justify-center z-20">
-                <div className="text-center p-6">
-                  <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Lock className="w-8 h-8 text-gray-500" />
+          return (
+            <Card 
+              key={assistant.id} 
+              className={`relative overflow-hidden transition-all duration-300 ${
+                isSelected 
+                  ? 'border-2 border-green-500 shadow-lg' 
+                  : isClickable 
+                    ? 'hover:shadow-xl hover:-translate-y-1 cursor-pointer' 
+                    : 'border-2 border-gray-200'
+              } bg-gradient-to-br ${assistant.bgColor}`}
+              onClick={() => isClickable && handleAssistantClick(assistant)}
+            >
+              {/* Badge do assistente */}
+              <div className="absolute top-4 right-4 z-10">
+                {isSelected && userPlan === 'free' ? (
+                  <div className="flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-green-400 to-blue-400 text-white">
+                    <CheckCircle className="w-3 h-3" />
+                    <span>Plano Gratuito</span>
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">
-                    {assistant.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-4 font-medium">
-                    Você já selecionou outro assistente gratuito.
-                  </p>
-                  <Button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onUpgrade();
-                    }}
-                    size="sm"
-                    className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
-                  >
-                    Upgrade para Premium
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            <CardHeader className="pb-4">
-              <div className={`w-12 h-12 bg-gradient-to-br ${assistant.color} rounded-lg flex items-center justify-center mb-4`}>
-                <IconComponent className="w-6 h-6 text-white" />
-              </div>
-              <CardTitle className="text-xl font-bold text-gray-900">
-                {assistant.title}
-              </CardTitle>
-              <CardDescription className="leading-relaxed text-gray-600">
-                {assistant.description}
-              </CardDescription>
-            </CardHeader>
-            
-            <CardContent className="pt-0">
-              <div className="space-y-3 mb-6">
-                {assistant.benefits.map((benefit, index) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <CheckCircle className="w-4 h-4 flex-shrink-0 text-green-500" />
-                    <span className="text-sm text-gray-700">
-                      {benefit}
-                    </span>
+                ) : assistant.isPremium ? (
+                  <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${
+                    userPlan === 'premium'
+                      ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-white' 
+                      : 'bg-gray-200 text-gray-600'
+                  }`}>
+                    <Crown className="w-3 h-3" />
+                    <span>Premium</span>
                   </div>
-                ))}
+                ) : null}
               </div>
-              
-              {!isLocked && (
-                <Button 
-                  className={`w-full bg-gradient-to-r ${assistant.color} hover:opacity-90 transition-opacity`}
-                >
-                  {cardActionText}
-                </Button>
+
+              {/* Lock Overlay para assistentes bloqueados */}
+              {isLocked && (
+                <div className="absolute inset-0 bg-white/20 backdrop-blur-sm flex items-center justify-center z-20">
+                  <div className="text-center p-6">
+                    <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Lock className="w-8 h-8 text-gray-500" />
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">
+                      {assistant.title}
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-4 font-medium">
+                      Você já selecionou outro assistente gratuito.
+                    </p>
+                    <Button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onUpgrade();
+                      }}
+                      size="sm"
+                      className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+                    >
+                      Upgrade para Premium
+                    </Button>
+                  </div>
+                </div>
               )}
-            </CardContent>
-          </Card>
-        );
-      })}
+
+              <CardHeader className="pb-4">
+                <div className={`w-12 h-12 bg-gradient-to-br ${assistant.color} rounded-lg flex items-center justify-center mb-4`}>
+                  <IconComponent className="w-6 h-6 text-white" />
+                </div>
+                <CardTitle className="text-xl font-bold text-gray-900">
+                  {assistant.title}
+                </CardTitle>
+                <CardDescription className="leading-relaxed text-gray-600">
+                  {assistant.description}
+                </CardDescription>
+              </CardHeader>
+              
+              <CardContent className="pt-0">
+                <div className="space-y-3 mb-6">
+                  {assistant.benefits.map((benefit, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      <CheckCircle className="w-4 h-4 flex-shrink-0 text-green-500" />
+                      <span className="text-sm text-gray-700">
+                        {benefit}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                
+                {!isLocked && (
+                  <Button 
+                    className={`w-full bg-gradient-to-r ${assistant.color} hover:opacity-90 transition-opacity`}
+                  >
+                    {cardActionText}
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
     </div>
   );
 };

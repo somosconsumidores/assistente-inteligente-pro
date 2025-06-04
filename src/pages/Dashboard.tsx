@@ -1,0 +1,113 @@
+
+import React from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useDashboardData } from '@/hooks/useDashboardData';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import UserPlanCard from '@/components/dashboard/UserPlanCard';
+import SavedPetitionsCard from '@/components/dashboard/SavedPetitionsCard';
+import SavedRecommendationsCard from '@/components/dashboard/SavedRecommendationsCard';
+import FinancialSummaryCard from '@/components/dashboard/FinancialSummaryCard';
+import RecentTravelCard from '@/components/dashboard/RecentTravelCard';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, LayoutDashboard } from 'lucide-react';
+
+const Dashboard: React.FC = () => {
+  const { profile } = useAuth();
+  const navigate = useNavigate();
+  const { petitions, productRecommendations, financialData, travelPlans, isLoading } = useDashboardData();
+
+  const handleUpgrade = () => {
+    console.log('Upgrade para premium');
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-center gap-4 mb-8">
+            <Skeleton className="h-8 w-8" />
+            <Skeleton className="h-8 w-48" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-64" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/')}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Voltar
+            </Button>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg">
+                <LayoutDashboard className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">Meu Painel</h1>
+                <p className="text-gray-600">
+                  Bem-vindo, {profile?.name || 'Usuário'}! Aqui está o resumo das suas atividades.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Dashboard Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Coluna 1 - Informações do usuário */}
+          <div className="space-y-6">
+            <UserPlanCard
+              userPlan={profile?.plan || 'free'}
+              selectedAssistant={profile?.selected_assistant_id}
+              onUpgrade={handleUpgrade}
+            />
+            
+            <FinancialSummaryCard
+              financialData={financialData}
+              onViewDashboard={() => navigate('/financas')}
+            />
+          </div>
+
+          {/* Coluna 2 - Petições e Recomendações */}
+          <div className="space-y-6">
+            <SavedPetitionsCard
+              petitions={petitions}
+              onViewAll={() => navigate('/direito-consumidor')}
+            />
+            
+            <SavedRecommendationsCard
+              recommendations={productRecommendations}
+              onViewAll={() => navigate('/produtos')}
+            />
+          </div>
+
+          {/* Coluna 3 - Viagens */}
+          <div className="space-y-6">
+            <RecentTravelCard
+              travelPlans={travelPlans}
+              onViewAll={() => navigate('/viagens')}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;

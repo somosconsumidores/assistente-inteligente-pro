@@ -155,6 +155,144 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_petitions: {
+        Row: {
+          case_details: Json | null
+          content: string
+          created_at: string
+          id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          case_details?: Json | null
+          content: string
+          created_at?: string
+          id?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          case_details?: Json | null
+          content?: string
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      saved_product_recommendations: {
+        Row: {
+          created_at: string
+          featured_products: Json | null
+          id: string
+          query: string
+          recommendations: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          featured_products?: Json | null
+          id?: string
+          query: string
+          recommendations: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          featured_products?: Json | null
+          id?: string
+          query?: string
+          recommendations?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      saved_travel_plans: {
+        Row: {
+          budget_info: Json | null
+          created_at: string
+          destination: string
+          id: string
+          itinerary: Json
+          travel_dates: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          budget_info?: Json | null
+          created_at?: string
+          destination: string
+          id?: string
+          itinerary: Json
+          travel_dates?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          budget_info?: Json | null
+          created_at?: string
+          destination?: string
+          id?: string
+          itinerary?: Json
+          travel_dates?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_financial_data: {
+        Row: {
+          created_at: string
+          dividas: number | null
+          gastos_fixes: number
+          gastos_variaveis: number
+          id: string
+          investimentos: number | null
+          meta_economia: number | null
+          objetivos: string[] | null
+          renda: number
+          reserva_emergencia: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dividas?: number | null
+          gastos_fixes: number
+          gastos_variaveis: number
+          id?: string
+          investimentos?: number | null
+          meta_economia?: number | null
+          objetivos?: string[] | null
+          renda: number
+          reserva_emergencia?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dividas?: number | null
+          gastos_fixes?: number
+          gastos_variaveis?: number
+          id?: string
+          investimentos?: number | null
+          meta_economia?: number | null
+          objetivos?: string[] | null
+          renda?: number
+          reserva_emergencia?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

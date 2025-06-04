@@ -95,7 +95,7 @@ export function AppSidebar() {
                     `}>
                     <item.icon className="w-5 h-5 flex-shrink-0" />
                     {!isCollapsed && <>
-                        <span className="flex-1 text-left text-sm font-medium text-slate-600">
+                        <span className="flex-1 text-left text-sm font-medium text-cyan-600">
                           {item.title}
                         </span>
                         {getPlanBadge(item.isPremium)}

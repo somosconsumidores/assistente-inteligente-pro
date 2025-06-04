@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -62,7 +63,12 @@ function App() {
                   <Travel />
                 </ProtectedRoute>
               } />
-               <Route path="/assistentes" element={
+              <Route path="/assistentes" element={
+                <ProtectedRoute>
+                  <Assistants />
+                </ProtectedRoute>
+              } />
+              <Route path="/select-assistant" element={
                 <ProtectedRoute>
                   <Assistants />
                 </ProtectedRoute>

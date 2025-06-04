@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -35,7 +34,7 @@ const Login = () => {
         title: "Sucesso!",
         description: "Login realizado com sucesso"
       });
-      navigate('/select-assistant');
+      navigate('/dashboard');
     } catch (error) {
       toast({
         title: "Erro",

@@ -1,16 +1,36 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Crown } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 import AssistantPanel from '@/components/AssistantPanel';
 
 const SelectAssistant = () => {
   const { profile, updateSelectedAssistant } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleUpgrade = () => {
     // Aqui seria a lógica para upgrade do plano
     console.log('Redirect to upgrade page');
+  };
+
+  const handleSelectAssistant = async (assistantId: string) => {
+    try {
+      await updateSelectedAssistant(assistantId);
+      toast({
+        title: "Sucesso!",
+        description: "Assistente selecionado com sucesso"
+      });
+      navigate('/dashboard');
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: error instanceof Error ? error.message : "Erro ao selecionar assistente",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -77,7 +97,7 @@ const SelectAssistant = () => {
           userPlan={profile?.plan as 'free' | 'premium' || 'free'} 
           onUpgrade={handleUpgrade}
           selectedAssistantId={profile?.selected_assistant_id} 
-          onSelectAssistant={updateSelectedAssistant} 
+          onSelectAssistant={handleSelectAssistant} 
         />
 
         {/* Bottom Info */}

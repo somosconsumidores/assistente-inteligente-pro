@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDashboardData } from '@/hooks/useDashboardData';
@@ -14,7 +13,6 @@ import AssistantCards from '@/components/AssistantCards';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useNavigate } from 'react-router-dom';
 import { LayoutDashboard } from 'lucide-react';
-
 const Dashboard: React.FC = () => {
   const {
     profile
@@ -28,14 +26,11 @@ const Dashboard: React.FC = () => {
     isLoading,
     refetch
   } = useDashboardData();
-  
   const handleUpgrade = () => {
     console.log('Upgrade para premium');
   };
-  
   if (isLoading) {
-    return (
-      <DashboardLayout>
+    return <DashboardLayout>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center gap-4 mb-8">
             <Skeleton className="h-8 w-8" />
@@ -47,12 +42,9 @@ const Dashboard: React.FC = () => {
           }).map((_, i) => <Skeleton key={i} className="h-64" />)}
           </div>
         </div>
-      </DashboardLayout>
-    );
+      </DashboardLayout>;
   }
-  
-  return (
-    <DashboardLayout>
+  return <DashboardLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -96,20 +88,8 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Assistants Section */}
-        <div className="mt-12">
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Meus Assistentes</h2>
-            <p className="text-gray-600">Escolha um assistente para começar a usar</p>
-          </div>
-          
-          <AssistantCards 
-            userPlan={profile?.plan || 'free'} 
-            onUpgrade={handleUpgrade}
-          />
-        </div>
+        
       </div>
-    </DashboardLayout>
-  );
+    </DashboardLayout>;
 };
-
 export default Dashboard;

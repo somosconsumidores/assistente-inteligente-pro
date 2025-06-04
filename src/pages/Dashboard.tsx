@@ -11,49 +11,43 @@ import RecentTravelCard from '@/components/dashboard/RecentTravelCard';
 import SelectedAssistantCard from '@/components/dashboard/SelectedAssistantCard';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, LayoutDashboard } from 'lucide-react';
-
 const Dashboard: React.FC = () => {
-  const { profile } = useAuth();
+  const {
+    profile
+  } = useAuth();
   const navigate = useNavigate();
-  const { petitions, productRecommendations, financialData, travelPlans, isLoading, refetch } = useDashboardData();
-
+  const {
+    petitions,
+    productRecommendations,
+    financialData,
+    travelPlans,
+    isLoading,
+    refetch
+  } = useDashboardData();
   const handleUpgrade = () => {
     console.log('Upgrade para premium');
   };
-
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
+    return <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center gap-4 mb-8">
             <Skeleton className="h-8 w-8" />
             <Skeleton className="h-8 w-48" />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-64" />
-            ))}
+            {Array.from({
+            length: 6
+          }).map((_, i) => <Skeleton key={i} className="h-64" />)}
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-gray-50">
+  return <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/')}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Voltar
-            </Button>
+            
             <div className="flex items-center gap-3">
               <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg">
                 <LayoutDashboard className="w-6 h-6 text-white" />
@@ -72,47 +66,26 @@ const Dashboard: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Coluna 1 - Informações do usuário e assistente */}
           <div className="space-y-6">
-            <UserPlanCard
-              userPlan={profile?.plan || 'free'}
-              selectedAssistant={profile?.selected_assistant_id}
-              onUpgrade={handleUpgrade}
-            />
+            <UserPlanCard userPlan={profile?.plan || 'free'} selectedAssistant={profile?.selected_assistant_id} onUpgrade={handleUpgrade} />
             
-            <SelectedAssistantCard
-              selectedAssistantId={profile?.selected_assistant_id}
-            />
+            <SelectedAssistantCard selectedAssistantId={profile?.selected_assistant_id} />
           </div>
 
           {/* Coluna 2 - Petições e Recomendações */}
           <div className="space-y-6">
-            <SavedPetitionsCard
-              petitions={petitions}
-              onViewAll={() => navigate('/peticoes-salvas')}
-            />
+            <SavedPetitionsCard petitions={petitions} onViewAll={() => navigate('/peticoes-salvas')} />
             
-            <SavedRecommendationsCard
-              recommendations={productRecommendations}
-              onViewAll={() => navigate('/recomendacoes-salvas')}
-              onUpdate={refetch}
-            />
+            <SavedRecommendationsCard recommendations={productRecommendations} onViewAll={() => navigate('/recomendacoes-salvas')} onUpdate={refetch} />
           </div>
 
           {/* Coluna 3 - Finanças e Viagens */}
           <div className="space-y-6">
-            <FinancialSummaryCard
-              financialData={financialData}
-              onViewDashboard={() => navigate('/financas')}
-            />
+            <FinancialSummaryCard financialData={financialData} onViewDashboard={() => navigate('/financas')} />
             
-            <RecentTravelCard
-              travelPlans={travelPlans}
-              onViewAll={() => navigate('/viagens')}
-            />
+            <RecentTravelCard travelPlans={travelPlans} onViewAll={() => navigate('/viagens')} />
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Dashboard;

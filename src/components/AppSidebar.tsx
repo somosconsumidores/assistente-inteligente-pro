@@ -68,7 +68,7 @@ export function AppSidebar() {
     return;
   };
   return <Sidebar className="bg-slate-900 border-slate-700">
-      <SidebarHeader className="p-4">
+      <SidebarHeader className="p-4 bg-zinc-800">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
             <LayoutDashboard className="w-4 h-4 text-white" />
@@ -80,7 +80,7 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="px-2">
+      <SidebarContent className="px-2 bg-neutral-800">
         <SidebarGroup>
           <SidebarGroupLabel className="text-slate-400 text-xs font-medium uppercase tracking-wider mb-2">
             {!isCollapsed && 'Navegação'}
@@ -95,7 +95,7 @@ export function AppSidebar() {
                     `}>
                     <item.icon className="w-5 h-5 flex-shrink-0" />
                     {!isCollapsed && <>
-                        <span className="flex-1 text-left text-sm font-medium text-cyan-600">
+                        <span className="flex-1 text-left text-sm font-medium text-slate-50">
                           {item.title}
                         </span>
                         {getPlanBadge(item.isPremium)}
@@ -107,8 +107,8 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t border-slate-700">
-        {!isCollapsed && profile && <div className="mb-4 p-3 bg-slate-800 rounded-lg">
+      <SidebarFooter className="p-4 border-t border-slate-700 bg-zinc-800">
+        {!isCollapsed && profile && <div className="mb-4 p-3 rounded-lg bg-violet-950">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-blue-500 rounded-full flex items-center justify-center">
                 <span className="text-white text-sm font-bold">

@@ -2,7 +2,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ProductSeal from './ProductSeal';
-import ProductImage from './ProductImage';
 import ProductActions from './ProductActions';
 
 interface FeaturedProduct {
@@ -17,11 +16,6 @@ interface FeaturedProduct {
 
 interface ProductCardProps {
   product: FeaturedProduct;
-  imageUrl?: string;
-  isImageLoading: boolean;
-  hasImageError: boolean;
-  onRetryImage: () => void;
-  onImageError: () => void;
 }
 
 const formatPrice = (price: string | number): string => {
@@ -53,14 +47,7 @@ const formatPrice = (price: string | number): string => {
   }).format(numericPrice);
 };
 
-const ProductCard = ({ 
-  product, 
-  imageUrl, 
-  isImageLoading, 
-  hasImageError, 
-  onRetryImage,
-  onImageError
-}: ProductCardProps) => {
+const ProductCard = ({ product }: ProductCardProps) => {
   const sealComponent = ProductSeal({ seal: product.seal });
   
   const formattedPrice = formatPrice(product.price);
@@ -68,14 +55,13 @@ const ProductCard = ({
   return (
     <Card className={`overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105 bg-gradient-to-br ${sealComponent.sealInfo.bgColor} border-2`}>
       <div className="relative">
-        <ProductImage
-          productId={product.id}
-          productName={product.name}
-          imageUrl={imageUrl}
-          isLoading={isImageLoading}
-          hasError={hasImageError}
-          onRetry={onRetryImage}
-        />
+        {/* Área visual sem imagem - apenas com gradiente e selo */}
+        <div className="w-full h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+          <div className="text-center text-gray-500">
+            <div className="text-4xl mb-2">{sealComponent.sealInfo.emoji}</div>
+            <span className="text-sm font-medium">{sealComponent.sealInfo.label}</span>
+          </div>
+        </div>
         {sealComponent.component}
       </div>
       

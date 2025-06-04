@@ -109,8 +109,8 @@ const Supermercado = () => {
                 <ShoppingBasket className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Assistente de Compras no Supermercado</h1>
-                <p className="text-gray-600">
+                <h1 className="text-3xl font-bold text-slate-50">Assistente de Compras no Supermercado</h1>
+                <p className="text-slate-50">
                   Scanner de produtos, comparação de preços e recomendações inteligentes
                 </p>
               </div>

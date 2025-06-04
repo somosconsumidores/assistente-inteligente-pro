@@ -10,7 +10,6 @@ import { useSavedItineraries } from '@/hooks/useSavedItineraries';
 import GeneratedItinerary from '@/components/GeneratedItinerary';
 import SavedItinerariesList from '@/components/SavedItinerariesList';
 import { useSearchParams } from 'react-router-dom';
-
 const Viagens = () => {
   const [searchParams] = useSearchParams();
   const initialTab = searchParams.get('tab') || 'planner';
@@ -31,19 +30,28 @@ const Viagens = () => {
     const tab = searchParams.get('tab') || 'planner';
     setActiveTab(tab);
   }, [searchParams]);
-
-  const { generateItinerary, isGenerating, generatedItinerary, clearItinerary } = useTravelItinerary();
-  const { savedItineraries, isLoading: isLoadingSaved, saveItinerary, deleteItinerary } = useSavedItineraries();
-
+  const {
+    generateItinerary,
+    isGenerating,
+    generatedItinerary,
+    clearItinerary
+  } = useTravelItinerary();
+  const {
+    savedItineraries,
+    isLoading: isLoadingSaved,
+    saveItinerary,
+    deleteItinerary
+  } = useSavedItineraries();
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
-
   const handleCreateItinerary = async () => {
     if (!formData.destination || !formData.departureDate || !formData.returnDate) {
       return;
     }
-
     await generateItinerary({
       destination: formData.destination,
       budget: formData.budget ? parseFloat(formData.budget) : undefined,
@@ -54,13 +62,11 @@ const Viagens = () => {
       additionalPreferences: formData.additionalPreferences || undefined
     });
   };
-
   const handleSaveItinerary = async () => {
     if (generatedItinerary) {
       await saveItinerary(generatedItinerary, formData);
     }
   };
-
   const handleBackToPlanner = () => {
     clearItinerary();
     setViewingSavedItinerary(null);
@@ -75,20 +81,16 @@ const Viagens = () => {
     });
     setActiveTab('planner');
   };
-
   const handleViewSavedItinerary = (itinerary: any) => {
     setViewingSavedItinerary(itinerary);
     setActiveTab('viewing');
   };
-
   const handleDeleteItinerary = async (id: string) => {
     if (confirm('Tem certeza que deseja excluir este roteiro?')) {
       await deleteItinerary(id);
     }
   };
-
-  return (
-    <DashboardLayout>
+  return <DashboardLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -98,8 +100,8 @@ const Viagens = () => {
                 <Plane className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Consultor de Viagens</h1>
-                <p className="text-gray-600">
+                <h1 className="text-3xl font-bold text-slate-50">Consultor de Viagens</h1>
+                <p className="text-slate-50">
                   Planeje sua viagem perfeita com roteiros personalizados e dicas de especialista
                 </p>
               </div>
@@ -108,51 +110,25 @@ const Viagens = () => {
         </div>
 
         {/* Mostrar roteiro gerado, roteiro salvo ou interface de planejamento */}
-        {generatedItinerary ? (
-          <GeneratedItinerary 
-            itinerary={generatedItinerary}
-            onBackToPlanner={handleBackToPlanner}
-            onSave={handleSaveItinerary}
-          />
-        ) : viewingSavedItinerary ? (
-          <GeneratedItinerary 
-            itinerary={viewingSavedItinerary.itinerary_data}
-            onBackToPlanner={handleBackToPlanner}
-            isSaved={true}
-          />
-        ) : (
-          <>
+        {generatedItinerary ? <GeneratedItinerary itinerary={generatedItinerary} onBackToPlanner={handleBackToPlanner} onSave={handleSaveItinerary} /> : viewingSavedItinerary ? <GeneratedItinerary itinerary={viewingSavedItinerary.itinerary_data} onBackToPlanner={handleBackToPlanner} isSaved={true} /> : <>
             {/* Navigation Tabs */}
             <div className="flex space-x-4 mb-8">
-              <Button 
-                variant={activeTab === 'planner' ? 'default' : 'outline'}
-                onClick={() => setActiveTab('planner')}
-                className="flex items-center space-x-2"
-              >
+              <Button variant={activeTab === 'planner' ? 'default' : 'outline'} onClick={() => setActiveTab('planner')} className="flex items-center space-x-2">
                 <MapPin className="w-4 h-4" />
                 <span>Planejador</span>
               </Button>
-              <Button 
-                variant={activeTab === 'saved' ? 'default' : 'outline'}
-                onClick={() => setActiveTab('saved')}
-                className="flex items-center space-x-2"
-              >
+              <Button variant={activeTab === 'saved' ? 'default' : 'outline'} onClick={() => setActiveTab('saved')} className="flex items-center space-x-2">
                 <BookOpen className="w-4 h-4" />
                 <span>Roteiros Salvos</span>
               </Button>
-              <Button 
-                variant={activeTab === 'itinerary' ? 'default' : 'outline'}
-                onClick={() => setActiveTab('itinerary')}
-                className="flex items-center space-x-2"
-              >
+              <Button variant={activeTab === 'itinerary' ? 'default' : 'outline'} onClick={() => setActiveTab('itinerary')} className="flex items-center space-x-2">
                 <Calendar className="w-4 h-4" />
                 <span>Exemplo</span>
               </Button>
             </div>
 
             {/* Planner Tab */}
-            {activeTab === 'planner' && (
-              <div className="space-y-6">
+            {activeTab === 'planner' && <div className="space-y-6">
                 <Card>
                   <CardHeader>
                     <CardTitle>Planeje sua Viagem Perfeita</CardTitle>
@@ -162,59 +138,27 @@ const Viagens = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="destino">Destino</Label>
-                        <Input 
-                          id="destino" 
-                          placeholder="Ex: Paris, França"
-                          value={formData.destination}
-                          onChange={(e) => handleInputChange('destination', e.target.value)}
-                        />
+                        <Input id="destino" placeholder="Ex: Paris, França" value={formData.destination} onChange={e => handleInputChange('destination', e.target.value)} />
                       </div>
                       <div>
                         <Label htmlFor="orcamento">Orçamento Total (R$)</Label>
-                        <Input 
-                          id="orcamento" 
-                          placeholder="0,00" 
-                          type="number"
-                          value={formData.budget}
-                          onChange={(e) => handleInputChange('budget', e.target.value)}
-                        />
+                        <Input id="orcamento" placeholder="0,00" type="number" value={formData.budget} onChange={e => handleInputChange('budget', e.target.value)} />
                       </div>
                       <div>
                         <Label htmlFor="data-ida">Data de Ida</Label>
-                        <Input 
-                          id="data-ida" 
-                          type="date"
-                          value={formData.departureDate}
-                          onChange={(e) => handleInputChange('departureDate', e.target.value)}
-                        />
+                        <Input id="data-ida" type="date" value={formData.departureDate} onChange={e => handleInputChange('departureDate', e.target.value)} />
                       </div>
                       <div>
                         <Label htmlFor="data-volta">Data de Volta</Label>
-                        <Input 
-                          id="data-volta" 
-                          type="date"
-                          value={formData.returnDate}
-                          onChange={(e) => handleInputChange('returnDate', e.target.value)}
-                        />
+                        <Input id="data-volta" type="date" value={formData.returnDate} onChange={e => handleInputChange('returnDate', e.target.value)} />
                       </div>
                       <div>
                         <Label htmlFor="pessoas">Número de Pessoas</Label>
-                        <Input 
-                          id="pessoas" 
-                          type="number" 
-                          min="1" 
-                          placeholder="1"
-                          value={formData.travelersCount}
-                          onChange={(e) => handleInputChange('travelersCount', e.target.value)}
-                        />
+                        <Input id="pessoas" type="number" min="1" placeholder="1" value={formData.travelersCount} onChange={e => handleInputChange('travelersCount', e.target.value)} />
                       </div>
                       <div>
                         <Label htmlFor="estilo">Estilo de Viagem</Label>
-                        <select 
-                          className="w-full p-2 border border-gray-300 rounded-md"
-                          value={formData.travelStyle}
-                          onChange={(e) => handleInputChange('travelStyle', e.target.value)}
-                        >
+                        <select className="w-full p-2 border border-gray-300 rounded-md" value={formData.travelStyle} onChange={e => handleInputChange('travelStyle', e.target.value)}>
                           <option>Econômica</option>
                           <option>Conforto</option>
                           <option>Luxo</option>
@@ -226,30 +170,14 @@ const Viagens = () => {
                     
                     <div>
                       <Label htmlFor="preferencias">Preferências Adicionais (Opcional)</Label>
-                      <textarea 
-                        id="preferencias"
-                        className="w-full p-2 border border-gray-300 rounded-md"
-                        rows={3}
-                        placeholder="Ex: Gosto de museus, prefiro evitar atividades muito físicas..."
-                        value={formData.additionalPreferences}
-                        onChange={(e) => handleInputChange('additionalPreferences', e.target.value)}
-                      />
+                      <textarea id="preferencias" className="w-full p-2 border border-gray-300 rounded-md" rows={3} placeholder="Ex: Gosto de museus, prefiro evitar atividades muito físicas..." value={formData.additionalPreferences} onChange={e => handleInputChange('additionalPreferences', e.target.value)} />
                     </div>
                     
-                    <Button 
-                      className="w-full" 
-                      size="lg" 
-                      onClick={handleCreateItinerary}
-                      disabled={isGenerating || !formData.destination || !formData.departureDate || !formData.returnDate}
-                    >
-                      {isGenerating ? (
-                        <>
+                    <Button className="w-full" size="lg" onClick={handleCreateItinerary} disabled={isGenerating || !formData.destination || !formData.departureDate || !formData.returnDate}>
+                      {isGenerating ? <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                           Criando Roteiro...
-                        </>
-                      ) : (
-                        'Criar Roteiro Personalizado'
-                      )}
+                        </> : 'Criar Roteiro Personalizado'}
                     </Button>
                   </CardContent>
                 </Card>
@@ -279,12 +207,10 @@ const Viagens = () => {
                     </div>
                   </CardContent>
                 </Card>
-              </div>
-            )}
+              </div>}
 
             {/* Saved Itineraries Tab */}
-            {activeTab === 'saved' && (
-              <div className="space-y-6">
+            {activeTab === 'saved' && <div className="space-y-6">
                 <Card>
                   <CardHeader>
                     <CardTitle>Seus Roteiros Salvos</CardTitle>
@@ -294,26 +220,16 @@ const Viagens = () => {
                   </CardHeader>
                 </Card>
 
-                {isLoadingSaved ? (
-                  <Card>
+                {isLoadingSaved ? <Card>
                     <CardContent className="p-8 text-center">
                       <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
                       <p>Carregando roteiros salvos...</p>
                     </CardContent>
-                  </Card>
-                ) : (
-                  <SavedItinerariesList
-                    itineraries={savedItineraries}
-                    onDelete={handleDeleteItinerary}
-                    onView={handleViewSavedItinerary}
-                  />
-                )}
-              </div>
-            )}
+                  </Card> : <SavedItinerariesList itineraries={savedItineraries} onDelete={handleDeleteItinerary} onView={handleViewSavedItinerary} />}
+              </div>}
 
             {/* Itinerary Tab - keep existing static example */}
-            {activeTab === 'itinerary' && (
-              <div className="space-y-6">
+            {activeTab === 'itinerary' && <div className="space-y-6">
                 {/* Static Itinerary Example */}
                 <Card>
                   <CardHeader>
@@ -323,8 +239,7 @@ const Viagens = () => {
                 </Card>
 
                 <div className="space-y-4">
-                  {[1, 2, 3, 4, 5].map((day) => (
-                    <Card key={day}>
+                  {[1, 2, 3, 4, 5].map(day => <Card key={day}>
                       <CardHeader>
                         <CardTitle className="text-lg">Dia {day}</CardTitle>
                       </CardHeader>
@@ -360,8 +275,7 @@ const Viagens = () => {
                           </div>
                         </div>
                       </CardContent>
-                    </Card>
-                  ))}
+                    </Card>)}
                 </div>
 
                 <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
@@ -377,13 +291,9 @@ const Viagens = () => {
                     </ul>
                   </CardContent>
                 </Card>
-              </div>
-            )}
-          </>
-        )}
+              </div>}
+          </>}
       </div>
-    </DashboardLayout>
-  );
+    </DashboardLayout>;
 };
-
 export default Viagens;

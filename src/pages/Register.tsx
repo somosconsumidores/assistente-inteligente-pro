@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, EyeOff, Mail, UserPlus } from 'lucide-react';
+import { Eye, EyeOff, Mail, UserPlus, X } from 'lucide-react';
+
 const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -22,6 +23,7 @@ const Register = () => {
     toast
   } = useToast();
   const navigate = useNavigate();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email || !password || !confirmPassword) {
@@ -63,8 +65,13 @@ const Register = () => {
       });
     }
   };
+
+  const handleClose = () => {
+    navigate('/');
+  };
+
   return <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md relative">
         {/* Logo */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center space-x-2">
@@ -75,7 +82,17 @@ const Register = () => {
           </Link>
         </div>
 
-        <Card className="border-2 border-gray-200 shadow-xl">
+        <Card className="border-2 border-gray-200 shadow-xl relative">
+          {/* Close button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleClose}
+            className="absolute right-2 top-2 z-10 h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold text-slate-50">
               Criar conta gratuita
@@ -141,4 +158,5 @@ const Register = () => {
       </div>
     </div>;
 };
+
 export default Register;

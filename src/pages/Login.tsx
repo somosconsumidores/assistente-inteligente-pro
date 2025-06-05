@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, EyeOff, Mail } from 'lucide-react';
+import { Eye, EyeOff, Mail, X } from 'lucide-react';
+
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,6 +20,7 @@ const Login = () => {
     toast
   } = useToast();
   const navigate = useNavigate();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
@@ -44,8 +46,13 @@ const Login = () => {
       });
     }
   };
+
+  const handleClose = () => {
+    navigate('/');
+  };
+
   return <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md relative">
         {/* Logo */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center space-x-2">
@@ -56,7 +63,17 @@ const Login = () => {
           </Link>
         </div>
 
-        <Card className="border-2 border-gray-200 dark:border-gray-700 shadow-xl">
+        <Card className="border-2 border-gray-200 dark:border-gray-700 shadow-xl relative">
+          {/* Close button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleClose}
+            className="absolute right-2 top-2 z-10 h-8 w-8 p-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold text-slate-50">
               Entrar na sua conta
@@ -104,4 +121,5 @@ const Login = () => {
       </div>
     </div>;
 };
+
 export default Login;

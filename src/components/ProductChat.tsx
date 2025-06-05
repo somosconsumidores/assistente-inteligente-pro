@@ -61,7 +61,7 @@ const ProductChat = () => {
               <Bot className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h3 className="font-bold text-lg">🏆 Mestre dos Produtos</h3>
+              <h3 className="font-bold text-lg text-gray-800">🏆 Mestre dos Produtos</h3>
               <p className="text-sm text-gray-600">Especialista em comparações e avaliações</p>
             </div>
           </div>

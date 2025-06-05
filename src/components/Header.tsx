@@ -174,10 +174,10 @@ const Header = () => {
                   </>
                 ) : (
                   <div className="space-y-3">
-                    <Button variant="outline" asChild className="w-full justify-center border-gray-700 hover:bg-gray-800 touch-target">
-                      <Link to="/login" onClick={closeMobileMenu}>
-                        <LogIn className="w-4 h-4 mr-2" />
-                        Entrar
+                    <Button variant="outline" asChild className="w-full justify-center border-gray-700 hover:bg-gray-800 touch-target text-white">
+                      <Link to="/login" onClick={closeMobileMenu} className="text-white">
+                        <LogIn className="w-4 h-4 mr-2 text-white" />
+                        <span className="text-white">Entrar</span>
                       </Link>
                     </Button>
                     <Button asChild className="w-full justify-center bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 touch-target">

@@ -2,9 +2,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight, Sparkles, LayoutDashboard } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Hero = () => {
+  const { user } = useAuth();
+
   return (
     <section className="relative mobile-padding py-12 sm:py-16 lg:py-20 xl:py-24 overflow-hidden">
       {/* Background Elements */}
@@ -39,27 +42,42 @@ const Hero = () => {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-4 sm:pt-6">
-            <Button 
-              asChild 
-              size="lg"
-              className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg touch-target"
-            >
-              <Link to="/register" className="flex items-center">
-                Começar Gratuitamente
-                <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
-              </Link>
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              size="lg"
-              asChild
-              className="w-full sm:w-auto border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg touch-target"
-            >
-              <Link to="/login">
-                Já tenho conta
-              </Link>
-            </Button>
+            {user ? (
+              <Button 
+                asChild 
+                size="lg"
+                className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg touch-target"
+              >
+                <Link to="/dashboard" className="flex items-center">
+                  <LayoutDashboard className="mr-2 w-4 h-4 sm:w-5 sm:h-5" />
+                  Acessar meu Painel
+                </Link>
+              </Button>
+            ) : (
+              <>
+                <Button 
+                  asChild 
+                  size="lg"
+                  className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg touch-target"
+                >
+                  <Link to="/register" className="flex items-center">
+                    Começar Gratuitamente
+                    <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
+                  </Link>
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  size="lg"
+                  asChild
+                  className="w-full sm:w-auto border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg touch-target"
+                >
+                  <Link to="/login">
+                    Já tenho conta
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Stats */}

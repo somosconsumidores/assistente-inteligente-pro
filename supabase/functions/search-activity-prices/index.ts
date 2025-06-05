@@ -19,8 +19,8 @@ interface PriceSearchResult {
   confidence: 'high' | 'medium' | 'low';
 }
 
-// Função para buscar preços via Google Places API
-const searchGooglePlaces = async (activityName: string, location: string): Promise<PriceSearchResult | null> => {
+// Função para buscar preços via Nova Google Places API
+const searchGooglePlacesNew = async (activityName: string, location: string): Promise<PriceSearchResult | null> => {
   const apiKey = Deno.env.get('GOOGLE_PLACES_API_KEY');
   
   if (!apiKey) {
@@ -29,87 +29,107 @@ const searchGooglePlaces = async (activityName: string, location: string): Promi
   }
 
   try {
-    // Primeiro, buscar o lugar
+    // Usar a nova Text Search API
     const searchQuery = `${activityName} ${location}`;
-    const searchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(searchQuery)}&key=${apiKey}`;
+    const searchUrl = 'https://places.googleapis.com/v1/places:searchText';
     
-    const searchResponse = await fetch(searchUrl);
+    const searchResponse = await fetch(searchUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': apiKey,
+        'X-Goog-FieldMask': 'places.id,places.displayName,places.priceRange,places.types,places.rating,places.userRatingCount'
+      },
+      body: JSON.stringify({
+        textQuery: searchQuery,
+        maxResultCount: 1,
+        languageCode: 'pt'
+      })
+    });
+
+    if (!searchResponse.ok) {
+      console.error('Erro na busca Places API:', searchResponse.status, searchResponse.statusText);
+      return null;
+    }
+
     const searchData = await searchResponse.json();
     
-    if (!searchData.results || searchData.results.length === 0) {
+    if (!searchData.places || searchData.places.length === 0) {
+      console.log('Nenhum lugar encontrado para:', searchQuery);
       return null;
     }
 
-    const place = searchData.results[0];
-    const placeId = place.place_id;
-    
-    // Buscar detalhes do lugar incluindo preços
-    const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=name,price_level,types&key=${apiKey}`;
-    
-    const detailsResponse = await fetch(detailsUrl);
-    const detailsData = await detailsResponse.json();
-    
-    if (!detailsData.result) {
-      return null;
-    }
+    const place = searchData.places[0];
+    console.log('Lugar encontrado:', place.displayName?.text, 'Tipos:', place.types);
 
-    const priceLevel = detailsData.result.price_level;
-    const types = detailsData.result.types || [];
-    
-    // Converter price_level do Google em estimativa de preço
+    // Verificar se tem dados de preço diretos
     let estimatedPrice = '';
     let confidence: 'high' | 'medium' | 'low' = 'medium';
-    
-    if (types.includes('museum')) {
-      switch (priceLevel) {
-        case 1: estimatedPrice = '€8-15'; break;
-        case 2: estimatedPrice = '€15-25'; break;
-        case 3: estimatedPrice = '€25-40'; break;
-        case 4: estimatedPrice = '€40-60'; break;
-        default: estimatedPrice = '€15-30'; confidence = 'low'; break;
-      }
-    } else if (types.includes('restaurant') || types.includes('food')) {
-      switch (priceLevel) {
-        case 1: estimatedPrice = '€15-25'; break;
-        case 2: estimatedPrice = '€25-45'; break;
-        case 3: estimatedPrice = '€45-80'; break;
-        case 4: estimatedPrice = '€80-150'; break;
-        default: estimatedPrice = '€30-50'; confidence = 'low'; break;
-      }
-    } else if (types.includes('tourist_attraction')) {
-      switch (priceLevel) {
-        case 1: estimatedPrice = '€5-12'; break;
-        case 2: estimatedPrice = '€12-25'; break;
-        case 3: estimatedPrice = '€25-45'; break;
-        case 4: estimatedPrice = '€45-80'; break;
-        default: estimatedPrice = '€15-35'; confidence = 'low'; break;
-      }
-    } else {
-      // Estimativa genérica baseada no price_level
-      switch (priceLevel) {
-        case 1: estimatedPrice = '€10-20'; break;
-        case 2: estimatedPrice = '€20-40'; break;
-        case 3: estimatedPrice = '€40-70'; break;
-        case 4: estimatedPrice = '€70-120'; break;
-        default: estimatedPrice = '€20-50'; confidence = 'low'; break;
+    let currency = 'EUR';
+
+    if (place.priceRange) {
+      // Nova API retorna range de preços estruturado
+      const startPrice = place.priceRange.startPrice;
+      const endPrice = place.priceRange.endPrice;
+      
+      if (startPrice && endPrice) {
+        estimatedPrice = `${startPrice.currencyCode || 'EUR'} ${startPrice.units || 0}-${endPrice.units || 0}`;
+        currency = startPrice.currencyCode || 'EUR';
+        confidence = 'high';
+        
+        console.log('Preço encontrado na nova API:', estimatedPrice);
       }
     }
 
-    if (priceLevel !== undefined) {
-      confidence = 'high';
+    // Se não tem preço direto, usar estimativa baseada em tipos e avaliações
+    if (!estimatedPrice) {
+      const types = place.types || [];
+      const rating = place.rating || 0;
+      const userRatingCount = place.userRatingCount || 0;
+      
+      // Usar avaliações para ajustar estimativas
+      let multiplier = 1;
+      if (rating >= 4.5 && userRatingCount > 100) {
+        multiplier = 1.3; // Lugares bem avaliados tendem a ser mais caros
+      } else if (rating < 3.5) {
+        multiplier = 0.8; // Lugares mal avaliados tendem a ser mais baratos
+      }
+
+      if (types.includes('museum')) {
+        const basePrice = Math.round(20 * multiplier);
+        estimatedPrice = `€${basePrice}-${basePrice + 15}`;
+        confidence = 'medium';
+      } else if (types.includes('restaurant') || types.includes('food') || types.includes('meal_takeaway')) {
+        const basePrice = Math.round(35 * multiplier);
+        estimatedPrice = `€${basePrice}-${basePrice + 25}`;
+        confidence = 'medium';
+      } else if (types.includes('tourist_attraction') || types.includes('establishment')) {
+        const basePrice = Math.round(15 * multiplier);
+        estimatedPrice = `€${basePrice}-${basePrice + 20}`;
+        confidence = 'medium';
+      } else if (types.includes('lodging')) {
+        const basePrice = Math.round(80 * multiplier);
+        estimatedPrice = `€${basePrice}-${basePrice + 50}`;
+        confidence = 'medium';
+      } else {
+        // Estimativa genérica
+        const basePrice = Math.round(25 * multiplier);
+        estimatedPrice = `€${basePrice}-${basePrice + 20}`;
+        confidence = 'low';
+      }
     }
 
     return {
       activityName,
       location,
       estimatedPrice,
-      currency: 'EUR',
+      currency,
       source: 'google_places',
       confidence
     };
 
   } catch (error) {
-    console.error('Erro ao buscar no Google Places:', error);
+    console.error('Erro ao buscar na nova Google Places API:', error);
     return null;
   }
 };
@@ -215,9 +235,9 @@ serve(async (req) => {
       )
     }
 
-    // Tentar buscar via Google Places API
-    console.log('Buscando preço via Google Places para:', activityName, location);
-    let priceResult = await searchGooglePlaces(activityName, location);
+    // Tentar buscar via Nova Google Places API
+    console.log('Buscando preço via Nova Google Places API para:', activityName, location);
+    let priceResult = await searchGooglePlacesNew(activityName, location);
 
     // Se não encontrou via API, usar estimativa
     if (!priceResult) {

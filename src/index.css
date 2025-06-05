@@ -55,31 +55,36 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* Prevent iOS bounce scrolling and zoom issues */
+    /* Allow normal scrolling behavior */
     -webkit-overflow-scrolling: touch;
-    position: fixed;
+    /* Remove fixed positioning that blocks scroll */
+    position: relative;
     width: 100%;
-    height: 100%;
-    overflow: hidden;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 
   #root {
-    height: 100%;
-    overflow: hidden;
+    min-height: 100vh;
+    width: 100%;
+    overflow-x: hidden;
   }
 
   html {
     scroll-behavior: smooth;
-    /* Prevent zoom on mobile */
+    /* Prevent zoom on mobile but allow scroll */
     -webkit-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
     height: 100%;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 
-  /* Prevent elastic scrolling on iOS */
+  /* Prevent elastic scrolling on iOS but allow normal scroll */
   html, body {
-    overscroll-behavior: none;
+    overscroll-behavior-x: none;
+    overscroll-behavior-y: auto;
   }
 
   /* iOS specific fixes */
@@ -87,6 +92,11 @@
     .mobile-safe-area {
       padding-top: max(env(safe-area-inset-top), 1rem);
       padding-bottom: max(env(safe-area-inset-bottom), 1rem);
+    }
+    
+    body {
+      height: 100vh;
+      height: -webkit-fill-available;
     }
   }
 }
@@ -244,16 +254,7 @@
   }
 }
 
-/* Fix iOS bounce scroll and viewport issues */
-@supports (-webkit-touch-callout: none) {
-  body {
-    position: relative;
-    height: 100vh;
-    height: -webkit-fill-available;
-  }
-}
-
-/* Prevent horizontal scroll */
+/* Prevent horizontal scroll but allow vertical */
 .no-horizontal-scroll {
   overflow-x: hidden;
   width: 100%;

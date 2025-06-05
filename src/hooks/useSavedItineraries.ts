@@ -64,7 +64,7 @@ export const useSavedItineraries = () => {
         user_id: user.id,
         title: `Viagem para ${formData.destination}`,
         destination: formData.destination,
-        itinerary_data: completeItineraryResponse, // Salvamos TODA a resposta
+        itinerary_data: completeItineraryResponse as any, // Cast to any to satisfy Json type
         departure_date: formData.departureDate,
         return_date: formData.returnDate,
         travelers_count: parseInt(formData.travelersCount),
@@ -76,7 +76,7 @@ export const useSavedItineraries = () => {
 
       const { data, error } = await supabase
         .from('saved_itineraries')
-        .insert([dataToSave])
+        .insert(dataToSave) // Remove the array brackets
         .select();
 
       if (error) throw error;

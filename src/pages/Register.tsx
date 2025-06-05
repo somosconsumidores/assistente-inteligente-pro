@@ -123,13 +123,13 @@ const Register = () => {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700" disabled={isLoading}>
+              <Button type="submit" disabled={isLoading} className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-slate-50 font-extrabold text-lg">
                 {isLoading ? "Criando conta..." : "Criar conta gratuita"}
               </Button>
             </form>
 
             <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-slate-50">
                 Já tem uma conta?{' '}
                 <Link to="/login" className="text-blue-600 hover:text-blue-700 font-medium">
                   Fazer login

@@ -5,6 +5,7 @@ import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGrou
 import { LayoutDashboard, Scale, TrendingUp, Package, ShoppingCart, MapPin, LogOut, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+
 const menuItems = [{
   title: 'Meu Painel',
   url: '/dashboard',
@@ -32,10 +33,11 @@ const menuItems = [{
   isPremium: true
 }, {
   title: 'Consultor de Viagens',
-  url: '/viagens',
+  url: '/viagens?tab=planner',
   icon: MapPin,
   isPremium: true
 }];
+
 export function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -46,9 +48,16 @@ export function AppSidebar() {
   const {
     state
   } = useSidebar();
-  const isActive = (path: string) => location.pathname === path;
+  
+  const isActive = (path: string) => {
+    // Remove query params for comparison
+    const pathWithoutQuery = path.split('?')[0];
+    return location.pathname === pathWithoutQuery;
+  };
+  
   const isPremiumUser = profile?.plan === 'premium';
   const isCollapsed = state === 'collapsed';
+  
   const handleLogout = async () => {
     try {
       await logout();
@@ -57,6 +66,7 @@ export function AppSidebar() {
       console.error('Erro ao fazer logout:', error);
     }
   };
+  
   const getPlanBadge = (isPremium: boolean) => {
     if (!isPremium) return null;
     if (isPremiumUser) {
@@ -67,6 +77,7 @@ export function AppSidebar() {
     }
     return;
   };
+
   return <Sidebar className="bg-slate-900 border-slate-700">
       <SidebarHeader className="p-4 bg-zinc-800">
         <div className="flex items-center gap-3">

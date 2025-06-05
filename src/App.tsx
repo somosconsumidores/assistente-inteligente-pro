@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
+import { Toaster as ShadcnToaster } from '@/components/ui/toaster';
 import { ThemeProvider } from "./components/ThemeProvider"
 
 import Home from './pages/Index';
@@ -92,6 +93,7 @@ function App() {
               } />
             </Routes>
             <Toaster />
+            <ShadcnToaster />
           </ThemeProvider>
         </AuthProvider>
       </BrowserRouter>

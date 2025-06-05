@@ -11,6 +11,7 @@ import GeneratedItinerary from '@/components/GeneratedItinerary';
 import SavedItinerariesList from '@/components/SavedItinerariesList';
 import { useSearchParams } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useToast } from '@/hooks/use-toast';
 
 const Viagens = () => {
   const [searchParams] = useSearchParams();
@@ -18,6 +19,7 @@ const Viagens = () => {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [viewingSavedItinerary, setViewingSavedItinerary] = useState(null);
   const isMobile = useIsMobile();
+  const { toast } = useToast();
   
   const [formData, setFormData] = useState({
     destination: '',
@@ -73,8 +75,15 @@ const Viagens = () => {
 
   const handleSaveItinerary = async () => {
     if (generatedItinerary) {
-      // Passamos TODA a resposta da IA, não apenas o itineraryData
-      await saveItinerary(generatedItinerary, formData);
+      const result = await saveItinerary(generatedItinerary, formData);
+      
+      if (result) {
+        toast({
+          title: "Roteiro Salvo com Sucesso!",
+          description: "Seu roteiro foi salvo e pode ser acessado na aba 'Salvos'",
+          variant: "default",
+        });
+      }
     }
   };
 

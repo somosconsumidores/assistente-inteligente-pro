@@ -287,12 +287,44 @@ const enrichActivitiesWithRealPrices = async (itineraryData: any, destination: s
           atividade.confiancaPreco = priceData.confidence;
           atividade.fontePreco = priceData.source;
           
-          console.log(`Preço atualizado: ${atividade.atividade} = ${priceData.estimatedPrice} (fonte: ${priceData.source})`);
+          // NOVA FUNCIONALIDADE: Capturar valor convertido para BRL
+          if (priceData.estimatedPriceBRL) {
+            atividade.custoBRL = priceData.estimatedPriceBRL;
+            atividade.exchangeRate = priceData.exchangeRate;
+            atividade.exchangeDate = priceData.exchangeDate;
+            atividade.originalCurrency = priceData.originalCurrency;
+          }
+          
+          console.log(`Preço atualizado: ${atividade.atividade} = ${priceData.estimatedPrice} (BRL: ${priceData.estimatedPriceBRL}) (fonte: ${priceData.source})`);
         } else {
           console.log(`Mantendo preço original para: ${atividade.atividade}`);
           atividade.precoReal = false;
           atividade.confiancaPreco = 'low';
           atividade.fontePreco = 'estimate';
+          
+          // Converter preço original se estiver em EUR
+          if (atividade.custoEstimado && atividade.custoEstimado.includes('€')) {
+            try {
+              // Chamar função de conversão para o preço original
+              const { data: conversionData, error: conversionError } = await supabase.functions.invoke('currency-conversion', {
+                body: {
+                  priceString: atividade.custoEstimado,
+                  fromCurrency: 'EUR',
+                  toCurrency: 'BRL'
+                }
+              });
+              
+              if (!conversionError && conversionData) {
+                atividade.custoBRL = `R$ ${conversionData.convertedAmount}`;
+                atividade.exchangeRate = conversionData.exchangeRate;
+                atividade.exchangeDate = conversionData.date;
+                atividade.originalCurrency = 'EUR';
+                console.log(`Preço convertido: ${atividade.atividade} = ${atividade.custoEstimado} -> ${atividade.custoBRL}`);
+              }
+            } catch (conversionError) {
+              console.error(`Erro na conversão de ${atividade.custoEstimado}:`, conversionError);
+            }
+          }
         }
         
         // Pequena pausa para não sobrecarregar as APIs
@@ -310,6 +342,46 @@ const enrichActivitiesWithRealPrices = async (itineraryData: any, destination: s
 
   console.log('=== FINALIZADO ENRIQUECIMENTO DE PREÇOS ===');
   return itineraryData;
+};
+
+// Função para calcular o total das atividades
+const calculateActivitiesTotalCost = (itineraryData: any): number => {
+  console.log('=== CALCULANDO CUSTO TOTAL DAS ATIVIDADES ===');
+  
+  let totalCost = 0;
+  
+  for (const dia of itineraryData.dias) {
+    for (const atividade of dia.atividades) {
+      // Verificar se existe custoBRL (valor convertido)
+      if (atividade.custoBRL) {
+        // Extrair valor numérico do custoBRL (formato "R$ 161")
+        const numericValue = parseFloat(atividade.custoBRL.replace(/[R$\s]/g, '').replace(',', '.'));
+        if (!isNaN(numericValue)) {
+          totalCost += numericValue;
+          console.log(`Atividade: ${atividade.atividade} - Valor: R$ ${numericValue}`);
+        }
+      } else if (atividade.custoEstimado) {
+        // Fallback para custoEstimado original (pode estar em EUR)
+        const estimatedValue = parseFloat(atividade.custoEstimado.replace(/[€R$\s]/g, '').replace(',', '.'));
+        if (!isNaN(estimatedValue)) {
+          // Se está em EUR, converter para BRL usando taxa padrão
+          if (atividade.custoEstimado.includes('€')) {
+            const convertedValue = estimatedValue * 6.70; // Taxa EUR->BRL padrão
+            totalCost += convertedValue;
+            console.log(`Atividade: ${atividade.atividade} - Valor convertido: R$ ${convertedValue}`);
+          } else {
+            totalCost += estimatedValue;
+            console.log(`Atividade: ${atividade.atividade} - Valor em BRL: R$ ${estimatedValue}`);
+          }
+        }
+      }
+    }
+  }
+  
+  console.log(`CUSTO TOTAL DAS ATIVIDADES: R$ ${totalCost}`);
+  console.log('=== FIM DO CÁLCULO ===');
+  
+  return Math.round(totalCost);
 };
 
 // Função para estimar custos de voo mais realistas
@@ -509,36 +581,8 @@ serve(async (req) => {
     const flightCosts = estimateFlightCosts(destination, travelersCount, travelStyle);
     const accommodationCosts = estimateAccommodationCosts(destination, maxDays, travelersCount, travelStyle);
     
-    const baseExtraExpensesPerDay = 100; // Por pessoa por dia em BRL
-    let extraMultiplier = 1;
-
-    switch (travelStyle.toLowerCase()) {
-      case 'econômica':
-      case 'economica':
-        extraMultiplier = 0.7;
-        break;
-      case 'conforto':
-        extraMultiplier = 1.3;
-        break;
-      case 'luxo':
-        extraMultiplier = 2.5;
-        break;
-      case 'aventura':
-        extraMultiplier = 0.8;
-        break;
-    }
-
-    const extraExpenses = Math.round(baseExtraExpensesPerDay * extraMultiplier * maxDays * travelersCount);
-
-    const travelCosts = {
-      flightCost: flightCosts,
-      accommodationCost: accommodationCosts,
-      extraExpenses: extraExpenses,
-      totalEstimatedCost: flightCosts.totalPrice + accommodationCosts.totalPrice + extraExpenses
-    };
-
-    console.log('Custos estimados calculados:', travelCosts);
-
+    // IMPORTANTE: Não calcular extraExpenses aqui ainda - será calculado após enriquecer as atividades
+    
     // Função para gerar prompt melhorado
     const generateOptimizedPrompt = (destination: string, days: number, budget: string, travelersCount: number, travelStyle: string, preferences: string) => {
       const largeCountries = ['china', 'brasil', 'estados unidos', 'eua', 'russia', 'india', 'canada', 'australia', 'argentina']
@@ -805,6 +849,19 @@ CRÍTICO: Use informações reais de ${destination}. Retorne APENAS JSON válido
     // NOVA FUNCIONALIDADE: Enriquecer atividades com preços reais
     console.log('Iniciando busca de preços reais para as atividades...');
     itineraryData = await enrichActivitiesWithRealPrices(itineraryData, destination);
+
+    // CALCULAR OUTRAS DESPESAS COM BASE NAS ATIVIDADES REAIS
+    const calculatedActivitiesCost = calculateActivitiesTotalCost(itineraryData);
+    
+    // Montar objeto de custos com valor real das atividades
+    const travelCosts = {
+      flightCost: flightCosts,
+      accommodationCost: accommodationCosts,
+      extraExpenses: calculatedActivitiesCost, // Agora baseado na soma real das atividades
+      totalEstimatedCost: flightCosts.totalPrice + accommodationCosts.totalPrice + calculatedActivitiesCost
+    };
+
+    console.log('Custos finais calculados:', travelCosts);
 
     // Avaliar se o orçamento é suficiente e adicionar análise
     let budgetAnalysis = null;

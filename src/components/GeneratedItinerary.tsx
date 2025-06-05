@@ -222,7 +222,7 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
         </CardHeader>
       </Card>
 
-      {/* Flight and Accommodation Pricing - Atualizado com melhor transparência */}
+      {/* Flight and Accommodation Pricing - Atualizado para mostrar atividades */}
       {travelCosts && (
         <Card className="bg-gradient-to-r from-blue-900/40 to-purple-900/40 border-blue-700/50">
           <CardHeader>
@@ -235,7 +235,7 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Flight Cost com mais detalhes */}
+            {/* Flight Cost */}
             <div className="p-3 sm:p-4 bg-gray-800/50 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <Plane className="w-4 h-4 text-blue-400" />
@@ -274,21 +274,24 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
               </div>
             </div>
 
-            {/* Other Expenses */}
+            {/* Activities Cost - NOVA SEÇÃO */}
             <div className="p-3 sm:p-4 bg-gray-800/50 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <DollarSign className="w-4 h-4 text-green-400" />
-                <h3 className="font-medium text-green-300">Outras Despesas</h3>
+                <h3 className="font-medium text-green-300">Atividades e Experiências</h3>
               </div>
               <div className="grid grid-cols-1 gap-2">
                 <div className="flex flex-col">
-                  <span className="text-xs text-slate-400">Alimentação, transporte e atividades</span>
+                  <span className="text-xs text-slate-400">Custo total das atividades do roteiro</span>
                   <span className="text-lg font-medium text-green-300">{formatCurrency(travelCosts.extraExpenses)}</span>
                 </div>
               </div>
+              <div className="mt-2 text-xs text-green-200">
+                * Baseado na soma dos preços das atividades específicas do seu roteiro
+              </div>
             </div>
 
-            {/* Total Cost com informação de câmbio */}
+            {/* Total Cost */}
             <div className="mt-3 p-4 bg-gradient-to-r from-blue-800/30 to-indigo-800/30 rounded-lg">
               <div className="flex items-center justify-between">
                 <span className="text-slate-200 font-medium">Custo Total Estimado:</span>
@@ -422,6 +425,11 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
                             <span className="font-medium">
                               {atividade.custoBRL || atividade.custoEstimado}
                             </span>
+                            {atividade.custoEstimado && atividade.custoBRL && atividade.custoEstimado !== atividade.custoBRL && (
+                              <span className="text-slate-600 ml-1">
+                                (original: {atividade.custoEstimado})
+                              </span>
+                            )}
                           </div>
                           
                           {/* Indicador de preço com informações de câmbio */}
@@ -470,6 +478,12 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
             </div>
             <div className="mt-3 p-3 bg-green-950/30 rounded-lg">
               <p className="text-green-200 text-sm">
+                <strong>🎯 Cálculo Preciso:</strong> O custo de "Atividades e Experiências" é calculado somando todos os 
+                preços específicos das atividades do seu roteiro, convertidos para BRL, garantindo maior precisão.
+              </p>
+            </div>
+            <div className="mt-3 p-3 bg-purple-950/30 rounded-lg">
+              <p className="text-purple-200 text-sm">
                 <strong>✈️ Custos de Voos e Hospedagem:</strong> Estimativas baseadas em dados históricos e 
                 padrões de preços por região. Valores podem variar conforme temporada, antecedência da reserva e disponibilidade.
               </p>

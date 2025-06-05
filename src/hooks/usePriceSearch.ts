@@ -6,7 +6,11 @@ interface PriceSearchResult {
   activityName: string;
   location: string;
   estimatedPrice: string;
+  estimatedPriceBRL: string;
   currency: string;
+  originalCurrency: string;
+  exchangeRate?: number;
+  exchangeDate?: string;
   source: 'google_places' | 'cache' | 'estimate';
   confidence: 'high' | 'medium' | 'low';
 }

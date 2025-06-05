@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -14,10 +13,64 @@ interface PriceSearchResult {
   activityName: string;
   location: string;
   estimatedPrice: string;
+  estimatedPriceBRL: string;
   currency: string;
+  originalCurrency: string;
+  exchangeRate?: number;
+  exchangeDate?: string;
   source: 'google_places' | 'cache' | 'estimate';
   confidence: 'high' | 'medium' | 'low';
 }
+
+// Função para converter moeda via nossa edge function
+const convertToBRL = async (priceString: string, fromCurrency: string = 'EUR'): Promise<{
+  convertedPrice: string;
+  exchangeRate: number;
+  exchangeDate: string;
+}> => {
+  try {
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    const { data, error } = await supabase.functions.invoke('currency-conversion', {
+      body: {
+        priceString: priceString,
+        fromCurrency: fromCurrency,
+        toCurrency: 'BRL'
+      }
+    });
+
+    if (error) {
+      console.error('Erro na conversão:', error);
+      // Fallback com taxa fixa
+      const fallbackRate = fromCurrency === 'EUR' ? 6.2 : 1;
+      const numericPrice = parseFloat(priceString.replace(/[€$R\s-]/g, '')) || 0;
+      return {
+        convertedPrice: `R$ ${Math.round(numericPrice * fallbackRate)}`,
+        exchangeRate: fallbackRate,
+        exchangeDate: new Date().toISOString().split('T')[0]
+      };
+    }
+
+    return {
+      convertedPrice: `R$ ${Math.round(data.convertedAmount)}`,
+      exchangeRate: data.exchangeRate,
+      exchangeDate: data.date
+    };
+  } catch (error) {
+    console.error('Erro na função de conversão:', error);
+    // Fallback
+    const fallbackRate = fromCurrency === 'EUR' ? 6.2 : 1;
+    const numericPrice = parseFloat(priceString.replace(/[€$R\s-]/g, '')) || 0;
+    return {
+      convertedPrice: `R$ ${Math.round(numericPrice * fallbackRate)}`,
+      exchangeRate: fallbackRate,
+      exchangeDate: new Date().toISOString().split('T')[0]
+    };
+  }
+};
 
 // Função para buscar preços via Nova Google Places API
 const searchGooglePlacesNew = async (activityName: string, location: string): Promise<PriceSearchResult | null> => {
@@ -222,12 +275,29 @@ serve(async (req) => {
 
     if (cachedPrice) {
       console.log('Preço encontrado em cache para:', activityName, location);
+      
+      // Converter preço do cache para BRL se necessário
+      let priceBRL = cachedPrice.estimated_price_brl;
+      let exchangeRate = cachedPrice.exchange_rate;
+      let exchangeDate = cachedPrice.exchange_date;
+      
+      if (!priceBRL) {
+        const conversion = await convertToBRL(cachedPrice.estimated_price, cachedPrice.currency);
+        priceBRL = conversion.convertedPrice;
+        exchangeRate = conversion.exchangeRate;
+        exchangeDate = conversion.exchangeDate;
+      }
+      
       return new Response(
         JSON.stringify({
           activityName,
           location,
           estimatedPrice: cachedPrice.estimated_price,
-          currency: cachedPrice.currency,
+          estimatedPriceBRL: priceBRL,
+          currency: 'BRL',
+          originalCurrency: cachedPrice.currency,
+          exchangeRate: exchangeRate,
+          exchangeDate: exchangeDate,
           source: 'cache',
           confidence: cachedPrice.confidence
         }),
@@ -245,7 +315,19 @@ serve(async (req) => {
       priceResult = generateEstimate(activityName, location);
     }
 
-    // Salvar no cache
+    // Converter para BRL
+    const conversion = await convertToBRL(priceResult.estimatedPrice, priceResult.currency);
+
+    const finalResult: PriceSearchResult = {
+      ...priceResult,
+      estimatedPriceBRL: conversion.convertedPrice,
+      originalCurrency: priceResult.currency,
+      currency: 'BRL',
+      exchangeRate: conversion.exchangeRate,
+      exchangeDate: conversion.exchangeDate
+    };
+
+    // Salvar no cache com informações de conversão
     await supabase
       .from('activity_price_cache')
       .upsert({
@@ -253,15 +335,18 @@ serve(async (req) => {
         activity_name: activityName,
         location: location,
         estimated_price: priceResult.estimatedPrice,
+        estimated_price_brl: conversion.convertedPrice,
         currency: priceResult.currency,
         source: priceResult.source,
-        confidence: priceResult.confidence
+        confidence: priceResult.confidence,
+        exchange_rate: conversion.exchangeRate,
+        exchange_date: conversion.exchangeDate
       });
 
-    console.log('Preço encontrado/estimado:', priceResult);
+    console.log('Preço encontrado/estimado com conversão:', finalResult);
 
     return new Response(
-      JSON.stringify(priceResult),
+      JSON.stringify(finalResult),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 

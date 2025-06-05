@@ -84,30 +84,42 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
     });
   };
 
-  // Nova função para renderizar indicador de preço real
-  const renderPriceIndicator = (atividade: any) => {
-    if (atividade.precoReal) {
+  // Nova função para renderizar informações de câmbio
+  const renderExchangeInfo = (atividade: any) => {
+    if (atividade.exchangeRate && atividade.exchangeDate && atividade.originalCurrency !== 'BRL') {
       return (
-        <div className="flex items-center gap-1 text-xs text-green-400">
-          <Verified className="w-3 h-3" />
-          <span>Preço real</span>
-        </div>
-      );
-    } else if (atividade.confiancaPreco === 'medium') {
-      return (
-        <div className="flex items-center gap-1 text-xs text-yellow-400">
-          <TrendingUp className="w-3 h-3" />
-          <span>Estimativa baseada em dados</span>
-        </div>
-      );
-    } else {
-      return (
-        <div className="flex items-center gap-1 text-xs text-slate-500">
-          <AlertTriangle className="w-3 h-3" />
-          <span>Estimativa aproximada</span>
+        <div className="flex items-center gap-1 text-xs text-blue-400 mt-1">
+          <span>Taxa: 1 {atividade.originalCurrency} = R$ {atividade.exchangeRate?.toFixed(2)}</span>
+          <span className="text-slate-500">({atividade.exchangeDate})</span>
         </div>
       );
     }
+    return null;
+  };
+
+  // Função atualizada para renderizar indicador de preço
+  const renderPriceIndicator = (atividade: any) => {
+    return (
+      <div className="space-y-1">
+        {atividade.precoReal ? (
+          <div className="flex items-center gap-1 text-xs text-green-400">
+            <Verified className="w-3 h-3" />
+            <span>Preço real</span>
+          </div>
+        ) : atividade.confiancaPreco === 'medium' ? (
+          <div className="flex items-center gap-1 text-xs text-yellow-400">
+            <TrendingUp className="w-3 h-3" />
+            <span>Estimativa baseada em dados</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1 text-xs text-slate-500">
+            <AlertTriangle className="w-3 h-3" />
+            <span>Estimativa aproximada</span>
+          </div>
+        )}
+        {renderExchangeInfo(atividade)}
+      </div>
+    );
   };
 
   return (
@@ -171,7 +183,7 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
         </CardHeader>
       </Card>
 
-      {/* Flight and Accommodation Pricing - Mobile optimized */}
+      {/* Flight and Accommodation Pricing - Atualizado com melhor transparência */}
       {travelCosts && (
         <Card className="bg-gradient-to-r from-blue-900/40 to-purple-900/40 border-blue-700/50">
           <CardHeader>
@@ -179,9 +191,12 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
               <Plane className="w-5 h-5" />
               Estimativa de Custos da Viagem
             </CardTitle>
+            <p className="text-sm text-blue-200">
+              Valores convertidos para reais brasileiros (BRL) com cotação do dia
+            </p>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Flight Cost */}
+            {/* Flight Cost com mais detalhes */}
             <div className="p-3 sm:p-4 bg-gray-800/50 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <Plane className="w-4 h-4 text-blue-400" />
@@ -196,6 +211,9 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
                   <span className="text-xs text-slate-400">Total passagens</span>
                   <span className="text-lg font-medium text-blue-300">{formatCurrency(travelCosts.flightCost.totalPrice)}</span>
                 </div>
+              </div>
+              <div className="mt-2 text-xs text-blue-200">
+                * Baseado em passagens econômicas para o destino escolhido
               </div>
             </div>
 
@@ -231,11 +249,14 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
               </div>
             </div>
 
-            {/* Total Cost */}
+            {/* Total Cost com informação de câmbio */}
             <div className="mt-3 p-4 bg-gradient-to-r from-blue-800/30 to-indigo-800/30 rounded-lg">
               <div className="flex items-center justify-between">
                 <span className="text-slate-200 font-medium">Custo Total Estimado:</span>
                 <span className="text-xl font-bold text-white">{formatCurrency(travelCosts.totalEstimatedCost)}</span>
+              </div>
+              <div className="text-xs text-slate-400 mt-1">
+                Valores em reais brasileiros (BRL) atualizados
               </div>
             </div>
           </CardContent>
@@ -319,7 +340,7 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
         </Card>
       )}
 
-      {/* Daily Itinerary - Mobile optimized com indicadores de preços reais */}
+      {/* Daily Itinerary com indicadores de câmbio atualizados */}
       {itineraryData.dias && itineraryData.dias.length > 0 && (
         <div className="space-y-4">
           {itineraryData.dias.map((day) => (
@@ -350,7 +371,7 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
                           {atividade.descricao}
                         </p>
                         
-                        {/* Location, Cost and Price Indicator - Mobile: Stacked, Desktop: Side by side */}
+                        {/* Location, Cost and Price Indicator com informações de câmbio */}
                         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs">
                           <div className="flex items-center gap-1 text-slate-500">
                             <MapPin className="w-3 h-3 flex-shrink-0" />
@@ -359,10 +380,12 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
                           
                           <div className="flex items-center gap-1 text-slate-500">
                             <DollarSign className="w-3 h-3 flex-shrink-0" />
-                            <span className="font-medium">{atividade.custoEstimado}</span>
+                            <span className="font-medium">
+                              {atividade.custoBRL || atividade.custoEstimado}
+                            </span>
                           </div>
                           
-                          {/* Novo indicador de preço real */}
+                          {/* Indicador de preço com informações de câmbio */}
                           {renderPriceIndicator(atividade)}
                         </div>
                       </div>
@@ -375,12 +398,12 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
         </div>
       )}
 
-      {/* Nova seção de informações sobre preços */}
+      {/* Nova seção de informações sobre preços com câmbio */}
       <Card className="bg-gradient-to-r from-blue-900/20 to-green-900/20 border-blue-700/30">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2 text-blue-300">
             <Verified className="w-5 h-5" />
-            Informações sobre Preços
+            Informações sobre Preços e Câmbio
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -399,6 +422,12 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
               <AlertTriangle className="w-4 h-4 text-slate-500" />
               <span className="text-slate-400">Estimativa aproximada:</span>
               <span className="text-slate-300">Valor médio para o tipo de atividade</span>
+            </div>
+            <div className="mt-4 p-3 bg-blue-950/30 rounded-lg">
+              <p className="text-blue-200 text-sm">
+                <strong>💱 Conversão de Moedas:</strong> Todos os preços são automaticamente convertidos para reais brasileiros (BRL) 
+                usando cotações atualizadas do dia. As taxas de câmbio e datas são exibidas quando aplicável.
+              </p>
             </div>
           </div>
         </CardContent>

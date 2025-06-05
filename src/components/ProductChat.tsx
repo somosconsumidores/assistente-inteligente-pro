@@ -1,16 +1,13 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MessageCircle, Star } from 'lucide-react';
 import { useProductChat } from '@/hooks/useProductChat';
 import ChatHeader from './chat/ChatHeader';
 import ChatMessages from './chat/ChatMessages';
 import ChatInput from './chat/ChatInput';
-import RecommendationsTab from './chat/RecommendationsTab';
+import FeaturedProducts from './FeaturedProducts';
 
 const ProductChat = () => {
   const [inputValue, setInputValue] = useState('');
-  const [activeTab, setActiveTab] = useState('chat');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const {
     messages,
@@ -34,20 +31,6 @@ const ProductChat = () => {
     });
   }, [messages]);
 
-  // Log featured products for debugging
-  useEffect(() => {
-    console.log('Featured products updated in ProductChat:', featuredProducts);
-  }, [featuredProducts]);
-
-  // Debug: Log tab state
-  useEffect(() => {
-    console.log('Active tab:', activeTab);
-    console.log('Valid products count:', featuredProducts.filter(
-      product => product.name && product.name.length >= 3 && 
-      product.scoreMestre >= 1 && product.scoreMestre <= 10
-    ).length);
-  }, [activeTab, featuredProducts]);
-
   const handleSend = async () => {
     if (!inputValue.trim() || isLoading) return;
     const messageToSend = inputValue;
@@ -64,7 +47,6 @@ const ProductChat = () => {
   const handleClearChat = () => {
     clearChat();
     startChat();
-    setActiveTab('chat');
   };
 
   const validProducts = featuredProducts.filter(
@@ -77,61 +59,43 @@ const ProductChat = () => {
       <div className="flex flex-col min-h-[600px] max-h-[80vh] bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
         <ChatHeader onClearChat={handleClearChat} />
 
-        {/* Tabs - Melhorado com cores mais visíveis */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-          <div className="px-4 pt-4 pb-2 border-b border-gray-200 bg-white">
-            <TabsList className="grid w-full grid-cols-2 bg-gray-50 border border-gray-300 rounded-lg p-1">
-              <TabsTrigger 
-                value="chat" 
-                className="flex items-center gap-2 text-gray-700 font-medium data-[state=active]:bg-white data-[state=active]:text-orange-600 data-[state=active]:shadow-sm transition-all duration-200"
-              >
-                <MessageCircle className="w-4 h-4" />
-                Chat
-              </TabsTrigger>
-              <TabsTrigger 
-                value="recommendations" 
-                className="flex items-center gap-2 text-gray-700 font-medium data-[state=active]:bg-white data-[state=active]:text-orange-600 data-[state=active]:shadow-sm transition-all duration-200"
-              >
-                <Star className="w-4 h-4" />
-                Nossas Recomendações
-                {validProducts.length > 0 && (
-                  <span className="bg-orange-500 text-white text-xs rounded-full px-2 py-1 ml-1 font-bold">
+        {/* Chat Interface - Sempre visível */}
+        <div className="flex-1 flex flex-col min-h-0">
+          <ChatMessages 
+            messages={messages} 
+            isLoading={isLoading} 
+            messagesEndRef={messagesEndRef} 
+          />
+          
+          {/* Seção de Recomendações - Aparece automaticamente quando há produtos */}
+          {validProducts.length > 0 && (
+            <div className="border-t border-gray-200 bg-gray-50 p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                  🏆 Produtos Recomendados
+                  <span className="bg-orange-500 text-white text-xs rounded-full px-2 py-1 font-bold">
                     {validProducts.length}
                   </span>
-                )}
-              </TabsTrigger>
-            </TabsList>
-          </div>
-
-          {/* Chat Tab */}
-          <TabsContent value="chat" className="flex-1 flex flex-col mt-0 data-[state=active]:flex">
-            <div className="flex-1 flex flex-col min-h-0">
-              <ChatMessages 
-                messages={messages} 
-                isLoading={isLoading} 
-                messagesEndRef={messagesEndRef} 
-              />
-              <ChatInput 
-                inputValue={inputValue}
-                setInputValue={setInputValue}
-                onSend={handleSend}
-                onKeyPress={handleKeyPress}
-                isLoading={isLoading}
-              />
+                </h3>
+              </div>
+              <div className="max-h-80 overflow-y-auto">
+                <FeaturedProducts 
+                  products={featuredProducts}
+                  query={lastQuery}
+                  recommendations={lastRecommendations}
+                />
+              </div>
             </div>
-          </TabsContent>
-
-          {/* Recommendations Tab */}
-          <TabsContent value="recommendations" className="flex-1 overflow-hidden data-[state=active]:flex data-[state=active]:flex-col">
-            <div className="flex-1 overflow-y-auto p-4">
-              <RecommendationsTab 
-                featuredProducts={featuredProducts}
-                lastQuery={lastQuery}
-                lastRecommendations={lastRecommendations}
-              />
-            </div>
-          </TabsContent>
-        </Tabs>
+          )}
+          
+          <ChatInput 
+            inputValue={inputValue}
+            setInputValue={setInputValue}
+            onSend={handleSend}
+            onKeyPress={handleKeyPress}
+            isLoading={isLoading}
+          />
+        </div>
       </div>
     </div>
   );

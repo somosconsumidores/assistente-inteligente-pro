@@ -91,10 +91,10 @@ const Header = () => {
                 </div>
               ) : (
                 <div className="flex items-center space-x-2">
-                  <Button variant="outline" size="sm" asChild className="border-gray-700 hover:bg-gray-800">
-                    <Link to="/login" className="flex items-center space-x-1 touch-target">
-                      <LogIn className="w-4 h-4" />
-                      <span className="hidden sm:inline">Entrar</span>
+                  <Button variant="outline" size="sm" asChild className="border-gray-700 hover:bg-gray-800 text-white">
+                    <Link to="/login" className="flex items-center space-x-1 touch-target text-white">
+                      <LogIn className="w-4 h-4 text-white" />
+                      <span className="hidden sm:inline text-white">Entrar</span>
                     </Link>
                   </Button>
                   <Button size="sm" asChild className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">

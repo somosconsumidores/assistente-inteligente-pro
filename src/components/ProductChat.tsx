@@ -40,10 +40,15 @@ const ProductChat = () => {
     console.log('Featured products updated in ProductChat:', featuredProducts);
   }, [featuredProducts]);
 
-  // Auto-switch to recommendations tab when products are available
+  // Auto-switch to recommendations tab only when products are available AND chat is complete (not loading)
   useEffect(() => {
     if (featuredProducts.length > 0 && messages.length > 0 && !isLoading) {
-      setActiveTab('recommendations');
+      // Add a small delay to ensure the user sees the complete response first
+      const timer = setTimeout(() => {
+        setActiveTab('recommendations');
+      }, 1000);
+      
+      return () => clearTimeout(timer);
     }
   }, [featuredProducts, messages.length, isLoading]);
 

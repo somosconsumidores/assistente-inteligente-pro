@@ -57,7 +57,7 @@ const FeaturedProducts = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3">
         <p className="text-sm text-gray-600">
           {validProducts.length === 1 ? '1 produto selecionado' : `${validProducts.length} produtos selecionados`} baseado na sua consulta
         </p>
@@ -67,13 +67,13 @@ const FeaturedProducts = ({
             onClick={handleSaveRecommendation} 
             disabled={isLoading || isSaved}
             size="sm"
-            className="flex items-center gap-2" 
+            className="w-full flex items-center gap-2" 
             variant={isSaved ? "default" : "outline"}
           >
             {isSaved ? (
               <>
                 <Check className="w-3 h-3" />
-                Salvo
+                Salvo no Painel
               </>
             ) : (
               <>
@@ -85,13 +85,7 @@ const FeaturedProducts = ({
         )}
       </div>
       
-      <div className={`grid gap-4 ${
-        validProducts.length === 1 
-          ? 'grid-cols-1 max-w-sm mx-auto' 
-          : validProducts.length === 2 
-          ? 'grid-cols-1 sm:grid-cols-2' 
-          : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
-      }`}>
+      <div className="space-y-4">
         {validProducts.map(product => (
           <ProductCard key={product.id} product={product} />
         ))}

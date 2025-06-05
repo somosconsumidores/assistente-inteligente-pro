@@ -5,6 +5,7 @@ import ChatHeader from './chat/ChatHeader';
 import ChatMessages from './chat/ChatMessages';
 import ChatInput from './chat/ChatInput';
 import FeaturedProducts from './FeaturedProducts';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const ProductChat = () => {
   const [inputValue, setInputValue] = useState('');
@@ -55,46 +56,63 @@ const ProductChat = () => {
   );
 
   return (
-    <div className="w-full max-w-6xl mx-auto">
-      <div className="flex flex-col min-h-[600px] max-h-[80vh] bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
-        <ChatHeader onClearChat={handleClearChat} />
+    <div className="w-full max-w-7xl mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-[700px]">
+        {/* Área do Chat - 2/3 da tela */}
+        <div className="lg:col-span-2">
+          <Card className="h-full bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+            <ChatHeader onClearChat={handleClearChat} />
+            
+            <div className="flex-1 flex flex-col h-[600px]">
+              <ChatMessages 
+                messages={messages} 
+                isLoading={isLoading} 
+                messagesEndRef={messagesEndRef} 
+              />
+              
+              <ChatInput 
+                inputValue={inputValue}
+                setInputValue={setInputValue}
+                onSend={handleSend}
+                onKeyPress={handleKeyPress}
+                isLoading={isLoading}
+              />
+            </div>
+          </Card>
+        </div>
 
-        {/* Chat Interface - Sempre visível */}
-        <div className="flex-1 flex flex-col min-h-0">
-          <ChatMessages 
-            messages={messages} 
-            isLoading={isLoading} 
-            messagesEndRef={messagesEndRef} 
-          />
-          
-          {/* Seção de Recomendações - Aparece automaticamente quando há produtos */}
-          {validProducts.length > 0 && (
-            <div className="border-t border-gray-200 bg-gray-50 p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                  🏆 Produtos Recomendados
-                  <span className="bg-orange-500 text-white text-xs rounded-full px-2 py-1 font-bold">
+        {/* Área das Recomendações - 1/3 da tela */}
+        <div className="lg:col-span-1">
+          <Card className="h-full bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-orange-500 to-red-600 text-white">
+              <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                🏆 Produtos Recomendados
+                {validProducts.length > 0 && (
+                  <span className="bg-white text-orange-600 text-xs rounded-full px-2 py-1 font-bold">
                     {validProducts.length}
                   </span>
-                </h3>
-              </div>
-              <div className="max-h-80 overflow-y-auto">
+                )}
+              </CardTitle>
+            </CardHeader>
+            
+            <CardContent className="p-4 h-[600px] overflow-y-auto">
+              {validProducts.length > 0 ? (
                 <FeaturedProducts 
                   products={featuredProducts}
                   query={lastQuery}
                   recommendations={lastRecommendations}
                 />
-              </div>
-            </div>
-          )}
-          
-          <ChatInput 
-            inputValue={inputValue}
-            setInputValue={setInputValue}
-            onSend={handleSend}
-            onKeyPress={handleKeyPress}
-            isLoading={isLoading}
-          />
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
+                  <div className="text-6xl mb-4">🔍</div>
+                  <h3 className="text-lg font-medium mb-2 text-gray-700">Nenhuma recomendação ainda</h3>
+                  <p className="text-sm leading-relaxed">
+                    Faça uma pergunta sobre produtos no chat ao lado e receba recomendações personalizadas aqui!
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

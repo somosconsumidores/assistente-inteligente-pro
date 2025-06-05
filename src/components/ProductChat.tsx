@@ -112,9 +112,9 @@ const ProductChat = () => {
         </div>
 
         {/* Input Area */}
-        <div className="border-t p-4 bg-white">
+        <div className="border-t p-4 bg-zinc-800">
           <div className="flex space-x-2">
-            <Input value={inputValue} onChange={e => setInputValue(e.target.value)} onKeyPress={handleKeyPress} placeholder="Pergunte sobre qualquer produto..." disabled={isLoading} className="flex-1 bg-slate-50" />
+            <Input value={inputValue} onChange={e => setInputValue(e.target.value)} onKeyPress={handleKeyPress} placeholder="Pergunte sobre qualquer produto..." disabled={isLoading} className="flex-1 bg-zinc-800 rounded-none" />
             <Button onClick={handleSend} disabled={isLoading || !inputValue.trim()} size="icon">
               <Send className="w-4 h-4" />
             </Button>

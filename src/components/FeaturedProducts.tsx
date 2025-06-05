@@ -39,7 +39,15 @@ const FeaturedProducts = ({
   );
 
   if (validProducts.length === 0) {
-    return null;
+    return (
+      <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 py-8">
+        <div className="text-6xl mb-4">🔍</div>
+        <h3 className="text-lg font-medium mb-2 text-gray-700">Aguardando recomendações</h3>
+        <p className="text-sm leading-relaxed max-w-xs">
+          Faça uma pergunta sobre produtos no chat e receba recomendações personalizadas aqui!
+        </p>
+      </div>
+    );
   }
 
   const handleSaveRecommendation = async () => {

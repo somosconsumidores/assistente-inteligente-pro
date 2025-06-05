@@ -99,6 +99,10 @@ export const useProductChat = () => {
     setIsLoading(true);
     setError(null);
     setLastQuery(userMessage);
+    
+    // Limpar produtos imediatamente quando nova consulta é feita
+    setFeaturedProducts([]);
+    setLastRecommendations(null);
 
     try {
       const conversationHistory = messages.map(msg => ({
@@ -126,6 +130,7 @@ export const useProductChat = () => {
         addMessage(data.analysis, 'assistant');
         setLastRecommendations(data);
         
+        // Só buscar e mostrar produtos após receber resposta da IA
         const products = await fetchProductsFromDatabase(data.productIds, data.category);
         console.log('Setting featured products from database:', products);
         if (products.length > 0) {
@@ -164,10 +169,10 @@ Sobre qual produto você gostaria de conversar hoje?`;
   const clearChat = useCallback(() => {
     setMessages([]);
     setError(null);
-    // Manter os produtos da última consulta para melhor UX
-    // setFeaturedProducts([]);
-    // setLastQuery('');
-    // setLastRecommendations(null);
+    // Limpar completamente na nova conversa
+    setFeaturedProducts([]);
+    setLastQuery('');
+    setLastRecommendations(null);
   }, []);
 
   return {

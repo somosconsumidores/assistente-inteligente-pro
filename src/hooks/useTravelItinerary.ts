@@ -33,9 +33,35 @@ interface ItineraryData {
   dias: ItineraryDay[];
 }
 
+interface TravelCosts {
+  flightCost: {
+    pricePerPerson: number;
+    totalPrice: number;
+  };
+  accommodationCost: {
+    pricePerDay: number;
+    totalPrice: number;
+  };
+  extraExpenses: number;
+  totalEstimatedCost: number;
+}
+
+interface BudgetAnalysis {
+  isEnough: boolean;
+  difference: number;
+  percentDifference: number;
+  message: string;
+}
+
+export interface TravelItineraryResponse {
+  itineraryData: ItineraryData;
+  travelCosts: TravelCosts;
+  budgetAnalysis: BudgetAnalysis | null;
+}
+
 export const useTravelItinerary = () => {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedItinerary, setGeneratedItinerary] = useState<ItineraryData | null>(null);
+  const [generatedItinerary, setGeneratedItinerary] = useState<TravelItineraryResponse | null>(null);
   const { toast } = useToast();
 
   const generateItinerary = async (params: TravelItineraryParams) => {
@@ -72,21 +98,32 @@ export const useTravelItinerary = () => {
         throw new Error('Nenhum dado retornado pela função');
       }
 
-      const { itineraryData } = response.data;
+      const { itineraryData, travelCosts, budgetAnalysis } = response.data;
       
       if (!itineraryData) {
         throw new Error('Dados do roteiro não encontrados na resposta');
       }
 
       console.log('Roteiro gerado com sucesso:', itineraryData);
-      setGeneratedItinerary(itineraryData);
+      console.log('Custos estimados:', travelCosts);
+      console.log('Análise de orçamento:', budgetAnalysis);
+      
+      setGeneratedItinerary({
+        itineraryData,
+        travelCosts,
+        budgetAnalysis
+      });
 
       toast({
         title: "Roteiro gerado com sucesso!",
-        description: "Seu roteiro personalizado foi criado. Use o botão 'Salvar Roteiro' para salvar.",
+        description: "Seu roteiro personalizado foi criado com análise de custos.",
       });
 
-      return itineraryData;
+      return {
+        itineraryData,
+        travelCosts,
+        budgetAnalysis
+      };
     } catch (error) {
       console.error('Erro ao gerar roteiro:', error);
       

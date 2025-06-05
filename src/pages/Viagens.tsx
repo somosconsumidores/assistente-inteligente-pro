@@ -68,7 +68,7 @@ const Viagens = () => {
   };
   const handleSaveItinerary = async () => {
     if (generatedItinerary) {
-      await saveItinerary(generatedItinerary, formData);
+      await saveItinerary(generatedItinerary.itineraryData, formData);
     }
   };
   const handleBackToPlanner = () => {
@@ -172,7 +172,11 @@ const Viagens = () => {
               />
             ) : viewingSavedItinerary ? (
               <GeneratedItinerary 
-                itinerary={viewingSavedItinerary.itinerary_data} 
+                itinerary={{
+                  itineraryData: viewingSavedItinerary.itinerary_data,
+                  travelCosts: null,
+                  budgetAnalysis: null
+                }} 
                 onBackToPlanner={handleBackToPlanner} 
                 isSaved={true} 
               />

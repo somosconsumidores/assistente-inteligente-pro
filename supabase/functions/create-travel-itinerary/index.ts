@@ -169,6 +169,93 @@ const progressiveJSONParse = (content: string): any => {
   }
 }
 
+// Nova função para pesquisar preços fictícios de voos e acomodação
+const estimateTravelCosts = (destination: string, departureDate: string, returnDate: string, travelersCount: number, travelStyle: string, days: number): any => {
+  const getRandomWithRange = (min: number, max: number): number => {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  };
+
+  // Estimar preço de voos com base no destino
+  let flightPricePerPerson = 0;
+  
+  // Destinos internacionais versus domésticos
+  const internationalDestinations = [
+    'paris', 'londres', 'nova york', 'tóquio', 'bangkok', 'dubai', 
+    'roma', 'barcelona', 'madrid', 'amsterdã', 'berlim', 'viena', 
+    'pequim', 'seul', 'singapura', 'sydney', 'toronto', 'vancouver', 
+    'cidade do méxico', 'cancún', 'buenos aires', 'santiago', 'lisboa', 
+    'miami', 'los angeles', 'las vegas', 'orlando', 'milão', 'veneza',
+    'atenas', 'cairo', 'marrakech', 'istambul', 'praga', 'budapeste'
+  ];
+
+  const isInternational = internationalDestinations.some(d => 
+    destination.toLowerCase().includes(d)
+  );
+
+  // Ajustar preços com base se é internacional ou doméstico
+  if (isInternational) {
+    flightPricePerPerson = getRandomWithRange(2000, 8000);
+  } else {
+    flightPricePerPerson = getRandomWithRange(400, 1200);
+  }
+
+  const totalFlightPrice = flightPricePerPerson * travelersCount;
+
+  // Estimar preço de acomodação com base no estilo da viagem
+  let accommodationPricePerDay = 0;
+  
+  switch (travelStyle) {
+    case 'Econômica':
+      accommodationPricePerDay = getRandomWithRange(80, 200);
+      break;
+    case 'Conforto':
+      accommodationPricePerDay = getRandomWithRange(200, 500);
+      break;
+    case 'Luxo':
+      accommodationPricePerDay = getRandomWithRange(500, 1500);
+      break;
+    case 'Aventura':
+      accommodationPricePerDay = getRandomWithRange(100, 300);
+      break;
+    case 'Cultural':
+      accommodationPricePerDay = getRandomWithRange(150, 350);
+      break;
+    default:
+      accommodationPricePerDay = getRandomWithRange(150, 300);
+  }
+
+  // Ajustar pelo destino
+  if (isInternational) {
+    accommodationPricePerDay *= 1.5; // Internacional é mais caro
+  }
+  
+  // Total estimado para acomodação por pessoa por dia
+  const accommodationPricePerPersonPerDay = accommodationPricePerDay;
+  
+  // Total estimado para acomodação para todos os viajantes durante toda a viagem
+  // Assumimos que pessoas compartilham quartos (dividimos por 2 se for mais de 1 pessoa)
+  const sharedFactor = travelersCount > 1 ? travelersCount / 1.5 : travelersCount;
+  const totalAccommodationPrice = Math.round(accommodationPricePerPersonPerDay * days * sharedFactor);
+
+  // Total estimado para todas as despesas (voos + acomodação + extras)
+  // Extras são aproximadamente 50% do custo de acomodação para comida/atividades
+  const extraExpenses = totalAccommodationPrice * 0.5;
+  const totalEstimatedCost = totalFlightPrice + totalAccommodationPrice + extraExpenses;
+
+  return {
+    flightCost: {
+      pricePerPerson: flightPricePerPerson,
+      totalPrice: totalFlightPrice
+    },
+    accommodationCost: {
+      pricePerDay: accommodationPricePerPersonPerDay,
+      totalPrice: totalAccommodationPrice
+    },
+    extraExpenses: Math.round(extraExpenses),
+    totalEstimatedCost: Math.round(totalEstimatedCost)
+  };
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -208,6 +295,10 @@ serve(async (req) => {
     if (days > 21) {
       console.log(`Limitando roteiro de ${days} dias para ${maxDays} dias para evitar resposta muito longa`)
     }
+
+    // Estimar custos de viagem antes de gerar o roteiro
+    const travelCosts = estimateTravelCosts(destination, departureDate, returnDate, travelersCount, travelStyle, maxDays);
+    console.log('Custos estimados de viagem:', travelCosts);
 
     // Função para gerar prompt melhorado
     const generateOptimizedPrompt = (destination: string, days: number, budget: string, travelersCount: number, travelStyle: string, preferences: string) => {
@@ -472,6 +563,23 @@ CRÍTICO: Use informações reais de ${destination}. Retorne APENAS JSON válido
       }
     }
 
+    // Avaliar se o orçamento é suficiente e adicionar análise
+    let budgetAnalysis = null;
+    if (budget) {
+      const userBudget = parseFloat(budget);
+      const budgetDifference = userBudget - travelCosts.totalEstimatedCost;
+      const isEnough = budgetDifference >= 0;
+      
+      budgetAnalysis = {
+        isEnough,
+        difference: Math.abs(budgetDifference),
+        percentDifference: Math.round((Math.abs(budgetDifference) / travelCosts.totalEstimatedCost) * 100),
+        message: isEnough 
+          ? `Seu orçamento de R$ ${userBudget.toLocaleString('pt-BR')} é suficiente para esta viagem` 
+          : `Seu orçamento de R$ ${userBudget.toLocaleString('pt-BR')} está abaixo do estimado para esta viagem`
+      };
+    }
+
     console.log(`Roteiro processado com sucesso - ${itineraryData.dias.length} dias para ${destination}`)
 
     return new Response(
@@ -480,7 +588,9 @@ CRÍTICO: Use informações reais de ${destination}. Retorne APENAS JSON válido
         itineraryData,
         actualDays: days,
         generatedDays: maxDays,
-        destination: destination
+        destination: destination,
+        travelCosts,
+        budgetAnalysis
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )

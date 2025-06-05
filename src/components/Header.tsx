@@ -98,9 +98,9 @@ const Header = () => {
                     </Link>
                   </Button>
                   <Button size="sm" asChild className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-                    <Link to="/register" className="flex items-center space-x-1 touch-target">
-                      <UserPlus className="w-4 h-4" />
-                      <span className="hidden sm:inline">Criar Conta</span>
+                    <Link to="/register" className="flex items-center space-x-1 touch-target text-white">
+                      <UserPlus className="w-4 h-4 text-white" />
+                      <span className="hidden sm:inline text-white">Criar Conta</span>
                     </Link>
                   </Button>
                 </div>
@@ -181,9 +181,9 @@ const Header = () => {
                       </Link>
                     </Button>
                     <Button asChild className="w-full justify-center bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 touch-target">
-                      <Link to="/register" onClick={closeMobileMenu}>
-                        <UserPlus className="w-4 h-4 mr-2" />
-                        Criar Conta
+                      <Link to="/register" onClick={closeMobileMenu} className="text-white">
+                        <UserPlus className="w-4 h-4 mr-2 text-white" />
+                        <span className="text-white">Criar Conta</span>
                       </Link>
                     </Button>
                   </div>

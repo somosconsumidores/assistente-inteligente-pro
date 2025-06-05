@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,93 +8,142 @@ import FinancialDashboard from '@/components/FinancialDashboard';
 import FinancialInsights from '@/components/FinancialInsights';
 import { FinancialData } from '@/hooks/useFinancialChat';
 import { DashboardLayout } from '@/components/DashboardLayout';
+import { useIsMobile } from '@/hooks/use-mobile';
+
 const Financas = () => {
   const [activeTab, setActiveTab] = useState('chat');
   const [financialData, setFinancialData] = useState<FinancialData | null>(null);
   const [hasCompletedChat, setHasCompletedChat] = useState(false);
+  const isMobile = useIsMobile();
+
   const handleChatComplete = (data: FinancialData) => {
     setFinancialData(data);
     setHasCompletedChat(true);
     setActiveTab('dashboard');
   };
+
   const resetExperience = () => {
     setFinancialData(null);
     setHasCompletedChat(false);
     setActiveTab('chat');
   };
-  return <DashboardLayout>
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-        {/* Header */}
-        <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
-          <div className="container mx-auto px-4 py-4 flex items-center justify-between bg-zinc-800">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-green-600 to-blue-600 rounded-lg flex items-center justify-center">
-                  <BarChart3 className="w-5 h-5 text-white" />
-                </div>
-                <span className="font-bold text-xl text-slate-50">Mestre das Finanças</span>
+
+  return (
+    <DashboardLayout>
+      <div className="min-h-screen bg-gray-900">
+        {/* Mobile-optimized content wrapper */}
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 safe-area-bottom">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6 sm:mb-8">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="p-2 bg-gradient-to-br from-green-600 to-blue-600 rounded-lg flex-shrink-0">
+                <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-50">Mestre das Finanças</h1>
+                <p className="text-xs sm:text-sm text-slate-400 hidden sm:block">
+                  Seu consultor financeiro pessoal
+                </p>
               </div>
             </div>
             
-            {hasCompletedChat && <Button onClick={resetExperience} variant="outline" size="sm">
+            {hasCompletedChat && (
+              <Button 
+                onClick={resetExperience} 
+                variant="outline" 
+                size={isMobile ? "sm" : "default"}
+                className="mobile-button-secondary"
+              >
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Reiniciar
-              </Button>}
+              </Button>
+            )}
           </div>
-        </header>
 
-        <div className="container mx-auto px-4 py-8 bg-zinc-800">
           {/* Welcome Card - Apenas se não completou o chat */}
-          {!hasCompletedChat && activeTab === 'chat' && <Card className="mb-8 bg-gradient-to-r from-green-500 to-blue-600 text-white border-0">
-              <CardHeader>
-                <CardTitle className="text-2xl">Bem-vindo ao seu Consultor Financeiro Pessoal! 🎯</CardTitle>
-                <CardDescription className="text-white/90">
+          {!hasCompletedChat && activeTab === 'chat' && (
+            <Card className="mb-6 sm:mb-8 bg-gradient-to-r from-green-500 to-blue-600 text-white border-0">
+              <CardHeader className="pb-4 sm:pb-6">
+                <CardTitle className="text-lg sm:text-xl lg:text-2xl">Bem-vindo ao seu Consultor Financeiro Pessoal! 🎯</CardTitle>
+                <CardDescription className="text-white/90 text-sm sm:text-base">
                   Vou te ajudar a organizar suas finanças de forma simples e personalizada. 
                   Através de uma conversa, vou entender sua situação e criar um plano sob medida para você.
                 </CardDescription>
               </CardHeader>
-            </Card>}
+            </Card>
+          )}
 
           {/* Navigation Tabs - Apenas após completar o chat */}
-          {hasCompletedChat && <div className="flex space-x-4 mb-8">
-              <Button variant={activeTab === 'dashboard' ? 'default' : 'outline'} onClick={() => setActiveTab('dashboard')} className="flex items-center space-x-2">
+          {hasCompletedChat && (
+            <div className={`flex ${isMobile ? 'flex-wrap gap-2' : 'space-x-4'} mb-6 sm:mb-8`}>
+              <Button 
+                variant={activeTab === 'dashboard' ? 'default' : 'outline'} 
+                onClick={() => setActiveTab('dashboard')} 
+                className={`flex items-center space-x-2 ${isMobile ? 'h-10 text-xs px-3' : 'h-10 sm:h-auto'}`}
+              >
                 <BarChart3 className="w-4 h-4" />
-                <span>Meu Dashboard</span>
+                <span>Dashboard</span>
               </Button>
-              <Button variant={activeTab === 'insights' ? 'default' : 'outline'} onClick={() => setActiveTab('insights')} className="flex items-center space-x-2">
+              <Button 
+                variant={activeTab === 'insights' ? 'default' : 'outline'} 
+                onClick={() => setActiveTab('insights')} 
+                className={`flex items-center space-x-2 ${isMobile ? 'h-10 text-xs px-3' : 'h-10 sm:h-auto'}`}
+              >
                 <Lightbulb className="w-4 h-4" />
-                <span>Análises e Dicas</span>
+                <span>Análises</span>
               </Button>
-              <Button variant={activeTab === 'chat' ? 'default' : 'outline'} onClick={() => setActiveTab('chat')} className="flex items-center space-x-2">
+              <Button 
+                variant={activeTab === 'chat' ? 'default' : 'outline'} 
+                onClick={() => setActiveTab('chat')} 
+                className={`flex items-center space-x-2 ${isMobile ? 'h-10 text-xs px-3' : 'h-10 sm:h-auto'}`}
+              >
                 <MessageCircle className="w-4 h-4" />
-                <span>Conversar Novamente</span>
+                <span>Conversar</span>
               </Button>
-            </div>}
+            </div>
+          )}
 
           {/* Content based on active tab */}
-          {activeTab === 'chat' && <div className="max-w-4xl mx-auto">
+          {activeTab === 'chat' && (
+            <div className="space-y-4 sm:space-y-6">
               <FinancialChat onComplete={handleChatComplete} />
-            </div>}
+            </div>
+          )}
 
-          {activeTab === 'dashboard' && financialData && <FinancialDashboard data={financialData} />}
+          {activeTab === 'dashboard' && financialData && (
+            <div className="space-y-4 sm:space-y-6">
+              <FinancialDashboard data={financialData} />
+            </div>
+          )}
 
-          {activeTab === 'insights' && financialData && <FinancialInsights data={financialData} />}
+          {activeTab === 'insights' && financialData && (
+            <div className="space-y-4 sm:space-y-6">
+              <FinancialInsights data={financialData} />
+            </div>
+          )}
 
           {/* Placeholder se não há dados e tentou acessar dashboard/insights */}
-          {(activeTab === 'dashboard' || activeTab === 'insights') && !financialData && <Card className="max-w-md mx-auto text-center">
-              <CardContent className="p-8">
+          {(activeTab === 'dashboard' || activeTab === 'insights') && !financialData && (
+            <Card className="max-w-md mx-auto text-center border-gray-700 bg-gray-800/50">
+              <CardContent className="p-6 sm:p-8">
                 <MessageCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Primeiro, vamos conversar!</h3>
-                <p className="text-gray-600 mb-4">
+                <h3 className="text-lg font-semibold mb-2 text-slate-50">Primeiro, vamos conversar!</h3>
+                <p className="text-slate-400 mb-4 text-sm">
                   Para gerar seu dashboard personalizado, preciso conhecer sua situação financeira.
                 </p>
-                <Button onClick={() => setActiveTab('chat')}>
+                <Button 
+                  onClick={() => setActiveTab('chat')}
+                  className="mobile-button mobile-button-primary w-full"
+                >
                   Começar Conversa
                 </Button>
               </CardContent>
-            </Card>}
+            </Card>
+          )}
         </div>
       </div>
-    </DashboardLayout>;
+    </DashboardLayout>
+  );
 };
+
 export default Financas;

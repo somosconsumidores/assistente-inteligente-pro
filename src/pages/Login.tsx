@@ -86,13 +86,13 @@ const Login = () => {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700" disabled={isLoading}>
+              <Button type="submit" disabled={isLoading} className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-slate-50 font-extrabold text-lg">
                 {isLoading ? "Entrando..." : "Entrar"}
               </Button>
             </form>
 
             <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600 dark:text-gray-300">
+              <p className="text-sm text-slate-50">
                 Não tem uma conta?{' '}
                 <Link to="/register" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">
                   Criar conta gratuita

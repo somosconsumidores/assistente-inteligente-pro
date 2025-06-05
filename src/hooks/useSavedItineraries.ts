@@ -63,12 +63,11 @@ export const useSavedItineraries = () => {
         .insert([
           {
             user_id: user.id,
+            title: `Viagem para ${formData.destination}`,
             destination: formData.destination,
             itinerary_data: itineraryData,
-            travel_dates: {
-              departure: formData.departureDate,
-              return: formData.returnDate
-            },
+            departure_date: formData.departureDate,
+            return_date: formData.returnDate,
             travelers_count: parseInt(formData.travelersCount),
             budget: formData.budget || null,
             travel_style: formData.travelStyle

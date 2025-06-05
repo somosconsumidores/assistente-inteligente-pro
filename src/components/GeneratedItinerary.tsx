@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MapPin, Clock, DollarSign, Lightbulb, Calendar, Save, ArrowLeft, Plane, Home, AlertTriangle, CheckCircle } from 'lucide-react';
+import { MapPin, Clock, DollarSign, Lightbulb, Calendar, Save, ArrowLeft, Plane, Home, AlertTriangle, CheckCircle, Verified, TrendingUp } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import type { TravelItineraryResponse } from '@/hooks/useTravelItinerary';
 
@@ -83,6 +82,32 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
       style: 'currency',
       currency: 'BRL'
     });
+  };
+
+  // Nova função para renderizar indicador de preço real
+  const renderPriceIndicator = (atividade: any) => {
+    if (atividade.precoReal) {
+      return (
+        <div className="flex items-center gap-1 text-xs text-green-400">
+          <Verified className="w-3 h-3" />
+          <span>Preço real</span>
+        </div>
+      );
+    } else if (atividade.confiancaPreco === 'medium') {
+      return (
+        <div className="flex items-center gap-1 text-xs text-yellow-400">
+          <TrendingUp className="w-3 h-3" />
+          <span>Estimativa baseada em dados</span>
+        </div>
+      );
+    } else {
+      return (
+        <div className="flex items-center gap-1 text-xs text-slate-500">
+          <AlertTriangle className="w-3 h-3" />
+          <span>Estimativa aproximada</span>
+        </div>
+      );
+    }
   };
 
   return (
@@ -294,7 +319,7 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
         </Card>
       )}
 
-      {/* Daily Itinerary - Mobile optimized */}
+      {/* Daily Itinerary - Mobile optimized com indicadores de preços reais */}
       {itineraryData.dias && itineraryData.dias.length > 0 && (
         <div className="space-y-4">
           {itineraryData.dias.map((day) => (
@@ -325,16 +350,20 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
                           {atividade.descricao}
                         </p>
                         
-                        {/* Location and Cost - Mobile: Stacked, Desktop: Side by side */}
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-slate-500">
-                          <div className="flex items-center gap-1">
+                        {/* Location, Cost and Price Indicator - Mobile: Stacked, Desktop: Side by side */}
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs">
+                          <div className="flex items-center gap-1 text-slate-500">
                             <MapPin className="w-3 h-3 flex-shrink-0" />
                             <span className="truncate">{atividade.localizacao}</span>
                           </div>
-                          <div className="flex items-center gap-1">
+                          
+                          <div className="flex items-center gap-1 text-slate-500">
                             <DollarSign className="w-3 h-3 flex-shrink-0" />
-                            <span>{atividade.custoEstimado}</span>
+                            <span className="font-medium">{atividade.custoEstimado}</span>
                           </div>
+                          
+                          {/* Novo indicador de preço real */}
+                          {renderPriceIndicator(atividade)}
                         </div>
                       </div>
                     </div>
@@ -345,6 +374,35 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
           ))}
         </div>
       )}
+
+      {/* Nova seção de informações sobre preços */}
+      <Card className="bg-gradient-to-r from-blue-900/20 to-green-900/20 border-blue-700/30">
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2 text-blue-300">
+            <Verified className="w-5 h-5" />
+            Informações sobre Preços
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3 text-sm">
+            <div className="flex items-center gap-2">
+              <Verified className="w-4 h-4 text-green-400" />
+              <span className="text-green-300">Preço real:</span>
+              <span className="text-slate-300">Obtido através de pesquisas em tempo real</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-yellow-400" />
+              <span className="text-yellow-300">Estimativa baseada em dados:</span>
+              <span className="text-slate-300">Calculado com base em informações do local</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-slate-500" />
+              <span className="text-slate-400">Estimativa aproximada:</span>
+              <span className="text-slate-300">Valor médio para o tipo de atividade</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

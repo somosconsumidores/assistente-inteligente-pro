@@ -1,5 +1,5 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -255,6 +255,62 @@ const estimateTravelCosts = (destination: string, departureDate: string, returnD
     totalEstimatedCost: Math.round(totalEstimatedCost)
   };
 }
+
+// Nova função para buscar preços reais das atividades
+const enrichActivitiesWithRealPrices = async (itineraryData: any, destination: string): Promise<any> => {
+  console.log('=== ENRIQUECENDO ATIVIDADES COM PREÇOS REAIS ===');
+  
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+  );
+
+  // Processar cada dia do roteiro
+  for (const dia of itineraryData.dias) {
+    // Processar cada atividade do dia
+    for (const atividade of dia.atividades) {
+      try {
+        console.log(`Buscando preço para: ${atividade.atividade} em ${destination}`);
+        
+        // Chamar a função de busca de preços
+        const { data: priceData, error } = await supabase.functions.invoke('search-activity-prices', {
+          body: {
+            activityName: atividade.atividade,
+            location: destination
+          }
+        });
+
+        if (!error && priceData) {
+          // Atualizar o custo com o preço real/estimado
+          atividade.custoEstimado = priceData.estimatedPrice;
+          atividade.precoReal = priceData.source === 'google_places';
+          atividade.confiancaPreco = priceData.confidence;
+          atividade.fontePreco = priceData.source;
+          
+          console.log(`Preço atualizado: ${atividade.atividade} = ${priceData.estimatedPrice} (fonte: ${priceData.source})`);
+        } else {
+          console.log(`Mantendo preço original para: ${atividade.atividade}`);
+          atividade.precoReal = false;
+          atividade.confiancaPreco = 'low';
+          atividade.fontePreco = 'estimate';
+        }
+        
+        // Pequena pausa para não sobrecarregar as APIs
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+      } catch (error) {
+        console.error(`Erro ao buscar preço para ${atividade.atividade}:`, error);
+        // Manter preço original em caso de erro
+        atividade.precoReal = false;
+        atividade.confiancaPreco = 'low';
+        atividade.fontePreco = 'estimate';
+      }
+    }
+  }
+
+  console.log('=== FINALIZADO ENRIQUECIMENTO DE PREÇOS ===');
+  return itineraryData;
+};
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -562,6 +618,10 @@ CRÍTICO: Use informações reais de ${destination}. Retorne APENAS JSON válido
         itineraryData.dias = itineraryData.dias.slice(0, maxDays)
       }
     }
+
+    // NOVA FUNCIONALIDADE: Enriquecer atividades com preços reais
+    console.log('Iniciando busca de preços reais para as atividades...');
+    itineraryData = await enrichActivitiesWithRealPrices(itineraryData, destination);
 
     // Avaliar se o orçamento é suficiente e adicionar análise
     let budgetAnalysis = null;

@@ -19,7 +19,7 @@ interface ChatMessagesProps {
 
 const ChatMessages = ({ messages, isLoading, messagesEndRef }: ChatMessagesProps) => {
   return (
-    <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
+    <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-gray-50 min-h-0">
       {messages.map(message => (
         <div key={message.id} className={`flex items-start space-x-3 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
           {message.type === 'assistant' && (

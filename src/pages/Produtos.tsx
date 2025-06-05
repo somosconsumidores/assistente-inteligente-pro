@@ -29,8 +29,8 @@ const Produtos = () => {
             </div>
           </div>
 
-          {/* Chat Section - Increased spacing */}
-          <div className="mb-12">
+          {/* Chat Section - Melhor espaçamento */}
+          <div className="mb-16">
             <Card className="border-gray-700 bg-gray-800/50 shadow-xl">
               <CardHeader className="pb-4 sm:pb-6">
                 <CardTitle className="text-lg sm:text-xl text-white">🏆 Chat com o Mestre dos Produtos</CardTitle>
@@ -38,37 +38,39 @@ const Produtos = () => {
                   Converse diretamente com nosso especialista IA para comparar produtos, encontrar as melhores ofertas e receber recomendações personalizadas
                 </CardDescription>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <ProductChat />
               </CardContent>
             </Card>
           </div>
 
-          {/* Info Card - Now with proper spacing to prevent overlap */}
-          <Card className="bg-gradient-to-r from-orange-900/30 to-red-900/30 border-orange-700/50 shadow-xl">
-            <CardHeader className="pb-4 sm:pb-6">
-              <CardTitle className="text-orange-400 text-lg sm:text-xl">🎯 Como funciona?</CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className={`grid ${isMobile ? 'grid-cols-1 gap-6' : 'md:grid-cols-3 gap-8'}`}>
-                <div className="text-center p-6 bg-orange-900/20 rounded-lg border border-orange-700/30">
-                  <div className="text-4xl sm:text-5xl mb-4">🔍</div>
-                  <h4 className="font-semibold mb-3 text-orange-300 text-base sm:text-lg">Pesquise</h4>
-                  <p className="text-sm sm:text-base text-orange-200 leading-relaxed">Digite qualquer produto que você quer comprar</p>
+          {/* Info Card - Espaçamento aumentado para evitar sobreposição */}
+          <div className="mt-20">
+            <Card className="bg-gradient-to-r from-orange-900/30 to-red-900/30 border-orange-700/50 shadow-xl">
+              <CardHeader className="pb-4 sm:pb-6">
+                <CardTitle className="text-orange-400 text-lg sm:text-xl">🎯 Como funciona?</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className={`grid ${isMobile ? 'grid-cols-1 gap-6' : 'md:grid-cols-3 gap-8'}`}>
+                  <div className="text-center p-6 bg-orange-900/20 rounded-lg border border-orange-700/30">
+                    <div className="text-4xl sm:text-5xl mb-4">🔍</div>
+                    <h4 className="font-semibold mb-3 text-orange-300 text-base sm:text-lg">Pesquise</h4>
+                    <p className="text-sm sm:text-base text-orange-200 leading-relaxed">Digite qualquer produto que você quer comprar</p>
+                  </div>
+                  <div className="text-center p-6 bg-orange-900/20 rounded-lg border border-orange-700/30">
+                    <div className="text-4xl sm:text-5xl mb-4">⚖️</div>
+                    <h4 className="font-semibold mb-3 text-orange-300 text-base sm:text-lg">Compare</h4>
+                    <p className="text-sm sm:text-base text-orange-200 leading-relaxed">Receba análises técnicas com Score Mestre e selos de qualidade</p>
+                  </div>
+                  <div className="text-center p-6 bg-orange-900/20 rounded-lg border border-orange-700/30">
+                    <div className="text-4xl sm:text-5xl mb-4">🛒</div>
+                    <h4 className="font-semibold mb-3 text-orange-300 text-base sm:text-lg">Compre</h4>
+                    <p className="text-sm sm:text-base text-orange-200 leading-relaxed">Acesse links diretos para as melhores ofertas</p>
+                  </div>
                 </div>
-                <div className="text-center p-6 bg-orange-900/20 rounded-lg border border-orange-700/30">
-                  <div className="text-4xl sm:text-5xl mb-4">⚖️</div>
-                  <h4 className="font-semibold mb-3 text-orange-300 text-base sm:text-lg">Compare</h4>
-                  <p className="text-sm sm:text-base text-orange-200 leading-relaxed">Receba análises técnicas com Score Mestre e selos de qualidade</p>
-                </div>
-                <div className="text-center p-6 bg-orange-900/20 rounded-lg border border-orange-700/30">
-                  <div className="text-4xl sm:text-5xl mb-4">🛒</div>
-                  <h4 className="font-semibold mb-3 text-orange-300 text-base sm:text-lg">Compre</h4>
-                  <p className="text-sm sm:text-base text-orange-200 leading-relaxed">Acesse links diretos para as melhores ofertas</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </DashboardLayout>

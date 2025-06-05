@@ -14,7 +14,7 @@ interface ChatInputProps {
 
 const ChatInput = ({ inputValue, setInputValue, onSend, onKeyPress, isLoading }: ChatInputProps) => {
   return (
-    <div className="border-t bg-white p-4">
+    <div className="border-t bg-white p-4 mt-auto">
       <div className="flex space-x-3 max-w-4xl mx-auto">
         <Input
           value={inputValue}

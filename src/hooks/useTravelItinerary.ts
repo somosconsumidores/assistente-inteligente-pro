@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -13,16 +12,25 @@ interface TravelItineraryParams {
   additionalPreferences?: string;
 }
 
+interface ItineraryActivity {
+  horario: string;
+  atividade: string;
+  descricao: string;
+  custoEstimado: string;
+  localizacao: string;
+  custoBRL?: string;
+  precoReal?: boolean;
+  confiancaPreco?: 'high' | 'medium' | 'low';
+  fontePreco?: 'google_places' | 'cache' | 'estimate';
+  exchangeRate?: number;
+  exchangeDate?: string;
+  originalCurrency?: string;
+}
+
 interface ItineraryDay {
   dia: number;
   titulo: string;
-  atividades: {
-    horario: string;
-    atividade: string;
-    descricao: string;
-    custoEstimado: string;
-    localizacao: string;
-  }[];
+  atividades: ItineraryActivity[];
 }
 
 interface ItineraryData {

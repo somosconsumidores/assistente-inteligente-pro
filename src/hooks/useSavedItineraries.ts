@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import type { TravelItineraryResponse } from '@/hooks/useTravelItinerary';
 
 export const useSavedItineraries = () => {
   const [savedItineraries, setSavedItineraries] = useState([]);
@@ -46,8 +47,8 @@ export const useSavedItineraries = () => {
     }
   }, [user]);
 
-  // Salvar um novo roteiro
-  const saveItinerary = async (itineraryData, formData) => {
+  // Salvar um novo roteiro com TODOS os dados da resposta da IA
+  const saveItinerary = async (completeItineraryResponse: TravelItineraryResponse, formData: any) => {
     if (!user) {
       toast({
         title: 'Não autenticado',
@@ -58,28 +59,31 @@ export const useSavedItineraries = () => {
     }
 
     try {
+      // Salvamos TODA a resposta da IA, não apenas itineraryData
+      const dataToSave = {
+        user_id: user.id,
+        title: `Viagem para ${formData.destination}`,
+        destination: formData.destination,
+        itinerary_data: completeItineraryResponse, // Salvamos TODA a resposta
+        departure_date: formData.departureDate,
+        return_date: formData.returnDate,
+        travelers_count: parseInt(formData.travelersCount),
+        budget: formData.budget || null,
+        travel_style: formData.travelStyle
+      };
+
+      console.log('Salvando roteiro completo:', dataToSave);
+
       const { data, error } = await supabase
         .from('saved_itineraries')
-        .insert([
-          {
-            user_id: user.id,
-            title: `Viagem para ${formData.destination}`,
-            destination: formData.destination,
-            itinerary_data: itineraryData,
-            departure_date: formData.departureDate,
-            return_date: formData.returnDate,
-            travelers_count: parseInt(formData.travelersCount),
-            budget: formData.budget || null,
-            travel_style: formData.travelStyle
-          }
-        ])
+        .insert([dataToSave])
         .select();
 
       if (error) throw error;
       
       toast({
-        title: 'Roteiro salvo',
-        description: 'Seu roteiro foi salvo com sucesso'
+        title: 'Roteiro Salvo com Sucesso!',
+        description: 'Seu roteiro foi salvo com todos os detalhes e análise financeira'
       });
       
       // Atualizar a lista
@@ -97,7 +101,7 @@ export const useSavedItineraries = () => {
   };
 
   // Deletar um roteiro
-  const deleteItinerary = async (id) => {
+  const deleteItinerary = async (id: string) => {
     if (!user) return;
     
     try {

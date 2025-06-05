@@ -34,24 +34,28 @@ const Viagens = () => {
     const tab = searchParams.get('tab') || 'planner';
     setActiveTab(tab);
   }, [searchParams]);
+  
   const {
     generateItinerary,
     isGenerating,
     generatedItinerary,
     clearItinerary
   } = useTravelItinerary();
+  
   const {
     savedItineraries,
     isLoading: isLoadingSaved,
     saveItinerary,
     deleteItinerary
   } = useSavedItineraries();
+
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
   };
+
   const handleCreateItinerary = async () => {
     if (!formData.destination || !formData.departureDate || !formData.returnDate) {
       return;
@@ -66,11 +70,14 @@ const Viagens = () => {
       additionalPreferences: formData.additionalPreferences || undefined
     });
   };
+
   const handleSaveItinerary = async () => {
     if (generatedItinerary) {
-      await saveItinerary(generatedItinerary.itineraryData, formData);
+      // Passamos TODA a resposta da IA, não apenas o itineraryData
+      await saveItinerary(generatedItinerary, formData);
     }
   };
+
   const handleBackToPlanner = () => {
     clearItinerary();
     setViewingSavedItinerary(null);
@@ -85,15 +92,19 @@ const Viagens = () => {
     });
     setActiveTab('planner');
   };
+
   const handleViewSavedItinerary = (itinerary: any) => {
+    console.log('Visualizando roteiro salvo:', itinerary);
     setViewingSavedItinerary(itinerary);
     setActiveTab('viewing');
   };
+
   const handleDeleteItinerary = async (id: string) => {
     if (confirm('Tem certeza que deseja excluir este roteiro?')) {
       await deleteItinerary(id);
     }
   };
+
   return (
     <DashboardLayout>
       <div className="flex flex-col h-full">
@@ -172,11 +183,7 @@ const Viagens = () => {
               />
             ) : viewingSavedItinerary ? (
               <GeneratedItinerary 
-                itinerary={{
-                  itineraryData: viewingSavedItinerary.itinerary_data,
-                  travelCosts: null,
-                  budgetAnalysis: null
-                }} 
+                itinerary={viewingSavedItinerary.itinerary_data}
                 onBackToPlanner={handleBackToPlanner} 
                 isSaved={true} 
               />
@@ -361,7 +368,6 @@ const Viagens = () => {
                 {/* Example Itinerary Tab */}
                 {activeTab === 'itinerary' && (
                   <div className="space-y-6">
-                    {/* ... keep existing code (static example itinerary) */}
                     <Card className="border-gray-700 bg-gray-800/50">
                       <CardHeader>
                         <CardTitle className="text-slate-50">Roteiro: Paris, França</CardTitle>

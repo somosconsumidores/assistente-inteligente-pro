@@ -220,6 +220,57 @@ const searchRealFlightPrices = async (destination: string, departureDate: string
   }
 };
 
+// Nova função para buscar preços reais de hospedagem usando a API
+const searchRealAccommodationPrices = async (destination: string, departureDate: string, returnDate: string, travelersCount: number, travelStyle: string): Promise<{
+  pricePerDay: number;
+  totalPrice: number;
+  source: 'real' | 'estimate';
+  currency?: string;
+} | null> => {
+  console.log('=== BUSCANDO PREÇOS REAIS DE HOSPEDAGEM ===');
+  
+  try {
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    console.log(`Chamando API de busca de hospedagem para ${destination}`);
+    
+    const { data, error } = await supabase.functions.invoke('search-accommodation-prices', {
+      body: {
+        destination: destination,
+        checkInDate: departureDate,
+        checkOutDate: returnDate,
+        adults: travelersCount,
+        travelStyle: travelStyle
+      }
+    });
+
+    if (error) {
+      console.error('Erro na chamada da API de hospedagem:', error);
+      return null;
+    }
+
+    if (data && data.success) {
+      console.log(`Preços reais de hospedagem encontrados: R$ ${data.pricePerDay} por dia`);
+      return {
+        pricePerDay: data.pricePerDay,
+        totalPrice: data.totalPrice,
+        source: 'real',
+        currency: data.currency
+      };
+    } else {
+      console.log('API de hospedagem não retornou dados válidos');
+      return null;
+    }
+    
+  } catch (error) {
+    console.error('Erro ao buscar preços reais de hospedagem:', error);
+    return null;
+  }
+};
+
 // Nova função para pesquisar preços fictícios de voos e acomodação
 const estimateTravelCosts = async (destination: string, departureDate: string, returnDate: string, travelersCount: number, travelStyle: string, days: number): Promise<any> => {
   console.log('=== INICIANDO CÁLCULO DE CUSTOS DE VIAGEM ===');
@@ -247,8 +298,28 @@ const estimateTravelCosts = async (destination: string, departureDate: string, r
     };
   }
 
-  // Calcular custos de hospedagem (mantém lógica existente)
-  const accommodationCosts = estimateAccommodationCosts(destination, days, travelersCount, travelStyle);
+  // Tentar buscar preços reais de hospedagem
+  const realAccommodationPrices = await searchRealAccommodationPrices(destination, departureDate, returnDate, travelersCount, travelStyle);
+  
+  let accommodationCosts;
+  if (realAccommodationPrices) {
+    console.log('Usando preços reais de hospedagem da API');
+    accommodationCosts = {
+      pricePerDay: realAccommodationPrices.pricePerDay,
+      totalPrice: realAccommodationPrices.totalPrice,
+      source: 'real',
+      currency: realAccommodationPrices.currency
+    };
+  } else {
+    console.log('Usando estimativa de preços de hospedagem (fallback)');
+    const estimatedAccommodation = estimateAccommodationCosts(destination, days, travelersCount, travelStyle);
+    accommodationCosts = {
+      pricePerDay: estimatedAccommodation.pricePerDay,
+      totalPrice: estimatedAccommodation.totalPrice,
+      source: 'estimate',
+      currency: 'BRL'
+    };
+  }
   
   return {
     flightCost: flightCosts,

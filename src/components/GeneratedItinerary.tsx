@@ -279,21 +279,45 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
               </div>
             </div>
 
-            {/* Accommodation Cost */}
-            <div className="p-3 sm:p-4 bg-gray-800/50 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <Home className="w-4 h-4 text-purple-400" />
-                <h3 className="font-medium text-purple-300">Hospedagem</h3>
+            {/* Accommodation Costs */}
+            <div className="bg-gradient-to-r from-green-900/30 to-emerald-900/30 p-4 rounded-lg border border-green-700">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-green-400 font-medium flex items-center">
+                  <Bed className="w-4 h-4 mr-2" />
+                  Hospedagem
+                </h4>
+                <div className="flex items-center space-x-2">
+                  {itinerary.travelCosts?.accommodationCost?.source === 'real' ? (
+                    <span className="text-xs bg-green-600 text-white px-2 py-1 rounded-full flex items-center">
+                      <CheckCircle className="w-3 h-3 mr-1" />
+                      Preço Real
+                    </span>
+                  ) : (
+                    <span className="text-xs bg-gray-600 text-white px-2 py-1 rounded-full flex items-center">
+                      <Clock className="w-3 h-3 mr-1" />
+                      Estimativa
+                    </span>
+                  )}
+                </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div className="flex flex-col">
-                  <span className="text-xs text-slate-400">Preço por dia</span>
-                  <span className="text-slate-50">{formatCurrency(travelCosts.accommodationCost.pricePerDay)}</span>
+              <div className="space-y-1">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-300">Por dia:</span>
+                  <span className="text-green-300 font-medium">
+                    R$ {itinerary.travelCosts?.accommodationCost?.pricePerDay?.toLocaleString('pt-BR') || '0'}
+                  </span>
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-xs text-slate-400">Total hospedagem</span>
-                  <span className="text-lg font-medium text-purple-300">{formatCurrency(travelCosts.accommodationCost.totalPrice)}</span>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-300">Total:</span>
+                  <span className="text-green-300 font-medium">
+                    R$ {itinerary.travelCosts?.accommodationCost?.totalPrice?.toLocaleString('pt-BR') || '0'}
+                  </span>
                 </div>
+                {itinerary.travelCosts?.accommodationCost?.source === 'real' && (
+                  <div className="text-xs text-green-400 mt-1">
+                    Fonte: Amadeus Hotels API
+                  </div>
+                )}
               </div>
             </div>
 

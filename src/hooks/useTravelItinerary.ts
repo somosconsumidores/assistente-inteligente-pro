@@ -52,6 +52,8 @@ interface TravelCosts {
   accommodationCost: {
     pricePerDay: number;
     totalPrice: number;
+    source: 'real' | 'estimate';
+    currency?: string;
   };
   extraExpenses: number;
   totalEstimatedCost: number;

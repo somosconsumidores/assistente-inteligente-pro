@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MapPin, Clock, DollarSign, Lightbulb, Calendar, Save, ArrowLeft, Plane, Home, AlertTriangle, CheckCircle, Verified, TrendingUp, Zap } from 'lucide-react';
+import { MapPin, Clock, DollarSign, Lightbulb, Calendar, Save, ArrowLeft, Plane, Home, AlertTriangle, CheckCircle, Verified, TrendingUp, Zap, Bed } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import type { TravelItineraryResponse } from '@/hooks/useTravelItinerary';
 

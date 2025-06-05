@@ -39,17 +39,7 @@ const ProductChat = () => {
     console.log('Featured products updated in ProductChat:', featuredProducts);
   }, [featuredProducts]);
 
-  // Auto-switch to recommendations tab only when products are available AND chat is complete (not loading)
-  useEffect(() => {
-    if (featuredProducts.length > 0 && messages.length > 0 && !isLoading) {
-      // Add a small delay to ensure the user sees the complete response first
-      const timer = setTimeout(() => {
-        setActiveTab('recommendations');
-      }, 1000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [featuredProducts, messages.length, isLoading]);
+  // Removed auto-switch logic - user stays in chat tab unless they manually switch
 
   const handleSend = async () => {
     if (!inputValue.trim() || isLoading) return;
@@ -76,18 +66,18 @@ const ProductChat = () => {
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col h-[600px] max-w-4xl mx-auto">
+    <div className="w-full max-w-6xl mx-auto">
+      <div className="flex flex-col h-[700px] bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
         <ChatHeader onClearChat={handleClearChat} />
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-          <TabsList className="grid w-full grid-cols-2 mx-4 mt-4">
-            <TabsTrigger value="chat" className="flex items-center gap-2">
+          <TabsList className="grid w-full grid-cols-2 mx-4 mt-4 bg-gray-100">
+            <TabsTrigger value="chat" className="flex items-center gap-2 data-[state=active]:bg-white">
               <MessageCircle className="w-4 h-4" />
               Chat
             </TabsTrigger>
-            <TabsTrigger value="recommendations" className="flex items-center gap-2">
+            <TabsTrigger value="recommendations" className="flex items-center gap-2 data-[state=active]:bg-white">
               <Star className="w-4 h-4" />
               Nossas Recomendações
               {validProducts.length > 0 && (
@@ -115,7 +105,7 @@ const ProductChat = () => {
           </TabsContent>
 
           {/* Recommendations Tab */}
-          <TabsContent value="recommendations" className="flex-1 p-4">
+          <TabsContent value="recommendations" className="flex-1 p-4 overflow-y-auto">
             <RecommendationsTab 
               featuredProducts={featuredProducts}
               lastQuery={lastQuery}

@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import ProductCard from '@/components/product/ProductCard';
 import type { Json } from '@/integrations/supabase/types';
+
 interface SavedRecommendation {
   id: string;
   query: string;
@@ -19,6 +20,7 @@ interface SavedRecommendation {
   featured_products: Json;
   created_at: string;
 }
+
 const SavedRecommendations: React.FC = () => {
   const {
     user
@@ -33,6 +35,7 @@ const SavedRecommendations: React.FC = () => {
   } = useSaveRecommendation();
   const [recommendations, setRecommendations] = useState<SavedRecommendation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
   const fetchRecommendations = async () => {
     if (!user) return;
     try {
@@ -58,6 +61,7 @@ const SavedRecommendations: React.FC = () => {
   useEffect(() => {
     fetchRecommendations();
   }, [user]);
+
   const handleDelete = async (id: string) => {
     const success = await deleteRecommendation(id);
     if (success) {
@@ -72,6 +76,7 @@ const SavedRecommendations: React.FC = () => {
     }
     return [];
   };
+
   if (isLoading) {
     return <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -87,25 +92,41 @@ const SavedRecommendations: React.FC = () => {
         </div>
       </div>;
   }
+
   return <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-zinc-800">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')} className="flex items-center gap-2">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 bg-zinc-800 safe-area-top">
+        {/* Header - Mobile Optimized */}
+        <div className="mb-6 sm:mb-8">
+          {/* Back Button - Mobile Optimized */}
+          <div className="mb-4 sm:mb-6">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => navigate('/dashboard')} 
+              className="flex items-center gap-2 text-slate-50 hover:bg-gray-700 mobile-button p-2 sm:p-3"
+            >
               <ArrowLeft className="w-4 h-4" />
-              Voltar ao Painel
+              <span className="text-sm sm:text-base">Voltar ao Painel</span>
             </Button>
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-r from-green-500 to-blue-600 rounded-lg">
-                <ShoppingCart className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-slate-50">Recomendações Salvas</h1>
-                <p className="text-slate-50">
-                  {recommendations.length === 0 ? 'Nenhuma recomendação salva' : recommendations.length === 1 ? '1 recomendação salva' : `${recommendations.length} recomendações salvas`}
-                </p>
-              </div>
+          </div>
+          
+          {/* Title Section - Mobile Optimized */}
+          <div className="flex items-start gap-3 sm:gap-4">
+            <div className="p-2 sm:p-3 bg-gradient-to-r from-green-500 to-blue-600 rounded-lg flex-shrink-0">
+              <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-50 leading-tight">
+                Recomendações Salvas
+              </h1>
+              <p className="text-sm sm:text-base text-slate-400 mt-1">
+                {recommendations.length === 0 
+                  ? 'Nenhuma recomendação salva' 
+                  : recommendations.length === 1 
+                  ? '1 recomendação salva' 
+                  : `${recommendations.length} recomendações salvas`
+                }
+              </p>
             </div>
           </div>
         </div>
@@ -123,7 +144,7 @@ const SavedRecommendations: React.FC = () => {
                 </Button>
               </div>
             </CardContent>
-          </Card> : <div className="space-y-8">
+          </Card> : <div className="space-y-6 sm:space-y-8">
             {recommendations.map(rec => {
           const featuredProducts = getFeaturedProducts(rec.featured_products);
           return <Card key={rec.id} className="overflow-hidden">
@@ -178,4 +199,5 @@ const SavedRecommendations: React.FC = () => {
       </div>
     </div>;
 };
+
 export default SavedRecommendations;

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,6 +12,14 @@ interface ItineraryActivity {
   descricao: string;
   custoEstimado: string;
   localizacao: string;
+  // New currency-related properties
+  custoBRL?: string;
+  precoReal?: boolean;
+  confiancaPreco?: 'high' | 'medium' | 'low';
+  fontePreco?: 'google_places' | 'cache' | 'estimate';
+  exchangeRate?: number;
+  exchangeDate?: string;
+  originalCurrency?: string;
 }
 
 interface ItineraryDay {
@@ -85,7 +94,7 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
   };
 
   // Nova função para renderizar informações de câmbio
-  const renderExchangeInfo = (atividade: any) => {
+  const renderExchangeInfo = (atividade: ItineraryActivity) => {
     if (atividade.exchangeRate && atividade.exchangeDate && atividade.originalCurrency !== 'BRL') {
       return (
         <div className="flex items-center gap-1 text-xs text-blue-400 mt-1">
@@ -98,7 +107,7 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
   };
 
   // Função atualizada para renderizar indicador de preço
-  const renderPriceIndicator = (atividade: any) => {
+  const renderPriceIndicator = (atividade: ItineraryActivity) => {
     return (
       <div className="space-y-1">
         {atividade.precoReal ? (

@@ -76,92 +76,105 @@ const AssistantCards = ({ userPlan, onUpgrade, isFirstAccess = false }: Assistan
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {assistants.map((assistant) => {
-        const Icon = assistant.icon;
-        const isAvailable = userPlan ? assistant.available : true; // Show all as available on landing page
-        
-        return (
-          <Card 
-            key={assistant.id} 
-            className={`relative overflow-hidden transition-all duration-300 hover:shadow-xl group ${
-              isAvailable 
-                ? 'hover:scale-105 cursor-pointer' 
-                : 'opacity-60'
-            } bg-white`}
-          >
-            {/* Background Gradient */}
-            <div className={`absolute inset-0 bg-gradient-to-br ${assistant.gradient} opacity-5`} />
-            
-            {/* Premium Badge */}
-            {userPlan && !isAvailable && (
-              <div className="absolute top-4 right-4 z-10">
-                <Badge variant="secondary" className="bg-orange-100 text-orange-800 border-orange-200">
-                  <Crown className="w-3 h-3 mr-1" />
-                  Premium
-                </Badge>
-              </div>
-            )}
+    <div id="assistentes" className="space-y-6 sm:space-y-8">
+      <div className="text-center space-y-3 sm:space-y-4">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
+          Escolha seu Assistente
+        </h2>
+        <p className="text-base sm:text-lg text-gray-400 max-w-3xl mx-auto leading-relaxed">
+          Cada assistente é especializado em uma área específica para oferecer o melhor suporte possível
+        </p>
+      </div>
 
-            {/* Free Badge */}
-            {userPlan === 'free' && assistant.isFree && (
-              <div className="absolute top-4 right-4 z-10">
-                <Badge className="bg-green-500 text-white border-green-600">
-                  <Sparkles className="w-3 h-3 mr-1" />
-                  Gratuito
-                </Badge>
-              </div>
-            )}
-            
-            <CardHeader className="relative z-10">
-              <div className="flex items-center gap-3 mb-2">
-                <div className={`p-3 rounded-lg bg-gradient-to-br ${assistant.gradient} text-white shadow-lg`}>
-                  <Icon className="w-6 h-6" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        {assistants.map((assistant) => {
+          const Icon = assistant.icon;
+          const isAvailable = userPlan ? assistant.available : true;
+          
+          return (
+            <Card 
+              key={assistant.id} 
+              className={`relative overflow-hidden transition-all duration-300 group border-gray-800 bg-gray-900/50 backdrop-blur-sm ${
+                isAvailable 
+                  ? 'hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-1 cursor-pointer hover-lift' 
+                  : 'opacity-60'
+              }`}
+            >
+              {/* Background Gradient */}
+              <div className={`absolute inset-0 bg-gradient-to-br ${assistant.gradient} opacity-5 group-hover:opacity-10 transition-opacity`} />
+              
+              {/* Premium Badge */}
+              {userPlan && !isAvailable && (
+                <div className="absolute top-3 right-3 z-10">
+                  <Badge variant="secondary" className="bg-orange-500/20 text-orange-300 border-orange-500/30 text-xs">
+                    <Crown className="w-3 h-3 mr-1" />
+                    Premium
+                  </Badge>
                 </div>
-                <CardTitle className="text-xl text-gray-900">
-                  {assistant.title}
-                </CardTitle>
-              </div>
-              <CardDescription className="text-sm leading-relaxed text-gray-600">
-                {assistant.description}
-              </CardDescription>
-            </CardHeader>
-            
-            <CardContent className="relative z-10">
-              {userPlan ? (
-                // Authenticated user view
-                isAvailable ? (
-                  <Link to={assistant.path}>
+              )}
+
+              {/* Free Badge */}
+              {userPlan === 'free' && assistant.isFree && (
+                <div className="absolute top-3 right-3 z-10">
+                  <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-xs">
+                    <Sparkles className="w-3 h-3 mr-1" />
+                    Gratuito
+                  </Badge>
+                </div>
+              )}
+              
+              <CardHeader className="relative z-10 p-4 sm:p-6">
+                <div className="flex items-start gap-3 sm:gap-4 mb-3 sm:mb-4">
+                  <div className={`p-2.5 sm:p-3 rounded-xl bg-gradient-to-br ${assistant.gradient} text-white shadow-lg flex-shrink-0`}>
+                    <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <CardTitle className="text-lg sm:text-xl text-white leading-tight">
+                      {assistant.title}
+                    </CardTitle>
+                  </div>
+                </div>
+                <CardDescription className="text-sm sm:text-base leading-relaxed text-gray-400">
+                  {assistant.description}
+                </CardDescription>
+              </CardHeader>
+              
+              <CardContent className="relative z-10 p-4 sm:p-6 pt-0">
+                {userPlan ? (
+                  // Authenticated user view
+                  isAvailable ? (
+                    <Link to={assistant.path}>
+                      <Button 
+                        className={`w-full bg-gradient-to-r ${assistant.gradient} hover:opacity-90 text-white font-medium py-2.5 sm:py-3 text-sm sm:text-base transition-all duration-200 touch-target`}
+                      >
+                        Acessar Assistente
+                      </Button>
+                    </Link>
+                  ) : (
                     <Button 
-                      className={`w-full bg-gradient-to-r ${assistant.gradient} hover:opacity-90 text-white font-medium py-2 transition-all duration-200`}
+                      onClick={onUpgrade}
+                      variant="outline" 
+                      className="w-full border-2 border-orange-500/30 text-orange-300 hover:bg-orange-500/10 font-medium py-2.5 sm:py-3 text-sm sm:text-base transition-all duration-200 touch-target"
                     >
-                      Acessar Assistente
+                      <Lock className="w-4 h-4 mr-2" />
+                      Fazer Upgrade
+                    </Button>
+                  )
+                ) : (
+                  // Landing page view
+                  <Link to="/login">
+                    <Button 
+                      className={`w-full bg-gradient-to-r ${assistant.gradient} hover:opacity-90 text-white font-medium py-2.5 sm:py-3 text-sm sm:text-base transition-all duration-200 touch-target`}
+                    >
+                      Começar Agora
                     </Button>
                   </Link>
-                ) : (
-                  <Button 
-                    onClick={onUpgrade}
-                    variant="outline" 
-                    className="w-full border-2 border-orange-200 text-orange-700 hover:bg-orange-50 font-medium py-2 transition-all duration-200"
-                  >
-                    <Lock className="w-4 h-4 mr-2" />
-                    Fazer Upgrade
-                  </Button>
-                )
-              ) : (
-                // Landing page view
-                <Link to="/login">
-                  <Button 
-                    className={`w-full bg-gradient-to-r ${assistant.gradient} hover:opacity-90 text-white font-medium py-2 transition-all duration-200`}
-                  >
-                    Começar Agora
-                  </Button>
-                </Link>
-              )}
-            </CardContent>
-          </Card>
-        );
-      })}
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
     </div>
   );
 };

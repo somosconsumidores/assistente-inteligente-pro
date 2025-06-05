@@ -9,12 +9,16 @@ import Footer from '@/components/Footer';
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-gray-900 text-white">
       <Header />
-      <Hero />
-      <AssistantCards />
-      <Features />
-      <Pricing />
+      <main className="safe-area-top safe-area-bottom">
+        <Hero />
+        <section className="mobile-padding py-8 sm:py-12 lg:py-16">
+          <AssistantCards />
+        </section>
+        <Features />
+        <Pricing />
+      </main>
       <Footer />
     </div>
   );

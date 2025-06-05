@@ -1,138 +1,156 @@
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Link } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle } from 'lucide-react';
-
-const plans = [
-  {
-    name: "Gratuito",
-    price: "R$ 0",
-    period: "/mês",
-    description: "Perfeito para experimentar",
-    features: [
-      "1 assistente à sua escolha",
-      "10 consultas por mês",
-      "Histórico básico",
-      "Suporte por email"
-    ],
-    buttonText: "Começar Grátis",
-    buttonVariant: "outline" as const,
-    popular: false
-  },
-  {
-    name: "Premium",
-    price: "R$ 29",
-    period: "/mês",
-    description: "Para uso completo e profissional",
-    features: [
-      "Todos os 5 assistentes",
-      "Consultas ilimitadas",
-      "Relatórios em PDF",
-      "WhatsApp integrado",
-      "Updates semanais",
-      "Histórico completo",
-      "Suporte prioritário"
-    ],
-    buttonText: "Assinar Premium",
-    buttonVariant: "default" as const,
-    popular: true
-  },
-  {
-    name: "White Label",
-    price: "R$ 297",
-    period: "/mês",
-    description: "Para empresas e influenciadores",
-    features: [
-      "Todos os recursos Premium",
-      "Sua marca personalizada",
-      "Domínio próprio",
-      "API personalizada",
-      "Suporte dedicado",
-      "Treinamento incluído"
-    ],
-    buttonText: "Falar com Vendas",
-    buttonVariant: "outline" as const,
-    popular: false
-  }
-];
+import { Badge } from '@/components/ui/badge';
+import { CheckCircle, Crown, Star, Zap } from 'lucide-react';
 
 const Pricing = () => {
+  const plans = [
+    {
+      name: 'Gratuito',
+      price: 'R$ 0',
+      period: '/mês',
+      description: 'Perfeito para começar',
+      icon: Star,
+      gradient: 'from-gray-600 to-gray-800',
+      features: [
+        '1 Assistente especializado',
+        'Mestre do Direito do Consumidor',
+        'Consultas ilimitadas',
+        'Suporte por email',
+        'Histórico de 30 dias'
+      ],
+      cta: 'Começar Gratuitamente',
+      ctaVariant: 'outline' as const,
+      popular: false
+    },
+    {
+      name: 'Premium',
+      price: 'R$ 29,90',
+      period: '/mês',
+      description: 'Acesso completo a todos os assistentes',
+      icon: Crown,
+      gradient: 'from-blue-600 to-purple-600',
+      features: [
+        'Todos os 5 assistentes',
+        'Consultas ilimitadas',
+        'Suporte prioritário 24/7',
+        'Histórico completo',
+        'Exportação de documentos',
+        'Análises avançadas',
+        'Atualizações em primeira mão'
+      ],
+      cta: 'Upgrade para Premium',
+      ctaVariant: 'default' as const,
+      popular: true
+    }
+  ];
+
   return (
-    <section id="precos" className="py-20 px-4 bg-gray-50">
-      <div className="container mx-auto max-w-6xl">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Escolha o Plano Ideal
+    <section id="precos" className="mobile-padding py-12 sm:py-16 lg:py-20">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="text-center space-y-3 sm:space-y-4 mb-8 sm:mb-12 lg:mb-16">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
+            Planos que se adaptam às suas necessidades
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Comece gratuitamente e evolua conforme suas necessidades crescem.
+          <p className="text-base sm:text-lg text-gray-400 max-w-3xl mx-auto leading-relaxed">
+            Comece gratuitamente e faça upgrade quando precisar de mais assistentes
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {plans.map((plan, index) => (
-            <Card 
-              key={index} 
-              className={`relative border-2 hover:shadow-xl transition-all duration-300 ${
-                plan.popular 
-                  ? 'border-blue-500 bg-white scale-105' 
-                  : 'border-gray-200 bg-white hover:border-blue-300'
-              }`}
-            >
-              {plan.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-semibold">
-                    Mais Popular
-                  </span>
-                </div>
-              )}
-              
-              <CardHeader className="text-center pb-8">
-                <CardTitle className="text-2xl font-bold text-gray-900 mb-2">
-                  {plan.name}
-                </CardTitle>
-                <div className="mb-4">
-                  <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
-                  <span className="text-gray-600">{plan.period}</span>
-                </div>
-                <CardDescription className="text-base">
-                  {plan.description}
-                </CardDescription>
-              </CardHeader>
-              
-              <CardContent className="space-y-6">
-                <ul className="space-y-3">
-                  {plan.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-center text-gray-700">
-                      <CheckCircle className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                
-                <Button 
-                  variant={plan.buttonVariant}
-                  className={`w-full py-3 ${
-                    plan.popular 
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700' 
-                      : ''
-                  }`}
-                  size="lg"
-                >
-                  {plan.buttonText}
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+        {/* Pricing Cards */}
+        <div className="grid md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto">
+          {plans.map((plan, index) => {
+            const Icon = plan.icon;
+            
+            return (
+              <Card 
+                key={index}
+                className={`relative overflow-hidden border-gray-800 bg-gray-900/50 backdrop-blur-sm transition-all duration-300 ${
+                  plan.popular 
+                    ? 'ring-2 ring-blue-500/50 hover:ring-blue-400/70 hover:shadow-2xl hover:shadow-blue-500/20' 
+                    : 'hover:shadow-xl'
+                } hover:-translate-y-1`}
+              >
+                {/* Popular Badge */}
+                {plan.popular && (
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                    <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-1.5 text-xs font-semibold">
+                      <Zap className="w-3 h-3 mr-1" />
+                      Mais Popular
+                    </Badge>
+                  </div>
+                )}
+
+                <CardHeader className="p-6 sm:p-8 text-center">
+                  <div className={`w-12 h-12 sm:w-16 sm:h-16 mx-auto rounded-2xl bg-gradient-to-br ${plan.gradient} flex items-center justify-center mb-4 sm:mb-6`}>
+                    <Icon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                  </div>
+                  
+                  <CardTitle className="text-xl sm:text-2xl text-white mb-2">
+                    {plan.name}
+                  </CardTitle>
+                  
+                  <div className="mb-3 sm:mb-4">
+                    <span className="text-3xl sm:text-4xl font-bold text-white">{plan.price}</span>
+                    <span className="text-base sm:text-lg text-gray-400">{plan.period}</span>
+                  </div>
+                  
+                  <p className="text-sm sm:text-base text-gray-400">
+                    {plan.description}
+                  </p>
+                </CardHeader>
+
+                <CardContent className="p-6 sm:p-8 pt-0">
+                  <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
+                    {plan.features.map((feature, featureIndex) => (
+                      <li key={featureIndex} className="flex items-start space-x-3">
+                        <div className="w-5 h-5 rounded-full bg-gradient-to-r from-green-500 to-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <CheckCircle className="w-3 h-3 text-white" />
+                        </div>
+                        <span className="text-sm sm:text-base text-gray-300 leading-relaxed">
+                          {feature}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Button 
+                    asChild
+                    variant={plan.ctaVariant}
+                    size="lg"
+                    className={`w-full font-semibold py-3 sm:py-4 text-sm sm:text-base touch-target ${
+                      plan.popular 
+                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white' 
+                        : 'border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white'
+                    }`}
+                  >
+                    <Link to="/register">
+                      {plan.cta}
+                    </Link>
+                  </Button>
+
+                  {plan.popular && (
+                    <p className="text-xs sm:text-sm text-center text-gray-500 mt-3 sm:mt-4">
+                      Cancele a qualquer momento
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
-        <div className="text-center mt-12">
-          <p className="text-gray-600 mb-4">
-            💳 Pagamento seguro • 🔄 Cancele quando quiser • 📱 Disponível 24/7
+        {/* Additional Info */}
+        <div className="text-center mt-8 sm:mt-12">
+          <p className="text-sm sm:text-base text-gray-400 mb-4">
+            💳 Aceitamos cartão de crédito, PIX e boleto bancário
           </p>
-          <p className="text-sm text-gray-500">
-            Todos os planos incluem 7 dias de garantia. Não gostou? Devolvemos seu dinheiro.
+          <p className="text-xs sm:text-sm text-gray-500">
+            Todos os preços são em reais (BRL) e incluem impostos
           </p>
         </div>
       </div>

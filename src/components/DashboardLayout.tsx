@@ -1,24 +1,27 @@
+
 import React from 'react';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
+
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
-export function DashboardLayout({
-  children
-}: DashboardLayoutProps) {
-  return <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gray-50">
+
+export function DashboardLayout({ children }: DashboardLayoutProps) {
+  return (
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-gray-900 safe-area-top safe-area-bottom">
         <AppSidebar />
         <main className="flex-1 flex flex-col">
-          <header className="sticky top-0 z-40 border-b border-gray-200 px-4 h-14 flex items-center gap-4 bg-zinc-800">
-            <SidebarTrigger className="text-slate-50" />
+          <header className="sticky top-0 z-40 border-b border-gray-800 mobile-padding h-12 sm:h-14 flex items-center gap-3 sm:gap-4 bg-gray-900/95 backdrop-blur-md">
+            <SidebarTrigger className="text-slate-50 touch-target" />
             <div className="flex-1" />
           </header>
-          <div className="flex-1 bg-zinc-800">
+          <div className="flex-1 bg-gray-900 overflow-auto">
             {children}
           </div>
         </main>
       </div>
-    </SidebarProvider>;
+    </SidebarProvider>
+  );
 }

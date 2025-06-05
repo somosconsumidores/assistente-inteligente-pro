@@ -10,15 +10,17 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gray-900 safe-area-top safe-area-bottom">
+      <div className="min-h-screen flex w-full bg-gray-900 safe-area-top safe-area-bottom touch-action-manipulation">
         <AppSidebar />
-        <main className="flex-1 flex flex-col">
+        <main className="flex-1 flex flex-col min-w-0">
           <header className="sticky top-0 z-40 border-b border-gray-800 mobile-padding h-12 sm:h-14 flex items-center gap-3 sm:gap-4 bg-gray-900/95 backdrop-blur-md">
             <SidebarTrigger className="text-slate-50 touch-target" />
             <div className="flex-1" />
           </header>
-          <div className="flex-1 bg-gray-900 overflow-auto">
-            {children}
+          <div className="flex-1 bg-gray-900 overflow-hidden">
+            <div className="h-full overflow-auto scrollbar-hide">
+              {children}
+            </div>
           </div>
         </main>
       </div>

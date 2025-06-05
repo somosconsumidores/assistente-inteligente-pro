@@ -312,6 +312,159 @@ const enrichActivitiesWithRealPrices = async (itineraryData: any, destination: s
   return itineraryData;
 };
 
+// Função para estimar custos de voo mais realistas
+const estimateFlightCosts = (destination: string, travelersCount: number, travelStyle: string): {
+  pricePerPerson: number;
+  totalPrice: number;
+} => {
+  const destinationLower = destination.toLowerCase();
+  
+  // Base de dados de estimativas por região (em EUR)
+  let baseFlightPrice = 800; // Valor padrão
+  
+  // Europa
+  if (destinationLower.includes('frança') || destinationLower.includes('paris') ||
+      destinationLower.includes('espanha') || destinationLower.includes('madrid') ||
+      destinationLower.includes('itália') || destinationLower.includes('roma') ||
+      destinationLower.includes('alemanha') || destinationLower.includes('berlim') ||
+      destinationLower.includes('holanda') || destinationLower.includes('amsterdam') ||
+      destinationLower.includes('portugal') || destinationLower.includes('lisboa')) {
+    baseFlightPrice = 600;
+  }
+  
+  // América do Norte
+  else if (destinationLower.includes('estados unidos') || destinationLower.includes('eua') ||
+           destinationLower.includes('new york') || destinationLower.includes('miami') ||
+           destinationLower.includes('canadá') || destinationLower.includes('toronto')) {
+    baseFlightPrice = 900;
+  }
+  
+  // Ásia
+  else if (destinationLower.includes('japão') || destinationLower.includes('tóquio') ||
+           destinationLower.includes('china') || destinationLower.includes('pequim') ||
+           destinationLower.includes('coreia') || destinationLower.includes('seul') ||
+           destinationLower.includes('tailândia') || destinationLower.includes('bangkok') ||
+           destinationLower.includes('vietnam') || destinationLower.includes('índia')) {
+    baseFlightPrice = 1200;
+  }
+  
+  // Oceania
+  else if (destinationLower.includes('austrália') || destinationLower.includes('sydney') ||
+           destinationLower.includes('nova zelândia') || destinationLower.includes('auckland')) {
+    baseFlightPrice = 1800;
+  }
+  
+  // África
+  else if (destinationLower.includes('áfrica do sul') || destinationLower.includes('cidade do cabo') ||
+           destinationLower.includes('marrocos') || destinationLower.includes('egito')) {
+    baseFlightPrice = 1000;
+  }
+  
+  // América do Sul (mais barato do Brasil)
+  else if (destinationLower.includes('argentina') || destinationLower.includes('chile') ||
+           destinationLower.includes('peru') || destinationLower.includes('uruguai') ||
+           destinationLower.includes('colômbia') || destinationLower.includes('equador')) {
+    baseFlightPrice = 400;
+  }
+  
+  // Ajustar por estilo de viagem
+  let multiplier = 1;
+  switch (travelStyle.toLowerCase()) {
+    case 'econômica':
+    case 'economica':
+      multiplier = 0.85;
+      break;
+    case 'conforto':
+      multiplier = 1.2;
+      break;
+    case 'luxo':
+      multiplier = 2.5;
+      break;
+    case 'aventura':
+      multiplier = 0.9;
+      break;
+    default:
+      multiplier = 1;
+  }
+  
+  const pricePerPersonEUR = Math.round(baseFlightPrice * multiplier);
+  
+  // Converter para BRL usando taxa atual (aproximada)
+  const eurToBrlRate = 6.70; // Taxa mais realista
+  const pricePerPersonBRL = Math.round(pricePerPersonEUR * eurToBrlRate);
+  
+  return {
+    pricePerPerson: pricePerPersonBRL,
+    totalPrice: pricePerPersonBRL * travelersCount
+  };
+};
+
+// Função para estimar custos de hospedagem mais realistas
+const estimateAccommodationCosts = (destination: string, days: number, travelersCount: number, travelStyle: string): {
+  pricePerDay: number;
+  totalPrice: number;
+} => {
+  const destinationLower = destination.toLowerCase();
+  
+  // Base de dados de custos por dia por pessoa (em EUR)
+  let baseDailyRate = 60; // Valor padrão
+  
+  // Cidades caras
+  if (destinationLower.includes('paris') || destinationLower.includes('londres') ||
+      destinationLower.includes('new york') || destinationLower.includes('tóquio') ||
+      destinationLower.includes('sydney') || destinationLower.includes('zürich')) {
+    baseDailyRate = 120;
+  }
+  
+  // Cidades médias
+  else if (destinationLower.includes('madrid') || destinationLower.includes('roma') ||
+           destinationLower.includes('berlim') || destinationLower.includes('amsterdam') ||
+           destinationLower.includes('barcelona') || destinationLower.includes('viena')) {
+    baseDailyRate = 80;
+  }
+  
+  // Destinos econômicos
+  else if (destinationLower.includes('tailândia') || destinationLower.includes('vietnam') ||
+           destinationLower.includes('índia') || destinationLower.includes('indonésia') ||
+           destinationLower.includes('argentina') || destinationLower.includes('peru')) {
+    baseDailyRate = 35;
+  }
+  
+  // Ajustar por estilo de viagem
+  let multiplier = 1;
+  switch (travelStyle.toLowerCase()) {
+    case 'econômica':
+    case 'economica':
+      multiplier = 0.6; // Hostels, pensões
+      break;
+    case 'conforto':
+      multiplier = 1.5; // Hotéis 3-4 estrelas
+      break;
+    case 'luxo':
+      multiplier = 4; // Hotéis 5 estrelas
+      break;
+    case 'aventura':
+      multiplier = 0.7; // Camping, hostels
+      break;
+    default:
+      multiplier = 1;
+  }
+  
+  const dailyRateEUR = Math.round(baseDailyRate * multiplier);
+  
+  // Converter para BRL
+  const eurToBrlRate = 6.70;
+  const dailyRateBRL = Math.round(dailyRateEUR * eurToBrlRate);
+  
+  // Considerar compartilhamento para grupos
+  const effectiveDailyRate = travelersCount > 1 ? Math.round(dailyRateBRL * 1.5 / travelersCount) : dailyRateBRL;
+  
+  return {
+    pricePerDay: effectiveDailyRate,
+    totalPrice: effectiveDailyRate * days * travelersCount
+  };
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -353,8 +506,38 @@ serve(async (req) => {
     }
 
     // Estimar custos de viagem antes de gerar o roteiro
-    const travelCosts = estimateTravelCosts(destination, departureDate, returnDate, travelersCount, travelStyle, maxDays);
-    console.log('Custos estimados de viagem:', travelCosts);
+    const flightCosts = estimateFlightCosts(destination, travelersCount, travelStyle);
+    const accommodationCosts = estimateAccommodationCosts(destination, maxDays, travelersCount, travelStyle);
+    
+    const baseExtraExpensesPerDay = 100; // Por pessoa por dia em BRL
+    let extraMultiplier = 1;
+
+    switch (travelStyle.toLowerCase()) {
+      case 'econômica':
+      case 'economica':
+        extraMultiplier = 0.7;
+        break;
+      case 'conforto':
+        extraMultiplier = 1.3;
+        break;
+      case 'luxo':
+        extraMultiplier = 2.5;
+        break;
+      case 'aventura':
+        extraMultiplier = 0.8;
+        break;
+    }
+
+    const extraExpenses = Math.round(baseExtraExpensesPerDay * extraMultiplier * maxDays * travelersCount);
+
+    const travelCosts = {
+      flightCost: flightCosts,
+      accommodationCost: accommodationCosts,
+      extraExpenses: extraExpenses,
+      totalEstimatedCost: flightCosts.totalPrice + accommodationCosts.totalPrice + extraExpenses
+    };
+
+    console.log('Custos estimados calculados:', travelCosts);
 
     // Função para gerar prompt melhorado
     const generateOptimizedPrompt = (destination: string, days: number, budget: string, travelersCount: number, travelStyle: string, preferences: string) => {

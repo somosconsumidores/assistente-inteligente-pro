@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -96,10 +95,17 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
   // Nova função para renderizar informações de câmbio
   const renderExchangeInfo = (atividade: ItineraryActivity) => {
     if (atividade.exchangeRate && atividade.exchangeDate && atividade.originalCurrency !== 'BRL') {
+      const isGoodRate = atividade.originalCurrency === 'EUR' && 
+                        atividade.exchangeRate >= 6.0 && 
+                        atividade.exchangeRate <= 7.5;
+      
       return (
-        <div className="flex items-center gap-1 text-xs text-blue-400 mt-1">
-          <span>Taxa: 1 {atividade.originalCurrency} = R$ {atividade.exchangeRate?.toFixed(2)}</span>
-          <span className="text-slate-500">({atividade.exchangeDate})</span>
+        <div className="space-y-1">
+          <div className={`flex items-center gap-1 text-xs mt-1 ${isGoodRate ? 'text-blue-400' : 'text-yellow-400'}`}>
+            <span>Taxa: 1 {atividade.originalCurrency} = R$ {atividade.exchangeRate?.toFixed(2)}</span>
+            <span className="text-slate-500">({atividade.exchangeDate})</span>
+          </div>
+          {renderConversionWarning(atividade)}
         </div>
       );
     }
@@ -129,6 +135,30 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
         {renderExchangeInfo(atividade)}
       </div>
     );
+  };
+
+  // Adicionar nova função para renderizar aviso de conversão
+  const renderConversionWarning = (atividade: ItineraryActivity) => {
+    // Se não tem taxa de câmbio ou fonte, não mostrar nada
+    if (!atividade.exchangeRate || !atividade.fontePreco) {
+      return null;
+    }
+    
+    // Verificar se a taxa parece suspeita (muito baixa para EUR->BRL)
+    const isSuspiciousRate = atividade.originalCurrency === 'EUR' && 
+                            atividade.exchangeRate && 
+                            atividade.exchangeRate < 5.5;
+    
+    if (isSuspiciousRate) {
+      return (
+        <div className="flex items-center gap-1 text-xs text-orange-400 mt-1">
+          <AlertTriangle className="w-3 h-3" />
+          <span>Taxa de câmbio pode estar desatualizada</span>
+        </div>
+      );
+    }
+    
+    return null;
   };
 
   return (
@@ -436,6 +466,12 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
               <p className="text-blue-200 text-sm">
                 <strong>💱 Conversão de Moedas:</strong> Todos os preços são automaticamente convertidos para reais brasileiros (BRL) 
                 usando cotações atualizadas do dia. As taxas de câmbio e datas são exibidas quando aplicável.
+              </p>
+            </div>
+            <div className="mt-3 p-3 bg-green-950/30 rounded-lg">
+              <p className="text-green-200 text-sm">
+                <strong>✈️ Custos de Voos e Hospedagem:</strong> Estimativas baseadas em dados históricos e 
+                padrões de preços por região. Valores podem variar conforme temporada, antecedência da reserva e disponibilidade.
               </p>
             </div>
           </div>

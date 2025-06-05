@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useProductChat } from '@/hooks/useProductChat';
 import ChatHeader from './chat/ChatHeader';
@@ -6,10 +5,15 @@ import ChatMessages from './chat/ChatMessages';
 import ChatInput from './chat/ChatInput';
 import FeaturedProducts from './FeaturedProducts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { ChevronUp, ChevronDown } from 'lucide-react';
 
 const ProductChat = () => {
   const [inputValue, setInputValue] = useState('');
+  const [showRecommendations, setShowRecommendations] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
+  
   const {
     messages,
     isLoading,
@@ -32,6 +36,13 @@ const ProductChat = () => {
     });
   }, [messages]);
 
+  // Auto-show recommendations on mobile when products are available
+  useEffect(() => {
+    if (isMobile && validProducts.length > 0) {
+      setShowRecommendations(true);
+    }
+  }, [featuredProducts, isMobile]);
+
   const handleSend = async () => {
     if (!inputValue.trim() || isLoading) return;
     const messageToSend = inputValue;
@@ -48,6 +59,9 @@ const ProductChat = () => {
   const handleClearChat = () => {
     clearChat();
     startChat();
+    if (isMobile) {
+      setShowRecommendations(false);
+    }
   };
 
   const validProducts = featuredProducts.filter(
@@ -55,10 +69,73 @@ const ProductChat = () => {
     product.scoreMestre >= 1 && product.scoreMestre <= 10
   );
 
+  // Mobile Layout
+  if (isMobile) {
+    return (
+      <div className="w-full max-w-7xl mx-auto flex flex-col h-full">
+        {/* Chat Area - Full width on mobile */}
+        <Card className="flex-1 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden mb-4">
+          <ChatHeader onClearChat={handleClearChat} />
+          
+          <div className="flex-1 flex flex-col" style={{ height: 'calc(100vh - 280px)' }}>
+            <ChatMessages 
+              messages={messages} 
+              isLoading={isLoading} 
+              messagesEndRef={messagesEndRef} 
+            />
+            
+            <ChatInput 
+              inputValue={inputValue}
+              setInputValue={setInputValue}
+              onSend={handleSend}
+              onKeyPress={handleKeyPress}
+              isLoading={isLoading}
+            />
+          </div>
+        </Card>
+
+        {/* Recommendations Toggle - Only show when there are products */}
+        {validProducts.length > 0 && (
+          <Card className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+            <CardHeader 
+              className="bg-gradient-to-r from-orange-500 to-red-600 text-white cursor-pointer"
+              onClick={() => setShowRecommendations(!showRecommendations)}
+            >
+              <CardTitle className="text-lg font-semibold flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  🏆 Produtos Recomendados
+                  <span className="bg-white text-orange-600 text-xs rounded-full px-2 py-1 font-bold">
+                    {validProducts.length}
+                  </span>
+                </div>
+                {showRecommendations ? (
+                  <ChevronUp className="w-5 h-5" />
+                ) : (
+                  <ChevronDown className="w-5 h-5" />
+                )}
+              </CardTitle>
+            </CardHeader>
+            
+            {showRecommendations && (
+              <CardContent className="p-4 max-h-96 overflow-y-auto">
+                <FeaturedProducts 
+                  products={featuredProducts}
+                  query={lastQuery}
+                  recommendations={lastRecommendations}
+                />
+              </CardContent>
+            )}
+          </Card>
+        )}
+      </div>
+    );
+  }
+
+  // Desktop Layout - Keep existing grid layout
   return (
     <div className="w-full max-w-7xl mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-[700px]">
-        {/* Área do Chat - 2/3 da tela */}
+        {/* Chat Area - 2/3 da tela */}
         <div className="lg:col-span-2">
           <Card className="h-full bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
             <ChatHeader onClearChat={handleClearChat} />
@@ -81,7 +158,7 @@ const ProductChat = () => {
           </Card>
         </div>
 
-        {/* Área das Recomendações - 1/3 da tela */}
+        {/* Recommendations Area - 1/3 da tela */}
         <div className="lg:col-span-1">
           <Card className="h-full bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
             <CardHeader className="bg-gradient-to-r from-orange-500 to-red-600 text-white">

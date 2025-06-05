@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MapPin, Clock, DollarSign, Lightbulb, Calendar, Save, ArrowLeft, Plane, Home, AlertTriangle, CheckCircle, Verified, TrendingUp } from 'lucide-react';
+import { MapPin, Clock, DollarSign, Lightbulb, Calendar, Save, ArrowLeft, Plane, Home, AlertTriangle, CheckCircle, Verified, TrendingUp, Zap } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import type { TravelItineraryResponse } from '@/hooks/useTravelItinerary';
 
@@ -161,6 +161,25 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
     return null;
   };
 
+  // Nova função para renderizar indicador de preço de voo
+  const renderFlightPriceIndicator = (flightCost: any) => {
+    if (flightCost?.source === 'real') {
+      return (
+        <div className="flex items-center gap-1 text-xs text-green-400 mt-1">
+          <Zap className="w-3 h-3" />
+          <span>Preço real obtido via API</span>
+        </div>
+      );
+    } else {
+      return (
+        <div className="flex items-center gap-1 text-xs text-yellow-400 mt-1">
+          <TrendingUp className="w-3 h-3" />
+          <span>Estimativa baseada em dados históricos</span>
+        </div>
+      );
+    }
+  };
+
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Mobile-optimized Header */}
@@ -222,7 +241,7 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
         </CardHeader>
       </Card>
 
-      {/* Flight and Accommodation Pricing - Atualizado para mostrar atividades */}
+      {/* Flight and Accommodation Pricing - Atualizado com indicadores de preço real */}
       {travelCosts && (
         <Card className="bg-gradient-to-r from-blue-900/40 to-purple-900/40 border-blue-700/50">
           <CardHeader>
@@ -231,11 +250,11 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
               Estimativa de Custos da Viagem
             </CardTitle>
             <p className="text-sm text-blue-200">
-              Valores convertidos para reais brasileiros (BRL) com cotação do dia
+              Valores atualizados com {travelCosts.flightCost?.source === 'real' ? 'preços reais de voos' : 'estimativas precisas'}
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Flight Cost */}
+            {/* Flight Cost - Atualizado com indicador de fonte */}
             <div className="p-3 sm:p-4 bg-gray-800/50 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <Plane className="w-4 h-4 text-blue-400" />
@@ -251,8 +270,12 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
                   <span className="text-lg font-medium text-blue-300">{formatCurrency(travelCosts.flightCost.totalPrice)}</span>
                 </div>
               </div>
+              {renderFlightPriceIndicator(travelCosts.flightCost)}
               <div className="mt-2 text-xs text-blue-200">
-                * Baseado em passagens econômicas para o destino escolhido
+                {travelCosts.flightCost?.source === 'real' 
+                  ? '* Preços obtidos em tempo real através de API especializada'
+                  : '* Baseado em passagens econômicas para o destino escolhido'
+                }
               </div>
             </div>
 
@@ -298,7 +321,10 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
                 <span className="text-xl font-bold text-white">{formatCurrency(travelCosts.totalEstimatedCost)}</span>
               </div>
               <div className="text-xs text-slate-400 mt-1">
-                Valores em reais brasileiros (BRL) atualizados
+                {travelCosts.flightCost?.source === 'real' 
+                  ? 'Cálculo com preços reais de voos + estimativas precisas'
+                  : 'Estimativas baseadas em dados históricos atualizados'
+                }
               </div>
             </div>
           </CardContent>
@@ -450,41 +476,49 @@ const GeneratedItinerary: React.FC<GeneratedItineraryProps> = ({
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2 text-blue-300">
             <Verified className="w-5 h-5" />
-            Informações sobre Preços e Câmbio
+            Informações sobre Preços e Fontes
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3 text-sm">
             <div className="flex items-center gap-2">
+              <Zap className="w-4 h-4 text-green-400" />
+              <span className="text-green-300">Preços reais via API:</span>
+              <span className="text-slate-300">Obtidos em tempo real de companhias aéreas</span>
+            </div>
+            <div className="flex items-center gap-2">
               <Verified className="w-4 h-4 text-green-400" />
-              <span className="text-green-300">Preço real:</span>
-              <span className="text-slate-300">Obtido através de pesquisas em tempo real</span>
+              <span className="text-green-300">Preço real de atividades:</span>
+              <span className="text-slate-300">Pesquisado através de bases de dados atualizadas</span>
             </div>
             <div className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-yellow-400" />
-              <span className="text-yellow-300">Estimativa baseada em dados:</span>
-              <span className="text-slate-300">Calculado com base em informações do local</span>
+              <span className="text-yellow-300">Estimativas inteligentes:</span>
+              <span className="text-slate-300">Baseadas em dados históricos e padrões de mercado</span>
             </div>
             <div className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-slate-500" />
-              <span className="text-slate-400">Estimativa aproximada:</span>
-              <span className="text-slate-300">Valor médio para o tipo de atividade</span>
+              <span className="text-slate-400">Estimativas aproximadas:</span>
+              <span className="text-slate-300">Valores médios quando dados específicos não estão disponíveis</span>
             </div>
-            <div className="mt-4 p-3 bg-blue-950/30 rounded-lg">
-              <p className="text-blue-200 text-sm">
-                <strong>💱 Conversão de Moedas:</strong> Todos os preços são automaticamente convertidos para reais brasileiros (BRL) 
-                usando cotações atualizadas do dia. As taxas de câmbio e datas são exibidas quando aplicável.
-              </p>
-            </div>
-            <div className="mt-3 p-3 bg-green-950/30 rounded-lg">
+            
+            <div className="mt-4 p-3 bg-green-950/30 rounded-lg">
               <p className="text-green-200 text-sm">
-                <strong>🎯 Cálculo Preciso:</strong> O custo de "Atividades e Experiências" é calculado somando todos os 
-                preços específicos das atividades do seu roteiro, convertidos para BRL, garantindo maior precisão.
+                <strong>🎯 Nova Funcionalidade:</strong> Agora buscamos preços reais de voos através de APIs especializadas! 
+                Quando disponível, você verá preços atualizados em tempo real das companhias aéreas.
               </p>
             </div>
+            
+            <div className="mt-3 p-3 bg-blue-950/30 rounded-lg">
+              <p className="text-blue-200 text-sm">
+                <strong>✈️ Custos de Voos:</strong> Estimativas baseadas em dados históricos e 
+                padrões de preços por região. Valores podem variar conforme temporada, antecedência da reserva e disponibilidade.
+              </p>
+            </div>
+            
             <div className="mt-3 p-3 bg-purple-950/30 rounded-lg">
               <p className="text-purple-200 text-sm">
-                <strong>✈️ Custos de Voos e Hospedagem:</strong> Estimativas baseadas em dados históricos e 
+                <strong>🏠 Hospedagem:</strong> Estimativas baseadas em dados históricos e 
                 padrões de preços por região. Valores podem variar conforme temporada, antecedência da reserva e disponibilidade.
               </p>
             </div>

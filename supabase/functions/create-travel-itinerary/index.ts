@@ -169,92 +169,181 @@ const progressiveJSONParse = (content: string): any => {
   }
 }
 
-// Nova função para pesquisar preços fictícios de voos e acomodação
-const estimateTravelCosts = (destination: string, departureDate: string, returnDate: string, travelersCount: number, travelStyle: string, days: number): any => {
-  const getRandomWithRange = (min: number, max: number): number => {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  };
-
-  // Estimar preço de voos com base no destino
-  let flightPricePerPerson = 0;
+// Nova função para buscar preços reais de voos usando a API
+const searchRealFlightPrices = async (destination: string, departureDate: string, returnDate: string, travelersCount: number): Promise<{
+  pricePerPerson: number;
+  totalPrice: number;
+  source: 'real' | 'estimate';
+  currency?: string;
+} | null> => {
+  console.log('=== BUSCANDO PREÇOS REAIS DE VOOS ===');
   
-  // Destinos internacionais versus domésticos
-  const internationalDestinations = [
-    'paris', 'londres', 'nova york', 'tóquio', 'bangkok', 'dubai', 
-    'roma', 'barcelona', 'madrid', 'amsterdã', 'berlim', 'viena', 
-    'pequim', 'seul', 'singapura', 'sydney', 'toronto', 'vancouver', 
-    'cidade do méxico', 'cancún', 'buenos aires', 'santiago', 'lisboa', 
-    'miami', 'los angeles', 'las vegas', 'orlando', 'milão', 'veneza',
-    'atenas', 'cairo', 'marrakech', 'istambul', 'praga', 'budapeste'
-  ];
+  try {
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
 
-  const isInternational = internationalDestinations.some(d => 
-    destination.toLowerCase().includes(d)
-  );
+    console.log(`Chamando API de busca de voos para ${destination}`);
+    
+    const { data, error } = await supabase.functions.invoke('search-flight-prices', {
+      body: {
+        origin: 'São Paulo', // Origem padrão
+        destination: destination,
+        departureDate: departureDate,
+        returnDate: returnDate,
+        passengers: travelersCount
+      }
+    });
 
-  // Ajustar preços com base se é internacional ou doméstico
-  if (isInternational) {
-    flightPricePerPerson = getRandomWithRange(2000, 8000);
+    if (error) {
+      console.error('Erro na chamada da API de voos:', error);
+      return null;
+    }
+
+    if (data && data.success) {
+      console.log(`Preços reais encontrados: R$ ${data.pricePerPerson} por pessoa`);
+      return {
+        pricePerPerson: data.pricePerPerson,
+        totalPrice: data.totalPrice,
+        source: 'real',
+        currency: data.currency
+      };
+    } else {
+      console.log('API de voos não retornou dados válidos');
+      return null;
+    }
+    
+  } catch (error) {
+    console.error('Erro ao buscar preços reais de voos:', error);
+    return null;
+  }
+};
+
+// Nova função para pesquisar preços fictícios de voos e acomodação
+const estimateTravelCosts = async (destination: string, departureDate: string, returnDate: string, travelersCount: number, travelStyle: string, days: number): Promise<any> => {
+  console.log('=== INICIANDO CÁLCULO DE CUSTOS DE VIAGEM ===');
+  
+  // Primeiro, tentar buscar preços reais de voos
+  const realFlightPrices = await searchRealFlightPrices(destination, departureDate, returnDate, travelersCount);
+  
+  let flightCosts;
+  if (realFlightPrices) {
+    console.log('Usando preços reais de voos da API');
+    flightCosts = {
+      pricePerPerson: realFlightPrices.pricePerPerson,
+      totalPrice: realFlightPrices.totalPrice,
+      source: 'real',
+      currency: realFlightPrices.currency
+    };
   } else {
-    flightPricePerPerson = getRandomWithRange(400, 1200);
+    console.log('Usando estimativa de preços de voos (fallback)');
+    const estimatedFlights = estimateFlightCosts(destination, travelersCount, travelStyle);
+    flightCosts = {
+      pricePerPerson: estimatedFlights.pricePerPerson,
+      totalPrice: estimatedFlights.totalPrice,
+      source: 'estimate',
+      currency: 'BRL'
+    };
   }
 
-  const totalFlightPrice = flightPricePerPerson * travelersCount;
-
-  // Estimar preço de acomodação com base no estilo da viagem
-  let accommodationPricePerDay = 0;
+  // Calcular custos de hospedagem (mantém lógica existente)
+  const accommodationCosts = estimateAccommodationCosts(destination, days, travelersCount, travelStyle);
   
-  switch (travelStyle) {
-    case 'Econômica':
-      accommodationPricePerDay = getRandomWithRange(80, 200);
+  return {
+    flightCost: flightCosts,
+    accommodationCost: accommodationCosts,
+    extraExpenses: 0, // Será calculado após enriquecer as atividades
+    totalEstimatedCost: flightCosts.totalPrice + accommodationCosts.totalPrice
+  };
+};
+
+// Função para estimar custos de voo mais realistas
+const estimateFlightCosts = (destination: string, travelersCount: number, travelStyle: string): {
+  pricePerPerson: number;
+  totalPrice: number;
+} => {
+  const destinationLower = destination.toLowerCase();
+  
+  // Base de dados de estimativas por região (em EUR)
+  let baseFlightPrice = 800; // Valor padrão
+  
+  // Europa
+  if (destinationLower.includes('frança') || destinationLower.includes('paris') ||
+      destinationLower.includes('espanha') || destinationLower.includes('madrid') ||
+      destinationLower.includes('itália') || destinationLower.includes('roma') ||
+      destinationLower.includes('alemanha') || destinationLower.includes('berlim') ||
+      destinationLower.includes('holanda') || destinationLower.includes('amsterdam') ||
+      destinationLower.includes('portugal') || destinationLower.includes('lisboa')) {
+    baseFlightPrice = 600;
+  }
+  
+  // América do Norte
+  else if (destinationLower.includes('estados unidos') || destinationLower.includes('eua') ||
+           destinationLower.includes('new york') || destinationLower.includes('miami') ||
+           destinationLower.includes('canadá') || destinationLower.includes('toronto')) {
+    baseFlightPrice = 900;
+  }
+  
+  // Ásia
+  else if (destinationLower.includes('japão') || destinationLower.includes('tóquio') ||
+           destinationLower.includes('china') || destinationLower.includes('pequim') ||
+           destinationLower.includes('coreia') || destinationLower.includes('seul') ||
+           destinationLower.includes('tailândia') || destinationLower.includes('bangkok') ||
+           destinationLower.includes('vietnam') || destinationLower.includes('índia')) {
+    baseFlightPrice = 1200;
+  }
+  
+  // Oceania
+  else if (destinationLower.includes('austrália') || destinationLower.includes('sydney') ||
+           destinationLower.includes('nova zelândia') || destinationLower.includes('auckland')) {
+    baseFlightPrice = 1800;
+  }
+  
+  // África
+  else if (destinationLower.includes('áfrica do sul') || destinationLower.includes('cidade do cabo') ||
+           destinationLower.includes('marrocos') || destinationLower.includes('egito')) {
+    baseFlightPrice = 1000;
+  }
+  
+  // América do Sul (mais barato do Brasil)
+  else if (destinationLower.includes('argentina') || destinationLower.includes('chile') ||
+           destinationLower.includes('peru') || destinationLower.includes('uruguai') ||
+           destinationLower.includes('colômbia') || destinationLower.includes('equador')) {
+    baseFlightPrice = 400;
+  }
+  
+  // Ajustar por estilo de viagem
+  let multiplier = 1;
+  switch (travelStyle.toLowerCase()) {
+    case 'econômica':
+    case 'economica':
+      multiplier = 0.85;
       break;
-    case 'Conforto':
-      accommodationPricePerDay = getRandomWithRange(200, 500);
+    case 'conforto':
+      multiplier = 1.2;
       break;
-    case 'Luxo':
-      accommodationPricePerDay = getRandomWithRange(500, 1500);
+    case 'luxo':
+      multiplier = 2.5;
       break;
-    case 'Aventura':
-      accommodationPricePerDay = getRandomWithRange(100, 300);
-      break;
-    case 'Cultural':
-      accommodationPricePerDay = getRandomWithRange(150, 350);
+    case 'aventura':
+      multiplier = 0.9;
       break;
     default:
-      accommodationPricePerDay = getRandomWithRange(150, 300);
-  }
-
-  // Ajustar pelo destino
-  if (isInternational) {
-    accommodationPricePerDay *= 1.5; // Internacional é mais caro
+      multiplier = 1;
   }
   
-  // Total estimado para acomodação por pessoa por dia
-  const accommodationPricePerPersonPerDay = accommodationPricePerDay;
+  const pricePerPersonEUR = Math.round(baseFlightPrice * multiplier);
   
-  // Total estimado para acomodação para todos os viajantes durante toda a viagem
-  // Assumimos que pessoas compartilham quartos (dividimos por 2 se for mais de 1 pessoa)
-  const sharedFactor = travelersCount > 1 ? travelersCount / 1.5 : travelersCount;
-  const totalAccommodationPrice = Math.round(accommodationPricePerPersonPerDay * days * sharedFactor);
-
-  // Total estimado para todas as despesas (voos + acomodação + extras)
-  // Extras são aproximadamente 50% do custo de acomodação para comida/atividades
-  const extraExpenses = totalAccommodationPrice * 0.5;
-  const totalEstimatedCost = totalFlightPrice + totalAccommodationPrice + extraExpenses;
-
+  // Converter para BRL usando taxa atual (aproximada)
+  const eurToBrlRate = 6.70; // Taxa mais realista
+  const pricePerPersonBRL = Math.round(pricePerPersonEUR * eurToBrlRate);
+  
   return {
-    flightCost: {
-      pricePerPerson: flightPricePerPerson,
-      totalPrice: totalFlightPrice
-    },
-    accommodationCost: {
-      pricePerDay: accommodationPricePerPersonPerDay,
-      totalPrice: totalAccommodationPrice
-    },
-    extraExpenses: Math.round(extraExpenses),
-    totalEstimatedCost: Math.round(totalEstimatedCost)
+    pricePerPerson: pricePerPersonBRL,
+    totalPrice: pricePerPersonBRL * travelersCount
   };
-}
+};
 
 // Nova função para buscar preços reais das atividades
 const enrichActivitiesWithRealPrices = async (itineraryData: any, destination: string): Promise<any> => {
@@ -384,93 +473,6 @@ const calculateActivitiesTotalCost = (itineraryData: any): number => {
   return Math.round(totalCost);
 };
 
-// Função para estimar custos de voo mais realistas
-const estimateFlightCosts = (destination: string, travelersCount: number, travelStyle: string): {
-  pricePerPerson: number;
-  totalPrice: number;
-} => {
-  const destinationLower = destination.toLowerCase();
-  
-  // Base de dados de estimativas por região (em EUR)
-  let baseFlightPrice = 800; // Valor padrão
-  
-  // Europa
-  if (destinationLower.includes('frança') || destinationLower.includes('paris') ||
-      destinationLower.includes('espanha') || destinationLower.includes('madrid') ||
-      destinationLower.includes('itália') || destinationLower.includes('roma') ||
-      destinationLower.includes('alemanha') || destinationLower.includes('berlim') ||
-      destinationLower.includes('holanda') || destinationLower.includes('amsterdam') ||
-      destinationLower.includes('portugal') || destinationLower.includes('lisboa')) {
-    baseFlightPrice = 600;
-  }
-  
-  // América do Norte
-  else if (destinationLower.includes('estados unidos') || destinationLower.includes('eua') ||
-           destinationLower.includes('new york') || destinationLower.includes('miami') ||
-           destinationLower.includes('canadá') || destinationLower.includes('toronto')) {
-    baseFlightPrice = 900;
-  }
-  
-  // Ásia
-  else if (destinationLower.includes('japão') || destinationLower.includes('tóquio') ||
-           destinationLower.includes('china') || destinationLower.includes('pequim') ||
-           destinationLower.includes('coreia') || destinationLower.includes('seul') ||
-           destinationLower.includes('tailândia') || destinationLower.includes('bangkok') ||
-           destinationLower.includes('vietnam') || destinationLower.includes('índia')) {
-    baseFlightPrice = 1200;
-  }
-  
-  // Oceania
-  else if (destinationLower.includes('austrália') || destinationLower.includes('sydney') ||
-           destinationLower.includes('nova zelândia') || destinationLower.includes('auckland')) {
-    baseFlightPrice = 1800;
-  }
-  
-  // África
-  else if (destinationLower.includes('áfrica do sul') || destinationLower.includes('cidade do cabo') ||
-           destinationLower.includes('marrocos') || destinationLower.includes('egito')) {
-    baseFlightPrice = 1000;
-  }
-  
-  // América do Sul (mais barato do Brasil)
-  else if (destinationLower.includes('argentina') || destinationLower.includes('chile') ||
-           destinationLower.includes('peru') || destinationLower.includes('uruguai') ||
-           destinationLower.includes('colômbia') || destinationLower.includes('equador')) {
-    baseFlightPrice = 400;
-  }
-  
-  // Ajustar por estilo de viagem
-  let multiplier = 1;
-  switch (travelStyle.toLowerCase()) {
-    case 'econômica':
-    case 'economica':
-      multiplier = 0.85;
-      break;
-    case 'conforto':
-      multiplier = 1.2;
-      break;
-    case 'luxo':
-      multiplier = 2.5;
-      break;
-    case 'aventura':
-      multiplier = 0.9;
-      break;
-    default:
-      multiplier = 1;
-  }
-  
-  const pricePerPersonEUR = Math.round(baseFlightPrice * multiplier);
-  
-  // Converter para BRL usando taxa atual (aproximada)
-  const eurToBrlRate = 6.70; // Taxa mais realista
-  const pricePerPersonBRL = Math.round(pricePerPersonEUR * eurToBrlRate);
-  
-  return {
-    pricePerPerson: pricePerPersonBRL,
-    totalPrice: pricePerPersonBRL * travelersCount
-  };
-};
-
 // Função para estimar custos de hospedagem mais realistas
 const estimateAccommodationCosts = (destination: string, days: number, travelersCount: number, travelStyle: string): {
   pricePerDay: number;
@@ -537,76 +539,30 @@ const estimateAccommodationCosts = (destination: string, days: number, travelers
   };
 };
 
-serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+// Função para gerar prompt melhorado
+const generateOptimizedPrompt = (destination: string, days: number, budget: string, travelersCount: number, travelStyle: string, preferences: string) => {
+  const largeCountries = ['china', 'brasil', 'estados unidos', 'eua', 'russia', 'india', 'canada', 'australia', 'argentina']
+  const isLargeCountry = largeCountries.some(country => destination.toLowerCase().includes(country))
+  
+  const budgetGuidance = budget ? `Orçamento total: R$ ${budget}` : 'Orçamento flexível'
+  const styleGuidance = {
+    'Econômica': 'hostels, transporte público, comida local, atrações gratuitas/baratas',
+    'Conforto': 'hotéis 3-4 estrelas, mix de transporte, restaurantes locais e alguns upscale',
+    'Luxo': 'hotéis 5 estrelas, transfers privados, restaurantes premium, experiências exclusivas',
+    'Aventura': 'atividades ao ar livre, esportes radicais, trilhas, experiências únicas',
+    'Cultural': 'museus, monumentos históricos, festivais locais, experiências autênticas'
   }
 
-  try {
-    const { destination, budget, departureDate, returnDate, travelersCount, travelStyle, additionalPreferences } = await req.json()
-
-    console.log('Dados recebidos:', { destination, budget, departureDate, returnDate, travelersCount, travelStyle, additionalPreferences })
-
-    // Validar dados obrigatórios
-    if (!destination || !travelStyle || !travelersCount || !departureDate || !returnDate) {
-      return new Response(
-        JSON.stringify({ error: 'Dados obrigatórios faltando' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    // Calcular número de dias baseado nas datas fornecidas
-    const start = new Date(departureDate)
-    const end = new Date(returnDate)
-    const timeDiff = end.getTime() - start.getTime()
-    const days = Math.ceil(timeDiff / (1000 * 60 * 60 * 24))
-
-    console.log('Número de dias calculado baseado nas datas:', days)
-
-    // Validar se as datas fazem sentido
-    if (days <= 0) {
-      return new Response(
-        JSON.stringify({ error: 'A data de volta deve ser posterior à data de ida' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    // Aumentar o limite máximo de dias para 21 (3 semanas)
-    const maxDays = Math.min(days, 21)
-    if (days > 21) {
-      console.log(`Limitando roteiro de ${days} dias para ${maxDays} dias para evitar resposta muito longa`)
-    }
-
-    // Estimar custos de viagem antes de gerar o roteiro
-    const flightCosts = estimateFlightCosts(destination, travelersCount, travelStyle);
-    const accommodationCosts = estimateAccommodationCosts(destination, maxDays, travelersCount, travelStyle);
-    
-    // IMPORTANTE: Não calcular extraExpenses aqui ainda - será calculado após enriquecer as atividades
-    
-    // Função para gerar prompt melhorado
-    const generateOptimizedPrompt = (destination: string, days: number, budget: string, travelersCount: number, travelStyle: string, preferences: string) => {
-      const largeCountries = ['china', 'brasil', 'estados unidos', 'eua', 'russia', 'india', 'canada', 'australia', 'argentina']
-      const isLargeCountry = largeCountries.some(country => destination.toLowerCase().includes(country))
-      
-      const budgetGuidance = budget ? `Orçamento total: R$ ${budget}` : 'Orçamento flexível'
-      const styleGuidance = {
-        'Econômica': 'hostels, transporte público, comida local, atrações gratuitas/baratas',
-        'Conforto': 'hotéis 3-4 estrelas, mix de transporte, restaurantes locais e alguns upscale',
-        'Luxo': 'hotéis 5 estrelas, transfers privados, restaurantes premium, experiências exclusivas',
-        'Aventura': 'atividades ao ar livre, esportes radicais, trilhas, experiências únicas',
-        'Cultural': 'museus, monumentos históricos, festivais locais, experiências autênticas'
-      }
-
-      let regionInstructions = ''
-      if (isLargeCountry && days > 7) {
-        regionInstructions = `
+  let regionInstructions = ''
+  if (isLargeCountry && days > 7) {
+    regionInstructions = `
 IMPORTANTE: Como ${destination} é um destino extenso e você tem ${days} dias, distribua o roteiro entre 2-4 cidades/regiões principais. 
 - Inclua informações sobre deslocamento entre cidades (tempo e meio de transporte)
 - Dedique 3-5 dias para cada região principal
 - Escolha regiões com características diferentes`
-      }
+  }
 
-      return `Você é um especialista em viagens. Crie um roteiro ÚNICO de ${days} dias para ${destination}.
+  return `Você é um especialista em viagens. Crie um roteiro ÚNICO de ${days} dias para ${destination}.
 
 DADOS DA VIAGEM:
 - Destino: ${destination}
@@ -653,67 +609,110 @@ FORMATO OBRIGATÓRIO - RESPONDA APENAS COM ESTE JSON VÁLIDO (sem markdown, sem 
 }
 
 CRÍTICO: Use informações reais de ${destination}. Retorne APENAS JSON válido sem formatação markdown.`
-    }
+}
 
-    // Função para fazer chamada à OpenAI com retry
-    const callOpenAIWithRetry = async (prompt: string, retries = 2) => {
-      for (let attempt = 1; attempt <= retries + 1; attempt++) {
-        try {
-          console.log(`=== TENTATIVA ${attempt} OPENAI ===`)
+// Função para fazer chamada à OpenAI com retry
+const callOpenAIWithRetry = async (prompt: string, maxDays: number, retries = 2) => {
+  for (let attempt = 1; attempt <= retries + 1; attempt++) {
+    try {
+      console.log(`=== TENTATIVA ${attempt} OPENAI ===`)
 
-          const response = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
-              'Content-Type': 'application/json',
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            {
+              role: 'system',
+              content: `Você é um especialista em viagens. Responda APENAS com JSON válido, sem markdown ou texto adicional. O JSON deve ter exatamente ${maxDays} dias de roteiro.`
             },
-            body: JSON.stringify({
-              model: 'gpt-4o-mini',
-              messages: [
-                {
-                  role: 'system',
-                  content: `Você é um especialista em viagens. Responda APENAS com JSON válido, sem markdown ou texto adicional. O JSON deve ter exatamente ${maxDays} dias de roteiro.`
-                },
-                {
-                  role: 'user',
-                  content: prompt
-                }
-              ],
-              temperature: 0.7,
-              max_tokens: maxDays <= 7 ? 3500 : maxDays <= 14 ? 5000 : 6000,
-              top_p: 0.9
-            })
-          })
-
-          if (!response.ok) {
-            console.error(`Erro na OpenAI API (tentativa ${attempt}):`, response.status, response.statusText)
-            if (attempt === retries + 1) {
-              throw new Error(`OpenAI API error: ${response.statusText}`)
+            {
+              role: 'user',
+              content: prompt
             }
-            continue
-          }
+          ],
+          temperature: 0.7,
+          max_tokens: maxDays <= 7 ? 3500 : maxDays <= 14 ? 5000 : 6000,
+          top_p: 0.9
+        })
+      })
 
-          const openaiData = await response.json()
-          console.log(`Resposta OpenAI recebida na tentativa ${attempt}`)
-          console.log('Tamanho da resposta:', openaiData.choices[0].message.content.length)
-          
-          return openaiData.choices[0].message.content
-        } catch (error) {
-          console.error(`Erro na tentativa ${attempt}:`, error)
-          if (attempt === retries + 1) {
-            throw error
-          }
-          // Aguardar antes da próxima tentativa
-          await new Promise(resolve => setTimeout(resolve, 1000))
+      if (!response.ok) {
+        console.error(`Erro na OpenAI API (tentativa ${attempt}):`, response.status, response.statusText)
+        if (attempt === retries + 1) {
+          throw new Error(`OpenAI API error: ${response.statusText}`)
         }
+        continue
       }
+
+      const openaiData = await response.json()
+      console.log(`Resposta OpenAI recebida na tentativa ${attempt}`)
+      console.log('Tamanho da resposta:', openaiData.choices[0].message.content.length)
+      
+      return openaiData.choices[0].message.content
+    } catch (error) {
+      console.error(`Erro na tentativa ${attempt}:`, error)
+      if (attempt === retries + 1) {
+        throw error
+      }
+      // Aguardar antes da próxima tentativa
+      await new Promise(resolve => setTimeout(resolve, 1000))
+    }
+  }
+}
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
+  try {
+    const { destination, budget, departureDate, returnDate, travelersCount, travelStyle, additionalPreferences } = await req.json()
+
+    console.log('Dados recebidos:', { destination, budget, departureDate, returnDate, travelersCount, travelStyle, additionalPreferences })
+
+    // Validar dados obrigatórios
+    if (!destination || !travelStyle || !travelersCount || !departureDate || !returnDate) {
+      return new Response(
+        JSON.stringify({ error: 'Dados obrigatórios faltando' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
+    // Calcular número de dias baseado nas datas fornecidas
+    const start = new Date(departureDate)
+    const end = new Date(returnDate)
+    const timeDiff = end.getTime() - start.getTime()
+    const days = Math.ceil(timeDiff / (1000 * 60 * 60 * 24))
+
+    console.log('Número de dias calculado baseado nas datas:', days)
+
+    // Validar se as datas fazem sentido
+    if (days <= 0) {
+      return new Response(
+        JSON.stringify({ error: 'A data de volta deve ser posterior à data de ida' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Aumentar o limite máximo de dias para 21 (3 semanas)
+    const maxDays = Math.min(days, 21)
+    if (days > 21) {
+      console.log(`Limitando roteiro de ${days} dias para ${maxDays} dias para evitar resposta muito longa`)
+    }
+
+    // Estimar custos de viagem ATUALIZADO - agora busca preços reais primeiro
+    const travelCosts = await estimateTravelCosts(destination, departureDate, returnDate, travelersCount, travelStyle, maxDays);
+    
     // Gerar prompt otimizado
     const prompt = generateOptimizedPrompt(destination, maxDays, budget, travelersCount, travelStyle, additionalPreferences)
     
     // Chamar OpenAI com retry
-    let itineraryContent = await callOpenAIWithRetry(prompt)
+    let itineraryContent = await callOpenAIWithRetry(prompt, maxDays)
     
     console.log('=== RESPOSTA COMPLETA DA OPENAI ===')
     console.log('Tamanho total:', itineraryContent.length)
@@ -853,13 +852,9 @@ CRÍTICO: Use informações reais de ${destination}. Retorne APENAS JSON válido
     // CALCULAR OUTRAS DESPESAS COM BASE NAS ATIVIDADES REAIS
     const calculatedActivitiesCost = calculateActivitiesTotalCost(itineraryData);
     
-    // Montar objeto de custos com valor real das atividades
-    const travelCosts = {
-      flightCost: flightCosts,
-      accommodationCost: accommodationCosts,
-      extraExpenses: calculatedActivitiesCost, // Agora baseado na soma real das atividades
-      totalEstimatedCost: flightCosts.totalPrice + accommodationCosts.totalPrice + calculatedActivitiesCost
-    };
+    // Montar objeto de custos com valor real das atividades E preços reais de voos
+    travelCosts.extraExpenses = calculatedActivitiesCost;
+    travelCosts.totalEstimatedCost = travelCosts.flightCost.totalPrice + travelCosts.accommodationCost.totalPrice + calculatedActivitiesCost;
 
     console.log('Custos finais calculados:', travelCosts);
 

@@ -9,12 +9,13 @@ import { useTravelItinerary } from '@/hooks/useTravelItinerary';
 import { useSavedItineraries } from '@/hooks/useSavedItineraries';
 import GeneratedItinerary from '@/components/GeneratedItinerary';
 import SavedItinerariesList from '@/components/SavedItinerariesList';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useToast } from '@/hooks/use-toast';
 
 const Viagens = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const initialTab = searchParams.get('tab') || 'planner';
   const [activeTab, setActiveTab] = useState(initialTab);
   const [viewingSavedItinerary, setViewingSavedItinerary] = useState(null);
@@ -31,10 +32,16 @@ const Viagens = () => {
     additionalPreferences: ''
   });
 
-  // Update active tab when URL changes
+  // Update active tab when URL changes and reset states when navigating to planner
   useEffect(() => {
     const tab = searchParams.get('tab') || 'planner';
     setActiveTab(tab);
+    
+    // If navigating to planner tab, reset all states
+    if (tab === 'planner') {
+      setViewingSavedItinerary(null);
+      clearItinerary();
+    }
   }, [searchParams]);
   
   const {
@@ -99,7 +106,7 @@ const Viagens = () => {
       travelStyle: 'Econômica',
       additionalPreferences: ''
     });
-    setActiveTab('planner');
+    navigate('/viagens?tab=planner', { replace: true });
   };
 
   const handleViewSavedItinerary = (itinerary: any) => {
@@ -112,6 +119,10 @@ const Viagens = () => {
     if (confirm('Tem certeza que deseja excluir este roteiro?')) {
       await deleteItinerary(id);
     }
+  };
+
+  const handleTabChange = (tab: string) => {
+    navigate(`/viagens?tab=${tab}`, { replace: true });
   };
 
   return (
@@ -141,7 +152,7 @@ const Viagens = () => {
               <div className="flex bg-gray-800 rounded-lg p-1">
                 <Button
                   variant={activeTab === 'planner' ? 'default' : 'ghost'}
-                  onClick={() => setActiveTab('planner')}
+                  onClick={() => handleTabChange('planner')}
                   className={`flex-1 h-10 text-xs sm:text-sm ${
                     activeTab === 'planner' 
                       ? 'bg-gradient-to-r from-sky-500 to-indigo-600 text-white' 
@@ -153,7 +164,7 @@ const Viagens = () => {
                 </Button>
                 <Button
                   variant={activeTab === 'saved' ? 'default' : 'ghost'}
-                  onClick={() => setActiveTab('saved')}
+                  onClick={() => handleTabChange('saved')}
                   className={`flex-1 h-10 text-xs sm:text-sm ${
                     activeTab === 'saved' 
                       ? 'bg-gradient-to-r from-sky-500 to-indigo-600 text-white' 
@@ -165,7 +176,7 @@ const Viagens = () => {
                 </Button>
                 <Button
                   variant={activeTab === 'itinerary' ? 'default' : 'ghost'}
-                  onClick={() => setActiveTab('itinerary')}
+                  onClick={() => handleTabChange('itinerary')}
                   className={`flex-1 h-10 text-xs sm:text-sm ${
                     activeTab === 'itinerary' 
                       ? 'bg-gradient-to-r from-sky-500 to-indigo-600 text-white' 

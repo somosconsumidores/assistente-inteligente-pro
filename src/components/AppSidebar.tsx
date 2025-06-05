@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -33,7 +34,7 @@ const menuItems = [{
   isPremium: true
 }, {
   title: 'Consultor de Viagens',
-  url: '/viagens?tab=planner',
+  url: '/viagens',
   icon: MapPin,
   isPremium: true
 }];
@@ -52,7 +53,8 @@ export function AppSidebar() {
   const isActive = (path: string) => {
     // Remove query params for comparison
     const pathWithoutQuery = path.split('?')[0];
-    return location.pathname === pathWithoutQuery;
+    const currentPathWithoutQuery = location.pathname;
+    return currentPathWithoutQuery === pathWithoutQuery;
   };
   
   const isPremiumUser = profile?.plan === 'premium';
@@ -64,6 +66,15 @@ export function AppSidebar() {
       navigate('/');
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
+    }
+  };
+
+  const handleNavigation = (item: typeof menuItems[0]) => {
+    if (item.url === '/viagens') {
+      // Always navigate to planner tab for travel consultant
+      navigate('/viagens?tab=planner', { replace: true });
+    } else {
+      navigate(item.url);
     }
   };
   
@@ -99,7 +110,7 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
               {menuItems.map(item => <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton onClick={() => navigate(item.url)} className={`
+                  <SidebarMenuButton onClick={() => handleNavigation(item)} className={`
                       w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
                       ${isActive(item.url) ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}
                       ${!isPremiumUser && item.isPremium ? 'opacity-75' : ''}

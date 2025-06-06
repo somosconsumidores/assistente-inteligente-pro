@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Crown } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -11,7 +11,46 @@ const SelectAssistant = () => {
   const { profile, updateSelectedAssistant } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { createCheckout } = useSubscription();
+  const { createCheckout, checkSubscription } = useSubscription();
+  const [searchParams] = useSearchParams();
+
+  // Handle success/cancel from Stripe
+  useEffect(() => {
+    const success = searchParams.get('success');
+    const canceled = searchParams.get('canceled');
+    const sessionId = searchParams.get('session_id');
+
+    if (success === 'true') {
+      console.log('Payment successful, session ID:', sessionId);
+      toast({
+        title: "Pagamento realizado com sucesso!",
+        description: "Bem-vindo ao plano Premium! Verificando status da assinatura...",
+      });
+      
+      // Check subscription status after successful payment
+      setTimeout(async () => {
+        await checkSubscription();
+        toast({
+          title: "Plano atualizado!",
+          description: "Agora você tem acesso a todos os assistentes premium!",
+        });
+      }, 2000);
+      
+      // Clean URL
+      navigate('/select-assistant', { replace: true });
+    }
+
+    if (canceled === 'true') {
+      toast({
+        title: "Pagamento cancelado",
+        description: "Você pode tentar novamente quando quiser.",
+        variant: "destructive"
+      });
+      
+      // Clean URL
+      navigate('/select-assistant', { replace: true });
+    }
+  }, [searchParams, toast, navigate, checkSubscription]);
 
   const handleUpgrade = async () => {
     try {

@@ -79,8 +79,8 @@ const FinancialChat: React.FC<FinancialChatProps> = ({
             
             <Card className={`max-w-sm ${message.type === 'user' ? 'bg-blue-500 text-white' : 'bg-white border-gray-200'}`}>
               <CardContent className="p-3">
-                <p className="text-sm">{message.content}</p>
-                <span className="text-xs opacity-70 mt-1 block">
+                <p className="text-sm text-zinc-800">{message.content}</p>
+                <span className="text-xs opacity-70 mt-1 block text-zinc-800">
                   {message.timestamp.toLocaleTimeString()}
                 </span>
               </CardContent>

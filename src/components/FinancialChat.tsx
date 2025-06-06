@@ -121,7 +121,7 @@ const FinancialChat: React.FC<FinancialChatProps> = ({
               </Button>
             </div> : <div className="flex space-x-2">
               <Input value={inputValue} onChange={handleCurrencyInput} onKeyPress={handleKeyPress} placeholder={currentStep.type === 'number' ? 'Digite o valor...' : 'Digite sua resposta...'} disabled={isLoading} className="flex-1" />
-              <Button onClick={handleSend} disabled={isLoading || !inputValue.trim()} size="icon" className="text-slate-50 bg-gray-950 hover:bg-gray-800">
+              <Button onClick={handleSend} disabled={isLoading || !inputValue.trim()} size="icon" className="text-slate-50 bg-blue-950 hover:bg-blue-800">
                 <Send className="w-4 h-4" />
               </Button>
             </div>}

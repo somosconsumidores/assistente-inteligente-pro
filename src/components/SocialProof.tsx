@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Star, Users, MessageCircle, ThumbsUp } from 'lucide-react';
@@ -28,7 +29,7 @@ const SocialProof = () => {
   ];
 
   const stats = [
-    { value: "10,000+", label: "Usuários Ativos", icon: Users },
+    { value: "1,000+", label: "Usuários Ativos", icon: Users },
     { value: "50,000+", label: "Consultas Realizadas", icon: MessageCircle },
     { value: "4.9/5", label: "Avaliação Média", icon: Star },
     { value: "98%", label: "Satisfação", icon: ThumbsUp }

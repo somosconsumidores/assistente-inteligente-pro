@@ -17,7 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 const Financas = () => {
   const [financialData, setFinancialData] = useState<FinancialData | null>(null);
   const [hasCompletedChat, setHasCompletedChat] = useState(false);
-  const [isLoadingData, setIsLoadingData] = useState(true);
+  const [isInitializing, setIsInitializing] = useState(true);
   const isMobile = useIsMobile();
   const { toast } = useToast();
 
@@ -25,30 +25,45 @@ const Financas = () => {
 
   // Load existing data on component mount
   useEffect(() => {
+    let isMounted = true;
+
     const loadExistingData = async () => {
-      setIsLoadingData(true);
       try {
+        console.log('Carregando dados financeiros no painel...');
         const existingData = await loadFinancialData();
+        
+        if (!isMounted) return;
+        
         if (existingData && Object.keys(existingData).length > 0) {
-          console.log('Dados financeiros carregados no painel:', existingData);
+          console.log('Dados financeiros carregados:', existingData);
           setFinancialData(existingData);
           setHasCompletedChat(true);
         } else {
           console.log('Nenhum dado financeiro encontrado');
+          setFinancialData(null);
+          setHasCompletedChat(false);
         }
       } catch (error) {
         console.error('Erro ao carregar dados financeiros:', error);
-        toast({
-          title: "Erro",
-          description: "Não foi possível carregar seus dados financeiros",
-          variant: "destructive"
-        });
+        if (isMounted) {
+          toast({
+            title: "Aviso",
+            description: "Não foi possível carregar dados salvos. Iniciando novo questionário.",
+            variant: "default"
+          });
+        }
       } finally {
-        setIsLoadingData(false);
+        if (isMounted) {
+          setIsInitializing(false);
+        }
       }
     };
 
     loadExistingData();
+
+    return () => {
+      isMounted = false;
+    };
   }, [loadFinancialData, toast]);
 
   const handleChatComplete = async (data: FinancialData) => {
@@ -56,28 +71,21 @@ const Financas = () => {
     setFinancialData(data);
     setHasCompletedChat(true);
     
-    // Force reload data from database to ensure sync
-    try {
-      const refreshedData = await loadFinancialData();
-      if (refreshedData && Object.keys(refreshedData).length > 0) {
-        console.log('Dados sincronizados:', refreshedData);
-        setFinancialData(refreshedData);
-      }
-    } catch (error) {
-      console.error('Erro ao sincronizar dados:', error);
-    }
+    toast({
+      title: "Sucesso! 🎉",
+      description: "Seus dados financeiros foram salvos com sucesso!"
+    });
   };
 
   const resetExperience = async () => {
-    console.log('Resetting financial experience');
     try {
       const deleted = await deleteFinancialData();
       if (deleted) {
         setFinancialData(null);
         setHasCompletedChat(false);
         toast({
-          title: "Sucesso",
-          description: "Seus dados foram resetados com sucesso"
+          title: "Dados resetados",
+          description: "Seus dados foram resetados. Você pode começar um novo questionário."
         });
       } else {
         toast({
@@ -96,13 +104,13 @@ const Financas = () => {
     }
   };
 
-  if (isLoadingData) {
+  if (isInitializing) {
     return (
       <DashboardLayout>
         <div className="min-h-screen bg-gray-900 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
-            <p className="text-slate-400">Carregando seus dados financeiros...</p>
+            <p className="text-slate-400">Iniciando Mestre das Finanças...</p>
           </div>
         </div>
       </DashboardLayout>
@@ -189,7 +197,7 @@ const Financas = () => {
                   className="data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200 flex items-center justify-center gap-2"
                 >
                   <Calculator className="w-4 h-4" />
-                  <span className="hidden sm:inline">Consultor Financeiro</span>
+                  <span className="hidden sm:inline">Consultor IA</span>
                 </TabsTrigger>
               </TabsList>
 

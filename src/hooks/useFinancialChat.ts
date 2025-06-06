@@ -112,7 +112,7 @@ export const useFinancialChat = () => {
   const [financialData, setFinancialData] = useState<Partial<FinancialData>>({});
   const [isCompleted, setIsCompleted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [hasLoadedData, setHasLoadedData] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(false);
   const [hasNotifiedCompletion, setHasNotifiedCompletion] = useState(false);
 
   const { saveFinancialData, loadFinancialData } = useFinancialDataStorage();
@@ -125,33 +125,37 @@ export const useFinancialChat = () => {
     }]);
   }, []);
 
-  // Load existing data on start
+  // Initialize once
   useEffect(() => {
-    const loadExistingData = async () => {
-      if (hasLoadedData) return;
-      
+    if (hasInitialized) return;
+
+    const initializeChat = async () => {
       try {
+        console.log('Inicializando chat financeiro...');
         const existingData = await loadFinancialData();
+        
         if (existingData && Object.keys(existingData).length > 0) {
           console.log('Dados financeiros encontrados:', existingData);
           setFinancialData(existingData);
           setIsCompleted(true);
           setCurrentStep(chatSteps.length);
-          setHasLoadedData(true);
           setHasNotifiedCompletion(true);
           addMessage('Bem-vindo de volta! Encontrei seus dados financeiros salvos. Você pode visualizar seu dashboard ou conversar comigo novamente para atualizar suas informações.', 'bot');
         } else {
-          console.log('Nenhum dado financeiro encontrado, iniciando novo chat');
-          setHasLoadedData(true);
+          console.log('Iniciando novo chat financeiro');
+          addMessage(chatSteps[0].question, 'bot');
         }
+        
+        setHasInitialized(true);
       } catch (error) {
-        console.error('Erro ao carregar dados:', error);
-        setHasLoadedData(true);
+        console.error('Erro ao inicializar chat:', error);
+        addMessage(chatSteps[0].question, 'bot');
+        setHasInitialized(true);
       }
     };
 
-    loadExistingData();
-  }, [loadFinancialData, addMessage, hasLoadedData]);
+    initializeChat();
+  }, [hasInitialized, loadFinancialData, addMessage]);
 
   const sendMessage = useCallback(async (userInput: string) => {
     if (currentStep >= chatSteps.length) return;
@@ -188,7 +192,6 @@ export const useFinancialChat = () => {
       [step.field]: processedValue
     };
     setFinancialData(updatedData);
-    console.log('Dados atualizados:', updatedData);
 
     // Próximo passo
     const nextStep = currentStep + 1;
@@ -197,57 +200,51 @@ export const useFinancialChat = () => {
     if (nextStep < chatSteps.length) {
       addMessage(chatSteps[nextStep].question, 'bot');
     } else {
-      // Chat completed - save data
+      // Chat completed
       const completeData = {
         ...updatedData,
-        categoriaGastos: {} // Default empty object
+        categoriaGastos: {}
       } as FinancialData;
 
       console.log('Finalizando chat com dados:', completeData);
       
       try {
-        const saved = await saveFinancialData(completeData);
-        if (saved) {
-          console.log('Dados salvos com sucesso no banco!');
-          setFinancialData(completeData);
-          addMessage('Perfeito! 🎉 Analisei todos os seus dados e salvei suas informações. Agora vou gerar seu dashboard personalizado com insights sobre sua situação financeira!', 'bot');
-        } else {
-          console.error('Falha ao salvar no banco de dados');
-          addMessage('Perfeito! 🎉 Analisei todos os seus dados. Agora vou gerar seu dashboard personalizado com insights sobre sua situação financeira!', 'bot');
-        }
+        await saveFinancialData(completeData);
+        setFinancialData(completeData);
+        addMessage('Perfeito! 🎉 Analisei todos os seus dados e salvei suas informações. Agora vou gerar seu dashboard personalizado!', 'bot');
+        setIsCompleted(true);
       } catch (error) {
-        console.error('Erro crítico ao salvar dados:', error);
-        addMessage('Perfeito! 🎉 Analisei todos os seus dados. Agora vou gerar seu dashboard personalizado com insights sobre sua situação financeira!', 'bot');
+        console.error('Erro ao salvar dados:', error);
+        addMessage('Perfeito! 🎉 Analisei todos os seus dados. Agora vou gerar seu dashboard personalizado!', 'bot');
+        setIsCompleted(true);
       }
-      
-      setIsCompleted(true);
     }
 
     setIsLoading(false);
   }, [currentStep, addMessage, financialData, saveFinancialData]);
 
   const startChat = useCallback(() => {
-    if (!hasLoadedData) return;
-    
-    // Reset only if not already completed
-    if (!isCompleted) {
-      console.log('Iniciando novo chat financeiro');
-      setMessages([]);
-      setCurrentStep(0);
-      setFinancialData({});
-      setIsCompleted(false);
-      setHasNotifiedCompletion(false);
-      addMessage(chatSteps[0].question, 'bot');
+    if (!isCompleted && hasInitialized) {
+      console.log('Chat já está ativo');
+      return;
     }
-  }, [addMessage, hasLoadedData, isCompleted]);
-
-  const resetChat = useCallback(() => {
-    console.log('Resetando chat financeiro');
+    
+    console.log('Resetando chat para novo início');
     setMessages([]);
     setCurrentStep(0);
     setFinancialData({});
     setIsCompleted(false);
-    setHasLoadedData(false);
+    setHasNotifiedCompletion(false);
+    setHasInitialized(false);
+  }, [isCompleted, hasInitialized]);
+
+  const resetChat = useCallback(() => {
+    console.log('Resetando chat completamente');
+    setMessages([]);
+    setCurrentStep(0);
+    setFinancialData({});
+    setIsCompleted(false);
+    setHasInitialized(false);
     setHasNotifiedCompletion(false);
   }, []);
 

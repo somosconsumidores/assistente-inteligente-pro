@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import SubscriptionButton from '@/components/SubscriptionButton';
+import LockedAssistantFeatures from '@/components/LockedAssistantFeatures';
 import { Lock, Crown, CheckCircle } from 'lucide-react';
 import { Assistant } from '@/data/assistants';
 
@@ -72,9 +73,15 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
             <p className="text-sm text-gray-300 mb-4 font-medium">
               Você já selecionou outro assistente gratuito.
             </p>
-            <SubscriptionButton 
-              size="sm"
-            />
+            
+            {/* Botão para ver features */}
+            <div className="space-y-2">
+              <LockedAssistantFeatures 
+                assistant={assistant} 
+                userPlan={userPlan}
+              />
+              <SubscriptionButton size="sm" />
+            </div>
           </div>
         </div>
       )}
@@ -103,13 +110,23 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
           ))}
         </div>
         
-        {!isLocked && (
-          <Button 
-            className={`w-full bg-gradient-to-r ${assistant.color} hover:opacity-90 transition-opacity text-white`}
-          >
-            {cardActionText}
-          </Button>
-        )}
+        <div className="space-y-2">
+          {!isLocked && (
+            <Button 
+              className={`w-full bg-gradient-to-r ${assistant.color} hover:opacity-90 transition-opacity text-white`}
+            >
+              {cardActionText}
+            </Button>
+          )}
+          
+          {/* Botão para ver features em assistentes premium não bloqueados */}
+          {!isLocked && assistant.isPremium && userPlan === 'free' && (
+            <LockedAssistantFeatures 
+              assistant={assistant} 
+              userPlan={userPlan}
+            />
+          )}
+        </div>
       </CardContent>
     </Card>
   );

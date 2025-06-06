@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -47,28 +48,30 @@ const Pricing = () => {
           const Icon = plan.icon;
           const isFree = plan.name === 'Gratuito';
           
-          return <Card key={index} className={`relative overflow-hidden border-gray-800 bg-gray-900/50 backdrop-blur-sm transition-all duration-300 ${plan.popular ? 'ring-2 ring-blue-500/50 hover:ring-blue-400/70 hover:shadow-2xl hover:shadow-blue-500/20' : 'hover:shadow-xl'} hover:-translate-y-1 ${plan.popular ? 'mt-4 sm:mt-6' : ''}`}>
-                {/* Selo "Acesso gratuito por tempo limitado" - apenas para o plano gratuito */}
-                {isFree && (
-                  <div className="absolute -top-2 -right-2 z-10">
-                    <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 shadow-lg animate-pulse">
-                      <Clock className="w-3 h-3" />
-                      Acesso gratuito por tempo limitado
-                    </div>
-                  </div>
-                )}
-
-                {/* Popular Badge */}
-                {plan.popular && <div className="absolute top-2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-                    <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-1 text-sm font-semibold">
-                      ⭐ Mais Popular
-                    </Badge>
-                  </div>}
-
-                <CardHeader className={`p-6 sm:p-8 text-center ${plan.popular ? 'pt-8 sm:pt-10' : ''}`}>
-                  <div className={`w-12 h-12 sm:w-16 sm:h-16 mx-auto rounded-2xl bg-gradient-to-br ${plan.gradient} flex items-center justify-center mb-4 sm:mb-6`}>
+          return <Card key={index} className={`relative overflow-hidden border-gray-800 bg-gray-900/50 backdrop-blur-sm transition-all duration-300 ${plan.popular ? 'ring-2 ring-blue-500/50 hover:ring-blue-400/70 hover:shadow-2xl hover:shadow-blue-500/20' : 'hover:shadow-xl'} hover:-translate-y-1`}>
+                <CardHeader className="p-6 sm:p-8 text-center">
+                  <div className={`w-12 h-12 sm:w-16 sm:h-16 mx-auto rounded-2xl bg-gradient-to-br ${plan.gradient} flex items-center justify-center mb-4`}>
                     <Icon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                   </div>
+                  
+                  {/* Selo "Acesso gratuito por tempo limitado" - logo abaixo do ícone */}
+                  {isFree && (
+                    <div className="mb-4">
+                      <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center justify-center gap-1 shadow-lg animate-pulse mx-auto w-fit">
+                        <Clock className="w-3 h-3" />
+                        Acesso gratuito por tempo limitado
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Selo "Mais Popular" - logo abaixo do ícone */}
+                  {plan.popular && (
+                    <div className="mb-4">
+                      <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-1 text-sm font-semibold mx-auto">
+                        ⭐ Mais Popular
+                      </Badge>
+                    </div>
+                  )}
                   
                   <CardTitle className="text-xl sm:text-2xl text-white mb-2">
                     {plan.name}

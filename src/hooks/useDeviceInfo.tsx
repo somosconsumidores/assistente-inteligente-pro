@@ -24,8 +24,8 @@ export function useDeviceInfo() {
           // Informações básicas para web
           setDeviceInfo({
             model: 'Web Browser',
-            platform: 'web',
-            operatingSystem: 'web',
+            platform: 'web' as any,
+            operatingSystem: 'unknown' as any,
             osVersion: '',
             manufacturer: '',
             isVirtual: false,

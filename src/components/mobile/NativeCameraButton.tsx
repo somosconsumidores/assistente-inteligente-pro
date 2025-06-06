@@ -26,7 +26,7 @@ export function NativeCameraButton({
   size = 'default'
 }: NativeCameraButtonProps) {
   const { takePhoto, selectFromGallery, isLoading } = useNativeCamera();
-  const { impact } = useNativeHaptics();
+  const { impact, success } = useNativeHaptics();
   const { isMobile } = useMobileDeviceInfo();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -35,7 +35,7 @@ export function NativeCameraButton({
     const photo = await takePhoto();
     if (photo && onPhotoTaken) {
       onPhotoTaken(photo);
-      await impact('success');
+      await success();
     }
     setIsOpen(false);
   };
@@ -45,7 +45,7 @@ export function NativeCameraButton({
     const photo = await selectFromGallery();
     if (photo && onPhotoTaken) {
       onPhotoTaken(photo);
-      await impact('success');
+      await success();
     }
     setIsOpen(false);
   };

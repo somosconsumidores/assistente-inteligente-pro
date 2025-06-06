@@ -45,9 +45,14 @@ export function useNativeHaptics() {
     }
   };
 
+  const success = async () => {
+    await notification('success');
+  };
+
   return {
     impact,
     notification,
-    vibrate
+    vibrate,
+    success
   };
 }

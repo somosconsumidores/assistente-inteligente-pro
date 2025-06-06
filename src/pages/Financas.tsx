@@ -124,41 +124,43 @@ const Financas = () => {
           {/* Content */}
           {hasCompletedChat ? (
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-3 bg-gray-800 border-gray-700">
+              <TabsList className="grid w-full grid-cols-3 bg-gray-800 border-gray-700 mb-6">
                 <TabsTrigger 
                   value="dashboard" 
-                  className="data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-300"
+                  className="data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-300 hover:text-white"
                 >
                   <BarChart3 className="w-4 h-4 mr-2" />
                   Dashboard
                 </TabsTrigger>
                 <TabsTrigger 
                   value="insights" 
-                  className="data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-300"
+                  className="data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-300 hover:text-white"
                 >
                   <Lightbulb className="w-4 h-4 mr-2" />
                   Análises
                 </TabsTrigger>
                 <TabsTrigger 
                   value="chat" 
-                  className="data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-300"
+                  className="data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-300 hover:text-white"
                 >
                   <MessageCircle className="w-4 h-4 mr-2" />
                   Conversar
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="dashboard" className="mt-6">
-                {financialData && <FinancialDashboard data={financialData} />}
-              </TabsContent>
+              <div className="tab-content">
+                <TabsContent value="dashboard" className="mt-0">
+                  {financialData && <FinancialDashboard data={financialData} />}
+                </TabsContent>
 
-              <TabsContent value="insights" className="mt-6">
-                {financialData && <FinancialInsights data={financialData} />}
-              </TabsContent>
+                <TabsContent value="insights" className="mt-0">
+                  {financialData && <FinancialInsights data={financialData} />}
+                </TabsContent>
 
-              <TabsContent value="chat" className="mt-6">
-                <FinancialChat onComplete={handleChatComplete} />
-              </TabsContent>
+                <TabsContent value="chat" className="mt-0">
+                  <FinancialChat onComplete={handleChatComplete} />
+                </TabsContent>
+              </div>
             </Tabs>
           ) : (
             <div className="space-y-4 sm:space-y-6">

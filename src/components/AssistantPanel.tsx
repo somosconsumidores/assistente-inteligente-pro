@@ -188,9 +188,6 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade, se
                     <SubscriptionButton 
                       size="sm"
                       className=""
-                      onClick={(e: React.MouseEvent) => {
-                        e.stopPropagation();
-                      }}
                     />
                   </div>
                 </div>

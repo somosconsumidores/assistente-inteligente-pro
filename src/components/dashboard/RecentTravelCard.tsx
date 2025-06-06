@@ -1,20 +1,19 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plane, MapPin, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-
 interface RecentTravelCardProps {
   travelPlans: any[];
   onViewAll: () => void;
 }
-
-const RecentTravelCard: React.FC<RecentTravelCardProps> = ({ travelPlans, onViewAll }) => {
+const RecentTravelCard: React.FC<RecentTravelCardProps> = ({
+  travelPlans,
+  onViewAll
+}) => {
   if (travelPlans.length === 0) {
-    return (
-      <Card>
+    return <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <Plane className="w-5 h-5 text-sky-600" />
@@ -28,20 +27,16 @@ const RecentTravelCard: React.FC<RecentTravelCardProps> = ({ travelPlans, onView
             <p className="text-sm">Use o Mestre das Viagens para planejar</p>
           </div>
         </CardContent>
-      </Card>
-    );
+      </Card>;
   }
-
   const mostRecentTravel = travelPlans[0];
-
-  return (
-    <Card>
+  return <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <Plane className="w-5 h-5 text-sky-600" />
           Planos de Viagem
         </CardTitle>
-        <Button variant="ghost" size="sm" onClick={onViewAll}>
+        <Button variant="ghost" size="sm" onClick={onViewAll} className="bg-zinc-900 hover:bg-zinc-800">
           Ver todos
         </Button>
       </CardHeader>
@@ -58,26 +53,22 @@ const RecentTravelCard: React.FC<RecentTravelCardProps> = ({ travelPlans, onView
               <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
                 <Calendar className="w-3 h-3" />
                 <span>
-                  Criado em {format(new Date(mostRecentTravel.created_at), "dd 'de' MMM", { locale: ptBR })}
+                  Criado em {format(new Date(mostRecentTravel.created_at), "dd 'de' MMM", {
+                  locale: ptBR
+                })}
                 </span>
               </div>
-              {mostRecentTravel.departure_date && mostRecentTravel.return_date && (
-                <div className="text-sm text-sky-700 bg-sky-100 px-2 py-1 rounded inline-block">
+              {mostRecentTravel.departure_date && mostRecentTravel.return_date && <div className="text-sm text-sky-700 bg-sky-100 px-2 py-1 rounded inline-block">
                   {format(new Date(mostRecentTravel.departure_date), 'dd/MM/yyyy')} - {format(new Date(mostRecentTravel.return_date), 'dd/MM/yyyy')}
-                </div>
-              )}
+                </div>}
             </div>
           </div>
         </div>
         
-        {travelPlans.length > 1 && (
-          <p className="text-sm text-gray-500 text-center mt-3">
+        {travelPlans.length > 1 && <p className="text-sm text-gray-500 text-center mt-3">
             +{travelPlans.length - 1} planos adicionais
-          </p>
-        )}
+          </p>}
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-
 export default RecentTravelCard;

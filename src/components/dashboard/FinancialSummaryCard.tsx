@@ -1,21 +1,17 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DollarSign, TrendingUp, TrendingDown, Target } from 'lucide-react';
-
 interface FinancialSummaryCardProps {
   financialData: any;
   onViewDashboard: () => void;
 }
-
-const FinancialSummaryCard: React.FC<FinancialSummaryCardProps> = ({ 
-  financialData, 
-  onViewDashboard 
+const FinancialSummaryCard: React.FC<FinancialSummaryCardProps> = ({
+  financialData,
+  onViewDashboard
 }) => {
   if (!financialData) {
-    return (
-      <Card>
+    return <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <DollarSign className="w-5 h-5 text-emerald-600" />
@@ -29,27 +25,22 @@ const FinancialSummaryCard: React.FC<FinancialSummaryCardProps> = ({
             <p className="text-sm">Use o Mestre das Finanças para começar</p>
           </div>
         </CardContent>
-      </Card>
-    );
+      </Card>;
   }
-
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
     }).format(value);
   };
-
   const saldoLiquido = Number(financialData.renda) - Number(financialData.gastos_fixes) - Number(financialData.gastos_variaveis);
-
-  return (
-    <Card>
+  return <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <DollarSign className="w-5 h-5 text-emerald-600" />
           Dashboard Financeiro
         </CardTitle>
-        <Button variant="ghost" size="sm" onClick={onViewDashboard}>
+        <Button variant="ghost" size="sm" onClick={onViewDashboard} className="text-slate-50 bg-zinc-900 hover:bg-zinc-800">
           Ver dashboard
         </Button>
       </CardHeader>
@@ -67,11 +58,7 @@ const FinancialSummaryCard: React.FC<FinancialSummaryCardProps> = ({
           
           <div className={`p-3 rounded-lg ${saldoLiquido >= 0 ? 'bg-blue-50' : 'bg-red-50'}`}>
             <div className="flex items-center gap-2 mb-1">
-              {saldoLiquido >= 0 ? (
-                <TrendingUp className="w-4 h-4 text-blue-600" />
-              ) : (
-                <TrendingDown className="w-4 h-4 text-red-600" />
-              )}
+              {saldoLiquido >= 0 ? <TrendingUp className="w-4 h-4 text-blue-600" /> : <TrendingDown className="w-4 h-4 text-red-600" />}
               <span className={`text-sm font-medium ${saldoLiquido >= 0 ? 'text-blue-800' : 'text-red-800'}`}>
                 Saldo
               </span>
@@ -82,8 +69,7 @@ const FinancialSummaryCard: React.FC<FinancialSummaryCardProps> = ({
           </div>
         </div>
 
-        {financialData.meta_economia && (
-          <div className="p-3 bg-yellow-50 rounded-lg">
+        {financialData.meta_economia && <div className="p-3 bg-yellow-50 rounded-lg">
             <div className="flex items-center gap-2 mb-1">
               <Target className="w-4 h-4 text-yellow-600" />
               <span className="text-sm font-medium text-yellow-800">Meta de Economia</span>
@@ -91,11 +77,8 @@ const FinancialSummaryCard: React.FC<FinancialSummaryCardProps> = ({
             <p className="text-lg font-bold text-yellow-700">
               {formatCurrency(Number(financialData.meta_economia))}
             </p>
-          </div>
-        )}
+          </div>}
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-
 export default FinancialSummaryCard;

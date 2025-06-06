@@ -17,6 +17,3 @@ verify_jwt = false
 
 [functions.gerar-peticao]
 verify_jwt = false
-
-[functions.financial-advisor-chat]
-verify_jwt = false

@@ -36,16 +36,11 @@ const FinancialChat: React.FC<FinancialChatProps> = ({ onComplete }) => {
     });
   }, [messages]);
 
-  // Call onComplete when chat is completed and we have valid data
+  // Only call onComplete once when chat is completed and we haven't notified yet
   useEffect(() => {
-    if (isCompleted && financialData && Object.keys(financialData).length > 0 && !hasNotifiedCompletion) {
-      console.log('Chat completado, notificando parent component:', financialData);
-      // Add a small delay to ensure the completion message is shown
-      const timer = setTimeout(() => {
-        onComplete(financialData);
-      }, 2000);
-      
-      return () => clearTimeout(timer);
+    if (isCompleted && financialData && !hasNotifiedCompletion) {
+      console.log('Chat completed with data:', financialData);
+      onComplete(financialData);
     }
   }, [isCompleted, financialData, onComplete, hasNotifiedCompletion]);
 
@@ -54,7 +49,6 @@ const FinancialChat: React.FC<FinancialChatProps> = ({ onComplete }) => {
 
     let valueToSend = inputValue;
     if (currentStep?.type === 'multiselect') {
-      if (selectedOptions.length === 0) return;
       valueToSend = selectedOptions.join(', ');
       setSelectedOptions([]);
     }
@@ -79,7 +73,6 @@ const FinancialChat: React.FC<FinancialChatProps> = ({ onComplete }) => {
 
   const formatCurrency = (value: string) => {
     const numbers = value.replace(/[^\d]/g, '');
-    if (!numbers) return '';
     const formatted = new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
@@ -110,10 +103,8 @@ const FinancialChat: React.FC<FinancialChatProps> = ({ onComplete }) => {
             
             <Card className={`max-w-sm ${message.type === 'user' ? 'bg-blue-500 text-white' : 'bg-white border-gray-200'}`}>
               <CardContent className="p-3">
-                <p className={`text-sm ${message.type === 'user' ? 'text-white' : 'text-zinc-800'}`}>
-                  {message.content}
-                </p>
-                <span className={`text-xs opacity-70 mt-1 block ${message.type === 'user' ? 'text-white' : 'text-zinc-600'}`}>
+                <p className="text-sm text-zinc-800">{message.content}</p>
+                <span className="text-xs opacity-70 mt-1 block text-zinc-800">
                   {message.timestamp.toLocaleTimeString()}
                 </span>
               </CardContent>

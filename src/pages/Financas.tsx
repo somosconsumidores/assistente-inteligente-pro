@@ -3,114 +3,57 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart3, Lightbulb, RefreshCw, Calculator } from 'lucide-react';
+import { BarChart3, Lightbulb, RefreshCw, MessageCircle } from 'lucide-react';
 import FinancialChat from '@/components/FinancialChat';
 import FinancialDashboard from '@/components/FinancialDashboard';
 import FinancialInsights from '@/components/FinancialInsights';
-import FinancialAdvisorChat from '@/components/FinancialAdvisorChat';
 import { FinancialData } from '@/hooks/useFinancialChat';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useFinancialDataStorage } from '@/hooks/useFinancialDataStorage';
-import { useToast } from '@/hooks/use-toast';
 
 const Financas = () => {
   const [financialData, setFinancialData] = useState<FinancialData | null>(null);
   const [hasCompletedChat, setHasCompletedChat] = useState(false);
-  const [isInitializing, setIsInitializing] = useState(true);
+  const [isLoadingData, setIsLoadingData] = useState(true);
   const isMobile = useIsMobile();
-  const { toast } = useToast();
 
   const { loadFinancialData, deleteFinancialData } = useFinancialDataStorage();
 
   // Load existing data on component mount
   useEffect(() => {
-    let isMounted = true;
-
     const loadExistingData = async () => {
-      try {
-        console.log('Carregando dados financeiros no painel...');
-        const existingData = await loadFinancialData();
-        
-        if (!isMounted) return;
-        
-        if (existingData && Object.keys(existingData).length > 0) {
-          console.log('Dados financeiros carregados:', existingData);
-          setFinancialData(existingData);
-          setHasCompletedChat(true);
-        } else {
-          console.log('Nenhum dado financeiro encontrado');
-          setFinancialData(null);
-          setHasCompletedChat(false);
-        }
-      } catch (error) {
-        console.error('Erro ao carregar dados financeiros:', error);
-        if (isMounted) {
-          toast({
-            title: "Aviso",
-            description: "Não foi possível carregar dados salvos. Iniciando novo questionário.",
-            variant: "default"
-          });
-        }
-      } finally {
-        if (isMounted) {
-          setIsInitializing(false);
-        }
+      const existingData = await loadFinancialData();
+      if (existingData) {
+        setFinancialData(existingData);
+        setHasCompletedChat(true);
       }
+      setIsLoadingData(false);
     };
 
     loadExistingData();
+  }, [loadFinancialData]);
 
-    return () => {
-      isMounted = false;
-    };
-  }, [loadFinancialData, toast]);
-
-  const handleChatComplete = async (data: FinancialData) => {
+  const handleChatComplete = (data: FinancialData) => {
     console.log('Chat completed with data:', data);
     setFinancialData(data);
     setHasCompletedChat(true);
-    
-    toast({
-      title: "Sucesso! 🎉",
-      description: "Seus dados financeiros foram salvos com sucesso!"
-    });
   };
 
   const resetExperience = async () => {
-    try {
-      const deleted = await deleteFinancialData();
-      if (deleted) {
-        setFinancialData(null);
-        setHasCompletedChat(false);
-        toast({
-          title: "Dados resetados",
-          description: "Seus dados foram resetados. Você pode começar um novo questionário."
-        });
-      } else {
-        toast({
-          title: "Erro",
-          description: "Não foi possível resetar os dados",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      console.error('Erro ao resetar dados:', error);
-      toast({
-        title: "Erro",
-        description: "Ocorreu um erro ao resetar os dados",
-        variant: "destructive"
-      });
-    }
+    console.log('Resetting financial experience');
+    await deleteFinancialData();
+    setFinancialData(null);
+    setHasCompletedChat(false);
   };
 
-  if (isInitializing) {
+  if (isLoadingData) {
     return (
       <DashboardLayout>
         <div className="min-h-screen bg-gray-900 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
-            <p className="text-slate-400">Iniciando Mestre das Finanças...</p>
+            <p className="text-slate-400">Carregando seus dados financeiros...</p>
           </div>
         </div>
       </DashboardLayout>
@@ -162,20 +105,20 @@ const Financas = () => {
           )}
 
           {/* Welcome back card for returning users */}
-          {hasCompletedChat && financialData && (
+          {hasCompletedChat && (
             <Card className="mb-6 sm:mb-8 bg-gradient-to-r from-blue-500 to-green-600 text-white border-0">
               <CardHeader className="pb-4 sm:pb-6">
                 <CardTitle className="text-lg sm:text-xl lg:text-2xl">Bem-vindo de volta! 🎉</CardTitle>
                 <CardDescription className="text-white/90 text-sm sm:text-base">
-                  Seus dados financeiros estão salvos e seguros. Visualize seu dashboard, análises detalhadas
-                  ou converse com seu consultor financeiro IA para receber conselhos personalizados.
+                  Seus dados financeiros estão salvos e seguros. Visualize seu dashboard atualizado e continue
+                  acompanhando seu progresso financeiro.
                 </CardDescription>
               </CardHeader>
             </Card>
           )}
 
           {/* Content */}
-          {hasCompletedChat && financialData ? (
+          {hasCompletedChat ? (
             <Tabs defaultValue="dashboard" className="w-full">
               <TabsList className="grid w-full grid-cols-3 bg-gray-800/50 backdrop-blur-sm border border-gray-700 mb-6 h-12">
                 <TabsTrigger 
@@ -193,24 +136,36 @@ const Financas = () => {
                   <span className="hidden sm:inline">Análises</span>
                 </TabsTrigger>
                 <TabsTrigger 
-                  value="advisor" 
+                  value="chat" 
                   className="data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200 flex items-center justify-center gap-2"
                 >
-                  <Calculator className="w-4 h-4" />
-                  <span className="hidden sm:inline">Consultor IA</span>
+                  <MessageCircle className="w-4 h-4" />
+                  <span className="hidden sm:inline">Conversar</span>
                 </TabsTrigger>
               </TabsList>
 
               <TabsContent value="dashboard" className="mt-0 focus-visible:outline-none">
-                <FinancialDashboard data={financialData} />
+                {financialData ? (
+                  <FinancialDashboard data={financialData} />
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-slate-400">Carregando dados do dashboard...</p>
+                  </div>
+                )}
               </TabsContent>
 
               <TabsContent value="insights" className="mt-0 focus-visible:outline-none">
-                <FinancialInsights data={financialData} />
+                {financialData ? (
+                  <FinancialInsights data={financialData} />
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-slate-400">Carregando análises...</p>
+                  </div>
+                )}
               </TabsContent>
 
-              <TabsContent value="advisor" className="mt-0 focus-visible:outline-none">
-                <FinancialAdvisorChat />
+              <TabsContent value="chat" className="mt-0 focus-visible:outline-none">
+                <FinancialChat onComplete={handleChatComplete} />
               </TabsContent>
             </Tabs>
           ) : (

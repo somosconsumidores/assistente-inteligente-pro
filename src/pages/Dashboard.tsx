@@ -14,10 +14,12 @@ import AssistantCards from '@/components/AssistantCards';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useNavigate } from 'react-router-dom';
 import { LayoutDashboard } from 'lucide-react';
+import { useMobileDeviceInfo } from '@/hooks/use-mobile';
 
 const Dashboard: React.FC = () => {
   const { profile } = useAuth();
   const navigate = useNavigate();
+  const { isMobile } = useMobileDeviceInfo();
   const {
     petitions,
     productRecommendations,
@@ -49,7 +51,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-zinc-800">
+      <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-zinc-800 ${isMobile ? 'mobile-safe-area' : ''}`}>
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
@@ -58,8 +60,10 @@ const Dashboard: React.FC = () => {
                 <LayoutDashboard className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-slate-50">Meu Painel</h1>
-                <p className="text-slate-50">
+                <h1 className={`font-bold text-slate-50 ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
+                  Meu Painel
+                </h1>
+                <p className={`text-slate-50 ${isMobile ? 'text-sm' : ''}`}>
                   Bem-vindo, {profile?.name || 'Usuário'}! Aqui está o resumo das suas atividades.
                 </p>
               </div>
@@ -67,8 +71,12 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Dashboard Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Dashboard Grid - Responsive for mobile */}
+        <div className={`grid gap-6 ${
+          isMobile 
+            ? 'grid-cols-1' 
+            : 'grid-cols-1 lg:grid-cols-3'
+        }`}>
           {/* Coluna 1 - Informações do usuário e assistente */}
           <div className="space-y-6">
             <UserPlanCard 

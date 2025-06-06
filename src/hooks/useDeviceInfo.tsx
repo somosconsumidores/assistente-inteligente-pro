@@ -31,10 +31,6 @@ export function useDeviceInfo() {
             isVirtual: false,
             isNative: false,
             memUsed: 0,
-            diskFree: 0,
-            diskTotal: 0,
-            realDiskFree: 0,
-            realDiskTotal: 0,
             webViewVersion: ''
           });
         }

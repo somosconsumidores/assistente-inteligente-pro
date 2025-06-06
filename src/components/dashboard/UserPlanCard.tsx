@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Crown, CheckCircle } from 'lucide-react';
+import { Crown, CheckCircle, Clock } from 'lucide-react';
 import SubscriptionButton from '@/components/SubscriptionButton';
 
 interface UserPlanCardProps {
@@ -19,7 +19,19 @@ const UserPlanCard: React.FC<UserPlanCardProps> = ({ userPlan, selectedAssistant
   };
 
   return (
-    <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-blue-200">
+    <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-blue-200 relative overflow-hidden">
+      {/* Selo de tempo limitado - apenas para plano gratuito */}
+      {userPlan === 'free' && (
+        <div className="absolute -top-1 -right-1 z-10">
+          <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 py-1 text-xs font-bold transform rotate-12 shadow-lg">
+            <div className="flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              <span>Acesso gratuito por tempo limitado</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           {userPlan === 'premium' ? (

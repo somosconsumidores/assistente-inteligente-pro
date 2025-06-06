@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Star, Users, MessageCircle, ThumbsUp } from 'lucide-react';
@@ -14,7 +15,7 @@ const SocialProof = () => {
     {
       name: "João Santos",
       role: "Advogado",
-      comment: "Me ajudou com um problema de cobrança indevida em minha conta.",
+      comment: "O assistente de direito do consumidor é incrível. Me ajuda a entender processos complexos de forma simples e rápida.",
       rating: 5,
       avatar: "JS"
     },

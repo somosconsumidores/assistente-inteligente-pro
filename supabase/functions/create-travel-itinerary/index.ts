@@ -580,7 +580,7 @@ const estimateAccommodationCosts = (destination: string, days: number, travelers
   switch (travelStyle.toLowerCase()) {
     case 'econômica':
     case 'economica':
-      multiplier = 0.6; // Hostels, pensões
+      multiplier = 0.85; // Hostels, pensões
       break;
     case 'conforto':
       multiplier = 1.5; // Hotéis 3-4 estrelas

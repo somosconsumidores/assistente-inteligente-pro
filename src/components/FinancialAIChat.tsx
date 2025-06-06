@@ -44,7 +44,7 @@ const FinancialAIChat: React.FC = () => {
             <Bot className="w-4 h-4 text-white" />
           </div>
           <div>
-            <h3 className="font-semibold text-gray-800">Consultor Financeiro IA</h3>
+            <h3 className="font-semibold text-white">Consultor Financeiro IA</h3>
             <p className="text-xs text-gray-500">Powered by OpenAI</p>
           </div>
         </div>

@@ -13,7 +13,6 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useFinancialDataStorage } from '@/hooks/useFinancialDataStorage';
 
 const Financas = () => {
-  const [activeTab, setActiveTab] = useState('chat');
   const [financialData, setFinancialData] = useState<FinancialData | null>(null);
   const [hasCompletedChat, setHasCompletedChat] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
@@ -28,7 +27,6 @@ const Financas = () => {
       if (existingData) {
         setFinancialData(existingData);
         setHasCompletedChat(true);
-        setActiveTab('dashboard');
       }
       setIsLoadingData(false);
     };
@@ -40,16 +38,13 @@ const Financas = () => {
     console.log('Chat completed with data:', data);
     setFinancialData(data);
     setHasCompletedChat(true);
-    setActiveTab('dashboard');
   };
 
   const resetExperience = async () => {
     console.log('Resetting financial experience');
-    // Delete saved data
     await deleteFinancialData();
     setFinancialData(null);
     setHasCompletedChat(false);
-    setActiveTab('chat');
   };
 
   if (isLoadingData) {
@@ -65,12 +60,9 @@ const Financas = () => {
     );
   }
 
-  console.log('Render state:', { activeTab, hasCompletedChat, financialData: !!financialData });
-
   return (
     <DashboardLayout>
       <div className="min-h-screen bg-gray-900">
-        {/* Mobile-optimized content wrapper */}
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 safe-area-bottom">
           {/* Header */}
           <div className="flex items-center justify-between mb-6 sm:mb-8">
@@ -127,64 +119,55 @@ const Financas = () => {
 
           {/* Content */}
           {hasCompletedChat ? (
-            <div className="w-full">
-              <Tabs 
-                value={activeTab} 
-                onValueChange={(value) => {
-                  console.log('Tab changed to:', value);
-                  setActiveTab(value);
-                }}
-                className="w-full"
-              >
-                <TabsList className="grid w-full grid-cols-3 bg-gray-800/50 backdrop-blur-sm border border-gray-700 mb-6 h-12">
-                  <TabsTrigger 
-                    value="dashboard" 
-                    className="data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200 flex items-center justify-center gap-2"
-                  >
-                    <BarChart3 className="w-4 h-4" />
-                    <span className="hidden sm:inline">Dashboard</span>
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="insights" 
-                    className="data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200 flex items-center justify-center gap-2"
-                  >
-                    <Lightbulb className="w-4 h-4" />
-                    <span className="hidden sm:inline">Análises</span>
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="chat" 
-                    className="data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200 flex items-center justify-center gap-2"
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                    <span className="hidden sm:inline">Conversar</span>
-                  </TabsTrigger>
-                </TabsList>
+            <Tabs defaultValue="dashboard" className="w-full">
+              <TabsList className="grid w-full grid-cols-3 bg-gray-800/50 backdrop-blur-sm border border-gray-700 mb-6 h-12">
+                <TabsTrigger 
+                  value="dashboard" 
+                  className="data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200 flex items-center justify-center gap-2"
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  <span className="hidden sm:inline">Dashboard</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="insights" 
+                  className="data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200 flex items-center justify-center gap-2"
+                >
+                  <Lightbulb className="w-4 h-4" />
+                  <span className="hidden sm:inline">Análises</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="chat" 
+                  className="data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200 flex items-center justify-center gap-2"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span className="hidden sm:inline">Conversar</span>
+                </TabsTrigger>
+              </TabsList>
 
-                <TabsContent value="dashboard" className="mt-0 focus-visible:outline-none">
-                  {financialData ? (
-                    <FinancialDashboard data={financialData} />
-                  ) : (
-                    <div className="text-center py-8">
-                      <p className="text-slate-400">Carregando dados do dashboard...</p>
-                    </div>
-                  )}
-                </TabsContent>
+              <TabsContent value="dashboard" className="mt-0 focus-visible:outline-none">
+                {financialData ? (
+                  <FinancialDashboard data={financialData} />
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-slate-400">Carregando dados do dashboard...</p>
+                  </div>
+                )}
+              </TabsContent>
 
-                <TabsContent value="insights" className="mt-0 focus-visible:outline-none">
-                  {financialData ? (
-                    <FinancialInsights data={financialData} />
-                  ) : (
-                    <div className="text-center py-8">
-                      <p className="text-slate-400">Carregando análises...</p>
-                    </div>
-                  )}
-                </TabsContent>
+              <TabsContent value="insights" className="mt-0 focus-visible:outline-none">
+                {financialData ? (
+                  <FinancialInsights data={financialData} />
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-slate-400">Carregando análises...</p>
+                  </div>
+                )}
+              </TabsContent>
 
-                <TabsContent value="chat" className="mt-0 focus-visible:outline-none">
-                  <FinancialChat onComplete={handleChatComplete} />
-                </TabsContent>
-              </Tabs>
-            </div>
+              <TabsContent value="chat" className="mt-0 focus-visible:outline-none">
+                <FinancialChat onComplete={handleChatComplete} />
+              </TabsContent>
+            </Tabs>
           ) : (
             <div className="space-y-4 sm:space-y-6">
               <FinancialChat onComplete={handleChatComplete} />

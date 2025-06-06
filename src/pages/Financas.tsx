@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart3, Lightbulb, RefreshCw, MessageCircle } from 'lucide-react';
@@ -9,12 +9,31 @@ import FinancialInsights from '@/components/FinancialInsights';
 import { FinancialData } from '@/hooks/useFinancialChat';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useFinancialDataStorage } from '@/hooks/useFinancialDataStorage';
 
 const Financas = () => {
   const [activeTab, setActiveTab] = useState('chat');
   const [financialData, setFinancialData] = useState<FinancialData | null>(null);
   const [hasCompletedChat, setHasCompletedChat] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(true);
   const isMobile = useIsMobile();
+
+  const { loadFinancialData, deleteFinancialData } = useFinancialDataStorage();
+
+  // Load existing data on component mount
+  useEffect(() => {
+    const loadExistingData = async () => {
+      const existingData = await loadFinancialData();
+      if (existingData) {
+        setFinancialData(existingData);
+        setHasCompletedChat(true);
+        setActiveTab('dashboard');
+      }
+      setIsLoadingData(false);
+    };
+
+    loadExistingData();
+  }, [loadFinancialData]);
 
   const handleChatComplete = (data: FinancialData) => {
     setFinancialData(data);
@@ -22,11 +41,26 @@ const Financas = () => {
     setActiveTab('dashboard');
   };
 
-  const resetExperience = () => {
+  const resetExperience = async () => {
+    // Delete saved data
+    await deleteFinancialData();
     setFinancialData(null);
     setHasCompletedChat(false);
     setActiveTab('chat');
   };
+
+  if (isLoadingData) {
+    return (
+      <DashboardLayout>
+        <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
+            <p className="text-slate-400">Carregando seus dados financeiros...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -68,6 +102,19 @@ const Financas = () => {
                 <CardDescription className="text-white/90 text-sm sm:text-base">
                   Vou te ajudar a organizar suas finanças de forma simples e personalizada. 
                   Através de uma conversa, vou entender sua situação e criar um plano sob medida para você.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          )}
+
+          {/* Welcome back card for returning users */}
+          {hasCompletedChat && activeTab === 'dashboard' && (
+            <Card className="mb-6 sm:mb-8 bg-gradient-to-r from-blue-500 to-green-600 text-white border-0">
+              <CardHeader className="pb-4 sm:pb-6">
+                <CardTitle className="text-lg sm:text-xl lg:text-2xl">Bem-vindo de volta! 🎉</CardTitle>
+                <CardDescription className="text-white/90 text-sm sm:text-base">
+                  Seus dados financeiros estão salvos e seguros. Visualize seu dashboard atualizado e continue
+                  acompanhando seu progresso financeiro.
                 </CardDescription>
               </CardHeader>
             </Card>

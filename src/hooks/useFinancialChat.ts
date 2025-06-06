@@ -1,5 +1,6 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { useFinancialDataStorage } from './useFinancialDataStorage';
 
 export interface FinancialData {
   renda: number;
@@ -111,6 +112,9 @@ export const useFinancialChat = () => {
   const [financialData, setFinancialData] = useState<Partial<FinancialData>>({});
   const [isCompleted, setIsCompleted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasLoadedData, setHasLoadedData] = useState(false);
+
+  const { saveFinancialData, loadFinancialData } = useFinancialDataStorage();
 
   const addMessage = useCallback((content: string, type: 'bot' | 'user') => {
     setMessages(prev => [...prev, {
@@ -119,6 +123,26 @@ export const useFinancialChat = () => {
       timestamp: new Date()
     }]);
   }, []);
+
+  // Load existing data on start
+  useEffect(() => {
+    const loadExistingData = async () => {
+      if (hasLoadedData) return;
+      
+      const existingData = await loadFinancialData();
+      if (existingData) {
+        setFinancialData(existingData);
+        setIsCompleted(true);
+        setCurrentStep(chatSteps.length);
+        setHasLoadedData(true);
+        addMessage('Bem-vindo de volta! Encontrei seus dados financeiros salvos. Você pode visualizar seu dashboard ou conversar comigo novamente para atualizar suas informações.', 'bot');
+      } else {
+        setHasLoadedData(true);
+      }
+    };
+
+    loadExistingData();
+  }, [loadFinancialData, addMessage, hasLoadedData]);
 
   const sendMessage = useCallback(async (userInput: string) => {
     if (currentStep >= chatSteps.length) return;
@@ -143,10 +167,11 @@ export const useFinancialChat = () => {
     }
 
     // Atualizar dados financeiros
-    setFinancialData(prev => ({
-      ...prev,
+    const updatedData = {
+      ...financialData,
       [step.field]: processedValue
-    }));
+    };
+    setFinancialData(updatedData);
 
     // Próximo passo
     const nextStep = currentStep + 1;
@@ -155,26 +180,40 @@ export const useFinancialChat = () => {
     if (nextStep < chatSteps.length) {
       addMessage(chatSteps[nextStep].question, 'bot');
     } else {
-      addMessage('Perfeito! 🎉 Analisei todos os seus dados. Agora vou gerar seu dashboard personalizado com insights sobre sua situação financeira!', 'bot');
+      // Chat completed - save data
+      const completeData = {
+        ...updatedData,
+        categoriaGastos: {} // Default empty object
+      } as FinancialData;
+
+      const saved = await saveFinancialData(completeData);
+      if (saved) {
+        addMessage('Perfeito! 🎉 Analisei todos os seus dados e salvei suas informações. Agora vou gerar seu dashboard personalizado com insights sobre sua situação financeira!', 'bot');
+      } else {
+        addMessage('Perfeito! 🎉 Analisei todos os seus dados. Agora vou gerar seu dashboard personalizado com insights sobre sua situação financeira!', 'bot');
+      }
       setIsCompleted(true);
     }
 
     setIsLoading(false);
-  }, [currentStep, addMessage]);
+  }, [currentStep, addMessage, financialData, saveFinancialData]);
 
   const startChat = useCallback(() => {
+    if (!hasLoadedData) return;
+    
     setMessages([]);
     setCurrentStep(0);
     setFinancialData({});
     setIsCompleted(false);
     addMessage(chatSteps[0].question, 'bot');
-  }, [addMessage]);
+  }, [addMessage, hasLoadedData]);
 
   const resetChat = useCallback(() => {
     setMessages([]);
     setCurrentStep(0);
     setFinancialData({});
     setIsCompleted(false);
+    setHasLoadedData(false);
   }, []);
 
   return {

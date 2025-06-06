@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDashboardData } from '@/hooks/useDashboardData';
@@ -12,8 +13,6 @@ import { DashboardLayout } from '@/components/DashboardLayout';
 import { useNavigate } from 'react-router-dom';
 import { LayoutDashboard } from 'lucide-react';
 import { useMobileDeviceInfo } from '@/hooks/use-mobile';
-import { DeviceInfoCard } from '@/components/mobile/DeviceInfoCard';
-import { NativeFeaturesCard } from '@/components/mobile/NativeFeaturesCard';
 
 const Dashboard: React.FC = () => {
   const { profile } = useAuth();
@@ -108,14 +107,6 @@ const Dashboard: React.FC = () => {
               <SelectedAssistantCard 
                 selectedAssistantId={profile?.selected_assistant_id}
               />
-            )}
-
-            {/* Novos cards mobile */}
-            {isMobile && (
-              <>
-                <DeviceInfoCard />
-                <NativeFeaturesCard />
-              </>
             )}
           </div>
 

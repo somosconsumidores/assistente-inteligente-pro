@@ -40,10 +40,10 @@ const FeaturedProducts = ({
 
   if (validProducts.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 py-8">
+      <div className="flex flex-col items-center justify-center h-full text-center text-gray-400 py-8">
         <div className="text-6xl mb-4">🔍</div>
-        <h3 className="text-lg font-medium mb-2 text-gray-700">Aguardando recomendações</h3>
-        <p className="text-sm leading-relaxed max-w-xs">
+        <h3 className="text-lg font-medium mb-2 text-gray-300">Aguardando recomendações</h3>
+        <p className="text-sm leading-relaxed max-w-xs text-gray-400">
           Faça uma pergunta sobre produtos no chat e receba recomendações personalizadas aqui!
         </p>
       </div>
@@ -66,7 +66,7 @@ const FeaturedProducts = ({
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3">
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-gray-300">
           {validProducts.length === 1 ? '1 produto selecionado' : `${validProducts.length} produtos selecionados`} baseado na sua consulta
         </p>
         
@@ -75,7 +75,7 @@ const FeaturedProducts = ({
             onClick={handleSaveRecommendation} 
             disabled={isLoading || isSaved}
             size="sm"
-            className="w-full flex items-center gap-2" 
+            className="w-full flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white border-orange-600" 
             variant={isSaved ? "default" : "outline"}
           >
             {isSaved ? (

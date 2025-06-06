@@ -23,8 +23,8 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade, se
       title: 'Mestre do Direito do Consumidor',
       description: 'Advogado pessoal para questões de consumo, petições e orientação jurídica.',
       icon: Scale,
-      color: 'from-blue-600 to-purple-600',
-      bgColor: 'from-blue-50 to-purple-50',
+      color: 'from-blue-400 to-purple-400',
+      bgColor: 'from-blue-900/20 to-purple-900/20',
       path: '/direito-consumidor',
       benefits: ['Consultoria jurídica 24/7', 'Geração de petições', 'Guia passo a passo'],
       isPremium: false
@@ -34,8 +34,8 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade, se
       title: 'Mestre das Finanças',
       description: 'Planejador financeiro que cria planos de recuperação e metas personalizadas.',
       icon: DollarSign,
-      color: 'from-green-600 to-blue-600',
-      bgColor: 'from-green-50 to-blue-50',
+      color: 'from-green-400 to-blue-400',
+      bgColor: 'from-green-900/20 to-blue-900/20',
       path: '/financas',
       benefits: ['Plano financeiro personalizado', 'Dashboard de controle', 'Metas inteligentes'],
       isPremium: true
@@ -45,8 +45,8 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade, se
       title: 'Mestre dos Produtos',
       description: 'Consultor de compras que compara produtos e recomenda a melhor escolha.',
       icon: ShoppingCart,
-      color: 'from-orange-600 to-red-600',
-      bgColor: 'from-orange-50 to-red-50',
+      color: 'from-orange-400 to-red-400',
+      bgColor: 'from-orange-900/20 to-red-900/20',
       path: '/produtos',
       benefits: ['Comparação inteligente', 'Análise de custo-benefício', 'Recomendações precisas'],
       isPremium: true
@@ -56,8 +56,8 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade, se
       title: 'Mestre das Viagens',
       description: 'Planejador completo que cria roteiros personalizados para suas viagens.',
       icon: Plane,
-      color: 'from-sky-600 to-indigo-600',
-      bgColor: 'from-sky-50 to-indigo-50',
+      color: 'from-sky-400 to-indigo-400',
+      bgColor: 'from-sky-900/20 to-indigo-900/20',
       path: '/viagens',
       benefits: ['Roteiros personalizados', 'Sugestões de hospedagem', 'Planejamento completo'],
       isPremium: true
@@ -67,8 +67,8 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade, se
       title: 'Mestre do Supermercado',
       description: 'Avaliador de produtos que compara qualidade, preço e recomenda opções.',
       icon: ShoppingBasket,
-      color: 'from-emerald-600 to-green-600',
-      bgColor: 'from-emerald-50 to-green-50',
+      color: 'from-emerald-400 to-green-400',
+      bgColor: 'from-emerald-900/20 to-green-900/20',
       path: '/supermercado',
       benefits: ['Scanner de produtos', 'Comparação de qualidade', 'Escolhas inteligentes'],
       isPremium: true
@@ -156,11 +156,11 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade, se
               key={assistant.id} 
               className={`relative overflow-hidden transition-all duration-300 ${
                 isSelected 
-                  ? 'border-2 border-green-500 shadow-lg' 
+                  ? 'border-2 border-green-400 shadow-lg bg-gray-800/50' 
                   : isClickable 
-                    ? 'hover:shadow-xl hover:-translate-y-1 cursor-pointer' 
-                    : 'border-2 border-gray-200'
-              } bg-gradient-to-br ${assistant.bgColor}`}
+                    ? 'hover:shadow-xl hover:-translate-y-1 cursor-pointer bg-gray-800/30 border-gray-700' 
+                    : 'border-2 border-gray-600 bg-gray-800/20'
+              } bg-gradient-to-br ${assistant.bgColor} backdrop-blur-sm`}
               onClick={() => isClickable && handleAssistantClick(assistant)}
             >
               {/* Badge do assistente */}
@@ -174,7 +174,7 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade, se
                   <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${
                     userPlan === 'premium'
                       ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-white' 
-                      : 'bg-gray-200 text-gray-600'
+                      : 'bg-gray-700 text-gray-300 border border-gray-600'
                   }`}>
                     <Crown className="w-3 h-3" />
                     <span>Premium</span>
@@ -184,20 +184,19 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade, se
 
               {/* Lock Overlay para assistentes bloqueados */}
               {isLocked && (
-                <div className="absolute inset-0 bg-white/20 backdrop-blur-sm flex items-center justify-center z-20">
+                <div className="absolute inset-0 bg-gray-900/80 backdrop-blur-sm flex items-center justify-center z-20">
                   <div className="text-center p-6">
-                    <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Lock className="w-8 h-8 text-gray-500" />
+                    <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Lock className="w-8 h-8 text-gray-400" />
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    <h3 className="text-lg font-bold text-white mb-2">
                       {assistant.title}
                     </h3>
-                    <p className="text-sm text-gray-600 mb-4 font-medium">
+                    <p className="text-sm text-gray-300 mb-4 font-medium">
                       Você já selecionou outro assistente gratuito.
                     </p>
                     <SubscriptionButton 
                       size="sm"
-                      className=""
                     />
                   </div>
                 </div>
@@ -207,10 +206,10 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade, se
                 <div className={`w-12 h-12 bg-gradient-to-br ${assistant.color} rounded-lg flex items-center justify-center mb-4`}>
                   <IconComponent className="w-6 h-6 text-white" />
                 </div>
-                <CardTitle className="text-xl font-bold text-gray-900">
+                <CardTitle className="text-xl font-bold text-white">
                   {assistant.title}
                 </CardTitle>
-                <CardDescription className="leading-relaxed text-gray-600">
+                <CardDescription className="leading-relaxed text-gray-300">
                   {assistant.description}
                 </CardDescription>
               </CardHeader>
@@ -219,8 +218,8 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade, se
                 <div className="space-y-3 mb-6">
                   {assistant.benefits.map((benefit, index) => (
                     <div key={index} className="flex items-center space-x-2">
-                      <CheckCircle className="w-4 h-4 flex-shrink-0 text-green-500" />
-                      <span className="text-sm text-gray-700">
+                      <CheckCircle className="w-4 h-4 flex-shrink-0 text-green-400" />
+                      <span className="text-sm text-gray-300">
                         {benefit}
                       </span>
                     </div>
@@ -229,7 +228,7 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade, se
                 
                 {!isLocked && (
                   <Button 
-                    className={`w-full bg-gradient-to-r ${assistant.color} hover:opacity-90 transition-opacity`}
+                    className={`w-full bg-gradient-to-r ${assistant.color} hover:opacity-90 transition-opacity text-white`}
                   >
                     {cardActionText}
                   </Button>

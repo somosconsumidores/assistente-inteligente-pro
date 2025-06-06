@@ -35,8 +35,8 @@ const Dashboard: React.FC = () => {
             <Skeleton className="h-8 w-8" />
             <Skeleton className="h-8 w-48" />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: 6 }).map((_, i) => (
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
               <Skeleton key={i} className="h-64" />
             ))}
           </div>
@@ -67,28 +67,49 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Dashboard Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Coluna 1 - Informações do usuário e assistente */}
-          <div className="space-y-6">
+        {/* Dashboard Grid - Layout otimizado para desktop */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
+          {/* Primeira linha - Cards principais */}
+          <div className="xl:col-span-1">
             <UserPlanCard 
               userPlan={profile?.plan || 'free'} 
               selectedAssistant={profile?.selected_assistant_id} 
             />
-            
-            {/* Só mostra o card do assistente selecionado se não for usuário premium */}
-            {!isPremiumUser && (
-              <SelectedAssistantCard selectedAssistantId={profile?.selected_assistant_id} />
-            )}
           </div>
 
-          {/* Coluna 2 - Petições e Recomendações */}
-          <div className="space-y-6">
+          {!isPremiumUser && (
+            <div className="xl:col-span-1">
+              <SelectedAssistantCard selectedAssistantId={profile?.selected_assistant_id} />
+            </div>
+          )}
+
+          <div className={`${!isPremiumUser ? 'xl:col-span-1' : 'xl:col-span-2'}`}>
+            <FinancialSummaryCard 
+              financialData={financialData} 
+              onViewDashboard={() => navigate('/financas')} 
+            />
+          </div>
+
+          {!isPremiumUser && (
+            <div className="xl:col-span-1">
+              <RecentTravelCard 
+                travelPlans={savedItineraries} 
+                onViewAll={() => {
+                  navigate('/viagens?tab=saved');
+                }} 
+              />
+            </div>
+          )}
+
+          {/* Segunda linha - Cards de conteúdo */}
+          <div className={`${isPremiumUser ? 'xl:col-span-2' : 'xl:col-span-2'}`}>
             <SavedPetitionsCard 
               petitions={petitions} 
               onViewAll={() => navigate('/peticoes-salvas')} 
             />
-            
+          </div>
+
+          <div className={`${isPremiumUser ? 'xl:col-span-2' : 'xl:col-span-2'}`}>
             <SavedRecommendationsCard 
               recommendations={productRecommendations} 
               onViewAll={() => navigate('/recomendacoes-salvas')} 
@@ -96,20 +117,17 @@ const Dashboard: React.FC = () => {
             />
           </div>
 
-          {/* Coluna 3 - Finanças e Viagens */}
-          <div className="space-y-6">
-            <FinancialSummaryCard 
-              financialData={financialData} 
-              onViewDashboard={() => navigate('/financas')} 
-            />
-            
-            <RecentTravelCard 
-              travelPlans={savedItineraries} 
-              onViewAll={() => {
-                navigate('/viagens?tab=saved');
-              }} 
-            />
-          </div>
+          {/* Para usuários premium, adicionar o card de viagens na segunda linha */}
+          {isPremiumUser && (
+            <div className="xl:col-span-4">
+              <RecentTravelCard 
+                travelPlans={savedItineraries} 
+                onViewAll={() => {
+                  navigate('/viagens?tab=saved');
+                }} 
+              />
+            </div>
+          )}
         </div>
       </div>
     </DashboardLayout>

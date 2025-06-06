@@ -1,13 +1,9 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { MessageSquare, Mail, Phone, MapPin } from 'lucide-react';
-
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-
-  return (
-    <footer className="bg-gray-950 border-t border-gray-800 safe-area-bottom">
+  return <footer className="bg-gray-950 border-t border-gray-800 safe-area-bottom">
       <div className="mobile-padding py-8 sm:py-12">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-12">
@@ -92,11 +88,11 @@ const Footer = () => {
                 </li>
                 <li className="flex items-center space-x-3">
                   <Phone className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                  <span className="text-sm sm:text-base text-gray-400">(11) 9999-9999</span>
+                  <span className="text-sm sm:text-base text-gray-400">(21) 97146-7532</span>
                 </li>
                 <li className="flex items-start space-x-3">
                   <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm sm:text-base text-gray-400">São Paulo, SP</span>
+                  <span className="text-sm sm:text-base text-gray-400">Rio de Janeiro, SP</span>
                 </li>
               </ul>
             </div>
@@ -123,8 +119,6 @@ const Footer = () => {
           </div>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;

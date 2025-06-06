@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,7 +5,6 @@ import { MessageSquare, LogIn, UserPlus, LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { ThemeToggle } from './ThemeToggle';
-
 const Header = () => {
   const {
     user,
@@ -18,7 +16,6 @@ const Header = () => {
   } = useToast();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
   const handleLogout = async () => {
     try {
       await logout();
@@ -36,22 +33,12 @@ const Header = () => {
       });
     }
   };
-
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
-
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
   };
-
-  const handleWhatsAppClick = () => {
-    const phoneNumber = "+5521971467532";
-    const message = "Olá! Gostaria de saber mais sobre a Biblioteca IA.";
-    const whatsappUrl = `https://wa.me/${phoneNumber.replace('+', '')}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
-  };
-
   return <>
       <header className="bg-gray-900/95 backdrop-blur-md border-b border-gray-800 sticky top-0 z-50 safe-area-top">
         <div className="mobile-padding py-3 sm:py-4">
@@ -59,7 +46,7 @@ const Header = () => {
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-2 touch-target" onClick={closeMobileMenu}>
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center text-sm text-center">
-                <span className="text-white font-bold text-sm sm:text-base">Assist IA</span>
+                <span className="text-white font-bold text-sm sm:text-base">BI</span>
               </div>
               <span className="font-bold text-lg sm:text-xl text-white">Biblioteca IA</span>
             </Link>
@@ -72,21 +59,14 @@ const Header = () => {
               <a href="#funcionalidades" className="text-gray-300 hover:text-blue-400 transition-colors touch-target">
                 Funcionalidades
               </a>
-              <a href="#precos" className="text-gray-300 hover:text-blue-400 transition-colors touch-target">
-                Preços
-              </a>
+              <a href="#precos" className="text-gray-300 hover:text-blue-400 transition-colors touch-target">B.IA</a>
             </nav>
 
             {/* Desktop Actions */}
             <div className="hidden sm:flex items-center space-x-2 lg:space-x-3">
               <ThemeToggle />
               
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="hidden md:flex items-center space-x-2 border-gray-700 hover:bg-gray-800"
-                onClick={handleWhatsAppClick}
-              >
+              <Button variant="outline" size="sm" className="hidden md:flex items-center space-x-2 border-gray-700 hover:bg-gray-800">
                 <MessageSquare className="w-4 h-4" />
                 <span>WhatsApp</span>
               </Button>
@@ -138,11 +118,7 @@ const Header = () => {
               </a>
               
               <div className="pt-4 border-t border-gray-700 space-y-3">
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-center border-gray-700 hover:bg-gray-800 touch-target"
-                  onClick={handleWhatsAppClick}
-                >
+                <Button variant="outline" className="w-full justify-center border-gray-700 hover:bg-gray-800 touch-target">
                   <MessageSquare className="w-4 h-4 mr-2" />
                   WhatsApp
                 </Button>
@@ -177,5 +153,4 @@ const Header = () => {
         </div>}
     </>;
 };
-
 export default Header;

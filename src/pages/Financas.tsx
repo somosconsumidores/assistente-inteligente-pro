@@ -12,12 +12,14 @@ import { FinancialData } from '@/hooks/useFinancialChat';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useFinancialDataStorage } from '@/hooks/useFinancialDataStorage';
+import { useToast } from '@/hooks/use-toast';
 
 const Financas = () => {
   const [financialData, setFinancialData] = useState<FinancialData | null>(null);
   const [hasCompletedChat, setHasCompletedChat] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const isMobile = useIsMobile();
+  const { toast } = useToast();
 
   const { loadFinancialData, deleteFinancialData } = useFinancialDataStorage();
 
@@ -25,39 +27,72 @@ const Financas = () => {
   useEffect(() => {
     const loadExistingData = async () => {
       setIsLoadingData(true);
-      const existingData = await loadFinancialData();
-      if (existingData) {
-        console.log('Dados financeiros carregados:', existingData);
-        setFinancialData(existingData);
-        setHasCompletedChat(true);
+      try {
+        const existingData = await loadFinancialData();
+        if (existingData && Object.keys(existingData).length > 0) {
+          console.log('Dados financeiros carregados no painel:', existingData);
+          setFinancialData(existingData);
+          setHasCompletedChat(true);
+        } else {
+          console.log('Nenhum dado financeiro encontrado');
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados financeiros:', error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível carregar seus dados financeiros",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoadingData(false);
       }
-      setIsLoadingData(false);
     };
 
     loadExistingData();
-  }, [loadFinancialData]);
+  }, [loadFinancialData, toast]);
 
-  const handleChatComplete = (data: FinancialData) => {
+  const handleChatComplete = async (data: FinancialData) => {
     console.log('Chat completed with data:', data);
     setFinancialData(data);
     setHasCompletedChat(true);
     
     // Force reload data from database to ensure sync
-    setTimeout(async () => {
+    try {
       const refreshedData = await loadFinancialData();
-      if (refreshedData) {
-        console.log('Dados atualizados:', refreshedData);
+      if (refreshedData && Object.keys(refreshedData).length > 0) {
+        console.log('Dados sincronizados:', refreshedData);
         setFinancialData(refreshedData);
       }
-    }, 1000);
+    } catch (error) {
+      console.error('Erro ao sincronizar dados:', error);
+    }
   };
 
   const resetExperience = async () => {
     console.log('Resetting financial experience');
-    const deleted = await deleteFinancialData();
-    if (deleted) {
-      setFinancialData(null);
-      setHasCompletedChat(false);
+    try {
+      const deleted = await deleteFinancialData();
+      if (deleted) {
+        setFinancialData(null);
+        setHasCompletedChat(false);
+        toast({
+          title: "Sucesso",
+          description: "Seus dados foram resetados com sucesso"
+        });
+      } else {
+        toast({
+          title: "Erro",
+          description: "Não foi possível resetar os dados",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao resetar dados:', error);
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao resetar os dados",
+        variant: "destructive"
+      });
     }
   };
 
@@ -119,7 +154,7 @@ const Financas = () => {
           )}
 
           {/* Welcome back card for returning users */}
-          {hasCompletedChat && (
+          {hasCompletedChat && financialData && (
             <Card className="mb-6 sm:mb-8 bg-gradient-to-r from-blue-500 to-green-600 text-white border-0">
               <CardHeader className="pb-4 sm:pb-6">
                 <CardTitle className="text-lg sm:text-xl lg:text-2xl">Bem-vindo de volta! 🎉</CardTitle>

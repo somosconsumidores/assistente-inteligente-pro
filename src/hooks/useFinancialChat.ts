@@ -102,7 +102,7 @@ const chatSteps: ChatStep[] = [
       'Educação/Cursos',
       'Investir mais'
     ],
-    formatValue: (value) => Array.isArray(value) ? value : [value]
+    formatValue: (value) => Array.isArray(value) ? value : value.split(', ').filter(Boolean)
   }
 ];
 
@@ -130,15 +130,22 @@ export const useFinancialChat = () => {
     const loadExistingData = async () => {
       if (hasLoadedData) return;
       
-      const existingData = await loadFinancialData();
-      if (existingData) {
-        setFinancialData(existingData);
-        setIsCompleted(true);
-        setCurrentStep(chatSteps.length);
-        setHasLoadedData(true);
-        setHasNotifiedCompletion(true);
-        addMessage('Bem-vindo de volta! Encontrei seus dados financeiros salvos. Você pode visualizar seu dashboard ou conversar comigo novamente para atualizar suas informações.', 'bot');
-      } else {
+      try {
+        const existingData = await loadFinancialData();
+        if (existingData && Object.keys(existingData).length > 0) {
+          console.log('Dados financeiros encontrados:', existingData);
+          setFinancialData(existingData);
+          setIsCompleted(true);
+          setCurrentStep(chatSteps.length);
+          setHasLoadedData(true);
+          setHasNotifiedCompletion(true);
+          addMessage('Bem-vindo de volta! Encontrei seus dados financeiros salvos. Você pode visualizar seu dashboard ou conversar comigo novamente para atualizar suas informações.', 'bot');
+        } else {
+          console.log('Nenhum dado financeiro encontrado, iniciando novo chat');
+          setHasLoadedData(true);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error);
         setHasLoadedData(true);
       }
     };
@@ -159,7 +166,14 @@ export const useFinancialChat = () => {
     let processedValue: any = userInput;
 
     if (step.formatValue) {
-      processedValue = step.formatValue(userInput);
+      try {
+        processedValue = step.formatValue(userInput);
+      } catch (error) {
+        console.error('Erro ao processar valor:', error);
+        addMessage('Por favor, insira um valor válido. Tente novamente! 😊', 'bot');
+        setIsLoading(false);
+        return;
+      }
     }
 
     if (step.validation && !step.validation(processedValue)) {
@@ -174,6 +188,7 @@ export const useFinancialChat = () => {
       [step.field]: processedValue
     };
     setFinancialData(updatedData);
+    console.log('Dados atualizados:', updatedData);
 
     // Próximo passo
     const nextStep = currentStep + 1;
@@ -188,19 +203,20 @@ export const useFinancialChat = () => {
         categoriaGastos: {} // Default empty object
       } as FinancialData;
 
-      console.log('Salvando dados financeiros:', completeData);
+      console.log('Finalizando chat com dados:', completeData);
       
       try {
         const saved = await saveFinancialData(completeData);
         if (saved) {
-          console.log('Dados salvos com sucesso!');
+          console.log('Dados salvos com sucesso no banco!');
+          setFinancialData(completeData);
           addMessage('Perfeito! 🎉 Analisei todos os seus dados e salvei suas informações. Agora vou gerar seu dashboard personalizado com insights sobre sua situação financeira!', 'bot');
         } else {
-          console.error('Erro ao salvar dados');
+          console.error('Falha ao salvar no banco de dados');
           addMessage('Perfeito! 🎉 Analisei todos os seus dados. Agora vou gerar seu dashboard personalizado com insights sobre sua situação financeira!', 'bot');
         }
       } catch (error) {
-        console.error('Erro ao salvar dados:', error);
+        console.error('Erro crítico ao salvar dados:', error);
         addMessage('Perfeito! 🎉 Analisei todos os seus dados. Agora vou gerar seu dashboard personalizado com insights sobre sua situação financeira!', 'bot');
       }
       
@@ -215,6 +231,7 @@ export const useFinancialChat = () => {
     
     // Reset only if not already completed
     if (!isCompleted) {
+      console.log('Iniciando novo chat financeiro');
       setMessages([]);
       setCurrentStep(0);
       setFinancialData({});
@@ -225,6 +242,7 @@ export const useFinancialChat = () => {
   }, [addMessage, hasLoadedData, isCompleted]);
 
   const resetChat = useCallback(() => {
+    console.log('Resetando chat financeiro');
     setMessages([]);
     setCurrentStep(0);
     setFinancialData({});

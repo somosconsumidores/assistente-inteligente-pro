@@ -1,6 +1,8 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import SubscriptionButton from '@/components/SubscriptionButton';
 import { Scale, DollarSign, ShoppingCart, Plane, ShoppingBasket, Lock, Crown, CheckCircle, LayoutDashboard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -116,7 +118,7 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade, se
         {assistants.map((assistant) => {
           const IconComponent = assistant.icon;
           
-          // Lógica para determinar o estado do card
+          // Lógica para determinar o estado do card baseado no plano e assistente selecionado
           let isLocked = false;
           let isSelected = false;
           let cardActionText = "Usar Assistente";

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDashboardData } from '@/hooks/useDashboardData';
@@ -13,10 +14,9 @@ import AssistantCards from '@/components/AssistantCards';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useNavigate } from 'react-router-dom';
 import { LayoutDashboard } from 'lucide-react';
+
 const Dashboard: React.FC = () => {
-  const {
-    profile
-  } = useAuth();
+  const { profile } = useAuth();
   const navigate = useNavigate();
   const {
     petitions,
@@ -26,25 +26,27 @@ const Dashboard: React.FC = () => {
     isLoading,
     refetch
   } = useDashboardData();
-  const handleUpgrade = () => {
-    console.log('Upgrade para premium');
-  };
+
   if (isLoading) {
-    return <DashboardLayout>
+    return (
+      <DashboardLayout>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center gap-4 mb-8">
             <Skeleton className="h-8 w-8" />
             <Skeleton className="h-8 w-48" />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({
-            length: 6
-          }).map((_, i) => <Skeleton key={i} className="h-64" />)}
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-64" />
+            ))}
           </div>
         </div>
-      </DashboardLayout>;
+      </DashboardLayout>
+    );
   }
-  return <DashboardLayout>
+
+  return (
+    <DashboardLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-zinc-800">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -67,28 +69,46 @@ const Dashboard: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Coluna 1 - Informações do usuário e assistente */}
           <div className="space-y-6">
-            <UserPlanCard userPlan={profile?.plan || 'free'} selectedAssistant={profile?.selected_assistant_id} onUpgrade={handleUpgrade} />
+            <UserPlanCard 
+              userPlan={profile?.plan || 'free'} 
+              selectedAssistant={profile?.selected_assistant_id} 
+            />
             
             <SelectedAssistantCard selectedAssistantId={profile?.selected_assistant_id} />
           </div>
 
           {/* Coluna 2 - Petições e Recomendações */}
           <div className="space-y-6">
-            <SavedPetitionsCard petitions={petitions} onViewAll={() => navigate('/peticoes-salvas')} />
+            <SavedPetitionsCard 
+              petitions={petitions} 
+              onViewAll={() => navigate('/peticoes-salvas')} 
+            />
             
-            <SavedRecommendationsCard recommendations={productRecommendations} onViewAll={() => navigate('/recomendacoes-salvas')} onUpdate={refetch} />
+            <SavedRecommendationsCard 
+              recommendations={productRecommendations} 
+              onViewAll={() => navigate('/recomendacoes-salvas')} 
+              onUpdate={refetch} 
+            />
           </div>
 
           {/* Coluna 3 - Finanças e Viagens */}
           <div className="space-y-6">
-            <FinancialSummaryCard financialData={financialData} onViewDashboard={() => navigate('/financas')} />
+            <FinancialSummaryCard 
+              financialData={financialData} 
+              onViewDashboard={() => navigate('/financas')} 
+            />
             
-            <RecentTravelCard travelPlans={savedItineraries} onViewAll={() => {
-            navigate('/viagens?tab=saved');
-          }} />
+            <RecentTravelCard 
+              travelPlans={savedItineraries} 
+              onViewAll={() => {
+                navigate('/viagens?tab=saved');
+              }} 
+            />
           </div>
         </div>
       </div>
-    </DashboardLayout>;
+    </DashboardLayout>
+  );
 };
+
 export default Dashboard;

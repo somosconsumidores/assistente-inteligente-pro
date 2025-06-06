@@ -4,16 +4,21 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Crown } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useSubscription } from '@/hooks/useSubscription';
 import AssistantPanel from '@/components/AssistantPanel';
 
 const SelectAssistant = () => {
   const { profile, updateSelectedAssistant } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { createCheckout } = useSubscription();
 
-  const handleUpgrade = () => {
-    // Aqui seria a lógica para upgrade do plano
-    console.log('Redirect to upgrade page');
+  const handleUpgrade = async () => {
+    try {
+      await createCheckout();
+    } catch (error) {
+      console.error('Error during upgrade:', error);
+    }
   };
 
   const handleSelectAssistant = async (assistantId: string) => {
@@ -69,8 +74,6 @@ const SelectAssistant = () => {
                 descriptionText = 'Como usuário premium, você tem acesso completo a todos os 5 assistentes especializados!';
               } else if (profile?.selected_assistant_id) {
                 descriptionText = 'Você já selecionou seu assistente gratuito. Utilize-o abaixo ou faça upgrade para ter acesso a todos!';
-                // TODO: Potentially display the name of the selected assistant if easily available.
-                // For now, this generic message is fine.
               } else {
                 descriptionText = 'No plano gratuito, você tem direito a escolher UM assistente especializado. Faça sua escolha abaixo.';
               }

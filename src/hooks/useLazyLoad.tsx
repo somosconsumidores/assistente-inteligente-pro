@@ -16,7 +16,7 @@ export function useLazyLoad(options: LazyLoadOptions = {}) {
 
   const [isIntersecting, setIsIntersecting] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
-  const ref = useRef<HTMLElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
 
   const load = useCallback(() => {
     setHasLoaded(true);

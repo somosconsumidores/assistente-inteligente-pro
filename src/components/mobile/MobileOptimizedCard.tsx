@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 
 interface MobileOptimizedCardProps {
   title?: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   isLoading?: boolean;
   className?: string;
   headerAction?: React.ReactNode;

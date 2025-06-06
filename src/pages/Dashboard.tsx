@@ -34,7 +34,7 @@ const Dashboard: React.FC = () => {
   if (isLoading) {
     return (
       <DashboardLayout>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-background">
           <div className="flex items-center gap-4 mb-8">
             <Skeleton className="h-8 w-8" />
             <Skeleton className="h-8 w-48" />
@@ -55,19 +55,19 @@ const Dashboard: React.FC = () => {
 
   return (
     <DashboardLayout onRefresh={refetch} enablePullToRefresh={true}>
-      <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-zinc-800 ${isMobile ? 'mobile-safe-area' : ''}`}>
+      <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-background text-foreground ${isMobile ? 'mobile-safe-area' : ''}`}>
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg">
-                <LayoutDashboard className="w-6 h-6 text-white" />
+              <div className="p-2 bg-primary rounded-lg">
+                <LayoutDashboard className="w-6 h-6 text-primary-foreground" />
               </div>
               <div>
-                <h1 className={`font-bold text-slate-50 ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
+                <h1 className={`font-bold text-foreground ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
                   Meu Painel
                 </h1>
-                <p className={`text-slate-50 ${isMobile ? 'text-sm' : ''}`}>
+                <p className={`text-muted-foreground ${isMobile ? 'text-sm' : ''}`}>
                   Bem-vindo, {profile?.name || 'Usuário'}! Aqui está o resumo das suas atividades.
                 </p>
               </div>

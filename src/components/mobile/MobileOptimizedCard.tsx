@@ -27,7 +27,7 @@ export function MobileOptimizedCard({
   if (isLoading) {
     return (
       <Card className={cn(
-        'border-gray-700 bg-gray-800/50',
+        'border bg-card text-card-foreground',
         isMobile && 'mx-2 rounded-xl',
         className
       )}>
@@ -47,10 +47,10 @@ export function MobileOptimizedCard({
 
   return (
     <Card className={cn(
-      'border-gray-700 bg-gray-800/50 transition-all duration-200',
+      'border bg-card text-card-foreground transition-all duration-200',
       isMobile && [
         'mx-2 rounded-xl shadow-lg',
-        'hover:shadow-xl hover:bg-gray-800/60'
+        'hover:shadow-xl hover:bg-card/80'
       ],
       !isMobile && 'hover:shadow-md',
       className
@@ -61,7 +61,7 @@ export function MobileOptimizedCard({
           isMobile && compact ? 'pb-2 px-4 pt-4' : 'pb-3'
         )}>
           <CardTitle className={cn(
-            'text-slate-50',
+            'text-card-foreground',
             isMobile ? 'text-lg' : 'text-xl'
           )}>
             {title}

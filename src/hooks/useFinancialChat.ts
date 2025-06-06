@@ -188,12 +188,22 @@ export const useFinancialChat = () => {
         categoriaGastos: {} // Default empty object
       } as FinancialData;
 
-      const saved = await saveFinancialData(completeData);
-      if (saved) {
-        addMessage('Perfeito! 🎉 Analisei todos os seus dados e salvei suas informações. Agora vou gerar seu dashboard personalizado com insights sobre sua situação financeira!', 'bot');
-      } else {
+      console.log('Salvando dados financeiros:', completeData);
+      
+      try {
+        const saved = await saveFinancialData(completeData);
+        if (saved) {
+          console.log('Dados salvos com sucesso!');
+          addMessage('Perfeito! 🎉 Analisei todos os seus dados e salvei suas informações. Agora vou gerar seu dashboard personalizado com insights sobre sua situação financeira!', 'bot');
+        } else {
+          console.error('Erro ao salvar dados');
+          addMessage('Perfeito! 🎉 Analisei todos os seus dados. Agora vou gerar seu dashboard personalizado com insights sobre sua situação financeira!', 'bot');
+        }
+      } catch (error) {
+        console.error('Erro ao salvar dados:', error);
         addMessage('Perfeito! 🎉 Analisei todos os seus dados. Agora vou gerar seu dashboard personalizado com insights sobre sua situação financeira!', 'bot');
       }
+      
       setIsCompleted(true);
     }
 

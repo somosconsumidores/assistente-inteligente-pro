@@ -36,11 +36,14 @@ const FinancialChat: React.FC<FinancialChatProps> = ({ onComplete }) => {
     });
   }, [messages]);
 
-  // Only call onComplete once when chat is completed and we haven't notified yet
+  // Call onComplete when chat is completed and we have valid data
   useEffect(() => {
-    if (isCompleted && financialData && !hasNotifiedCompletion) {
+    if (isCompleted && financialData && Object.keys(financialData).length > 0 && !hasNotifiedCompletion) {
       console.log('Chat completed with data:', financialData);
-      onComplete(financialData);
+      // Add a small delay to ensure the completion message is shown
+      setTimeout(() => {
+        onComplete(financialData);
+      }, 2000);
     }
   }, [isCompleted, financialData, onComplete, hasNotifiedCompletion]);
 

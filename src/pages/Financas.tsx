@@ -24,8 +24,10 @@ const Financas = () => {
   // Load existing data on component mount
   useEffect(() => {
     const loadExistingData = async () => {
+      setIsLoadingData(true);
       const existingData = await loadFinancialData();
       if (existingData) {
+        console.log('Dados financeiros carregados:', existingData);
         setFinancialData(existingData);
         setHasCompletedChat(true);
       }
@@ -39,13 +41,24 @@ const Financas = () => {
     console.log('Chat completed with data:', data);
     setFinancialData(data);
     setHasCompletedChat(true);
+    
+    // Force reload data from database to ensure sync
+    setTimeout(async () => {
+      const refreshedData = await loadFinancialData();
+      if (refreshedData) {
+        console.log('Dados atualizados:', refreshedData);
+        setFinancialData(refreshedData);
+      }
+    }, 1000);
   };
 
   const resetExperience = async () => {
     console.log('Resetting financial experience');
-    await deleteFinancialData();
-    setFinancialData(null);
-    setHasCompletedChat(false);
+    const deleted = await deleteFinancialData();
+    if (deleted) {
+      setFinancialData(null);
+      setHasCompletedChat(false);
+    }
   };
 
   if (isLoadingData) {
@@ -119,7 +132,7 @@ const Financas = () => {
           )}
 
           {/* Content */}
-          {hasCompletedChat ? (
+          {hasCompletedChat && financialData ? (
             <Tabs defaultValue="dashboard" className="w-full">
               <TabsList className="grid w-full grid-cols-3 bg-gray-800/50 backdrop-blur-sm border border-gray-700 mb-6 h-12">
                 <TabsTrigger 
@@ -146,23 +159,11 @@ const Financas = () => {
               </TabsList>
 
               <TabsContent value="dashboard" className="mt-0 focus-visible:outline-none">
-                {financialData ? (
-                  <FinancialDashboard data={financialData} />
-                ) : (
-                  <div className="text-center py-8">
-                    <p className="text-slate-400">Carregando dados do dashboard...</p>
-                  </div>
-                )}
+                <FinancialDashboard data={financialData} />
               </TabsContent>
 
               <TabsContent value="insights" className="mt-0 focus-visible:outline-none">
-                {financialData ? (
-                  <FinancialInsights data={financialData} />
-                ) : (
-                  <div className="text-center py-8">
-                    <p className="text-slate-400">Carregando análises...</p>
-                  </div>
-                )}
+                <FinancialInsights data={financialData} />
               </TabsContent>
 
               <TabsContent value="advisor" className="mt-0 focus-visible:outline-none">

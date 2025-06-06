@@ -30,7 +30,7 @@ const SocialProof = () => {
 
   const stats = [
     { value: "1,000+", label: "Usuários Ativos", icon: Users },
-    { value: "50,000+", label: "Consultas Realizadas", icon: MessageCircle },
+    { value: "5,000+", label: "Consultas Realizadas", icon: MessageCircle },
     { value: "4.9/5", label: "Avaliação Média", icon: Star },
     { value: "98%", label: "Satisfação", icon: ThumbsUp }
   ];

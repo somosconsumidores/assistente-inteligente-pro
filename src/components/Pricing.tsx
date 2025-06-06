@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,7 +18,7 @@ const Pricing = () => {
     popular: false
   }, {
     name: 'Premium',
-    price: 'R$ 29,90',
+    price: 'R$ 9,90',
     period: '/mês',
     description: 'Acesso completo a todos os assistentes',
     icon: Crown,

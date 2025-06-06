@@ -3,10 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart3, Lightbulb, RefreshCw, MessageCircle } from 'lucide-react';
+import { BarChart3, Lightbulb, RefreshCw, Calculator } from 'lucide-react';
 import FinancialChat from '@/components/FinancialChat';
 import FinancialDashboard from '@/components/FinancialDashboard';
 import FinancialInsights from '@/components/FinancialInsights';
+import FinancialAdvisorChat from '@/components/FinancialAdvisorChat';
 import { FinancialData } from '@/hooks/useFinancialChat';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -110,8 +111,8 @@ const Financas = () => {
               <CardHeader className="pb-4 sm:pb-6">
                 <CardTitle className="text-lg sm:text-xl lg:text-2xl">Bem-vindo de volta! 🎉</CardTitle>
                 <CardDescription className="text-white/90 text-sm sm:text-base">
-                  Seus dados financeiros estão salvos e seguros. Visualize seu dashboard atualizado e continue
-                  acompanhando seu progresso financeiro.
+                  Seus dados financeiros estão salvos e seguros. Visualize seu dashboard, análises detalhadas
+                  ou converse com seu consultor financeiro IA para receber conselhos personalizados.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -136,11 +137,11 @@ const Financas = () => {
                   <span className="hidden sm:inline">Análises</span>
                 </TabsTrigger>
                 <TabsTrigger 
-                  value="chat" 
+                  value="advisor" 
                   className="data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200 flex items-center justify-center gap-2"
                 >
-                  <MessageCircle className="w-4 h-4" />
-                  <span className="hidden sm:inline">Conversar</span>
+                  <Calculator className="w-4 h-4" />
+                  <span className="hidden sm:inline">Consultor Financeiro</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -164,8 +165,8 @@ const Financas = () => {
                 )}
               </TabsContent>
 
-              <TabsContent value="chat" className="mt-0 focus-visible:outline-none">
-                <FinancialChat onComplete={handleChatComplete} />
+              <TabsContent value="advisor" className="mt-0 focus-visible:outline-none">
+                <FinancialAdvisorChat />
               </TabsContent>
             </Tabs>
           ) : (

@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import SubscriptionButton from '@/components/SubscriptionButton';
 import { Scale, DollarSign, ShoppingCart, Plane, ShoppingBasket, Lock, Crown, CheckCircle, LayoutDashboard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAssistantAccess } from '@/hooks/useAssistantAccess';
 
 interface AssistantPanelProps {
   userPlan: 'free' | 'premium';
@@ -15,6 +15,7 @@ interface AssistantPanelProps {
 
 const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade, selectedAssistantId, onSelectAssistant }) => {
   const navigate = useNavigate();
+  const { checkAssistantAccess } = useAssistantAccess();
 
   const assistants = [
     {
@@ -75,8 +76,13 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade, se
   ];
 
   const handleAssistantClick = (assistant: typeof assistants[0]) => {
+    console.log('[AssistantPanel] Clicked on assistant:', assistant.id);
+    console.log('[AssistantPanel] User plan:', userPlan);
+    console.log('[AssistantPanel] Selected assistant:', selectedAssistantId);
+
     // Se é usuário premium, pode acessar qualquer assistente
     if (userPlan === 'premium') {
+      console.log('[AssistantPanel] Premium user, navigating to:', assistant.path);
       navigate(assistant.path);
       return;
     }
@@ -85,17 +91,21 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade, se
     if (userPlan === 'free') {
       // Se ainda não selecionou um assistente, pode escolher qualquer um
       if (!selectedAssistantId && onSelectAssistant) {
+        console.log('[AssistantPanel] Free user selecting first assistant:', assistant.id);
         onSelectAssistant(assistant.id);
         return;
       }
       
-      // Se já selecionou um assistente, só pode acessar o selecionado
-      if (selectedAssistantId === assistant.id) {
+      // Se já selecionou um assistente, verifica se tem acesso
+      const hasAccess = checkAssistantAccess(assistant.id);
+      if (hasAccess) {
+        console.log('[AssistantPanel] Free user has access, navigating to:', assistant.path);
         navigate(assistant.path);
         return;
       }
       
       // Se clicou em um assistente diferente do selecionado, não faz nada (está bloqueado)
+      console.log('[AssistantPanel] Free user access denied for assistant:', assistant.id);
       return;
     }
   };

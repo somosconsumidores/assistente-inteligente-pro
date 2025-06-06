@@ -7,21 +7,40 @@ export const useAssistantAccess = () => {
   const { toast } = useToast();
 
   const checkAssistantAccess = (assistantId: string): boolean => {
+    console.log('[useAssistantAccess] Checking access for assistant:', assistantId);
+    console.log('[useAssistantAccess] User profile:', profile);
+
     // Se não tem profile carregado ainda
-    if (!profile) return false;
+    if (!profile) {
+      console.log('[useAssistantAccess] No profile loaded, denying access');
+      return false;
+    }
 
     // Usuários premium têm acesso a tudo
-    if (profile.plan === 'premium') return true;
+    if (profile.plan === 'premium') {
+      console.log('[useAssistantAccess] Premium user, granting access');
+      return true;
+    }
 
     // Usuários gratuitos só têm acesso ao assistente selecionado
     if (profile.plan === 'free') {
-      // Se ainda não selecionou um assistente, pode acessar qualquer um para escolher
-      if (!profile.selected_assistant_id) return true;
+      // Se ainda não selecionou um assistente, NÃO tem acesso
+      if (!profile.selected_assistant_id) {
+        console.log('[useAssistantAccess] Free user without selected assistant, denying access');
+        return false;
+      }
       
       // Se já selecionou, só pode acessar o selecionado
-      return profile.selected_assistant_id === assistantId;
+      const hasAccess = profile.selected_assistant_id === assistantId;
+      console.log('[useAssistantAccess] Free user access check:', {
+        selectedAssistant: profile.selected_assistant_id,
+        requestedAssistant: assistantId,
+        hasAccess
+      });
+      return hasAccess;
     }
 
+    console.log('[useAssistantAccess] Unknown plan, denying access');
     return false;
   };
 
@@ -30,6 +49,14 @@ export const useAssistantAccess = () => {
       title: "Acesso Restrito",
       description: "Você já escolheu seu assistente gratuito. Faça upgrade para Premium para acessar todos os assistentes.",
       variant: "destructive"
+    });
+  };
+
+  const handleNoAssistantSelected = () => {
+    toast({
+      title: "Escolha seu Assistente",
+      description: "Primeiro você precisa escolher um assistente na página de seleção.",
+      variant: "default"
     });
   };
 
@@ -44,6 +71,7 @@ export const useAssistantAccess = () => {
   return {
     checkAssistantAccess,
     handleBlockedAccess,
+    handleNoAssistantSelected,
     isAssistantSelected,
     hasSelectedAssistant,
     userPlan: profile?.plan || 'free',

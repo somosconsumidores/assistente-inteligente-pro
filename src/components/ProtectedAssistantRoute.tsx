@@ -18,15 +18,38 @@ const ProtectedAssistantRoute: React.FC<ProtectedAssistantRouteProps> = ({
 }) => {
   const navigate = useNavigate();
   const { profile, isLoading } = useAuth();
-  const { checkAssistantAccess, handleBlockedAccess } = useAssistantAccess();
+  const { 
+    checkAssistantAccess, 
+    handleBlockedAccess, 
+    handleNoAssistantSelected,
+    hasSelectedAssistant 
+  } = useAssistantAccess();
 
   useEffect(() => {
+    console.log('[ProtectedAssistantRoute] Effect triggered', {
+      assistantId,
+      isLoading,
+      profile: profile ? {
+        plan: profile.plan,
+        selectedAssistant: profile.selected_assistant_id
+      } : null
+    });
+
     // Aguarda o carregamento do profile
     if (isLoading) return;
 
     // Se não tem profile (não logado), redireciona para login
     if (!profile) {
+      console.log('[ProtectedAssistantRoute] No profile, redirecting to login');
       navigate('/login');
+      return;
+    }
+
+    // Se é usuário gratuito e ainda não selecionou assistente
+    if (profile.plan === 'free' && !hasSelectedAssistant()) {
+      console.log('[ProtectedAssistantRoute] Free user without selected assistant, redirecting to select-assistant');
+      handleNoAssistantSelected();
+      navigate('/select-assistant');
       return;
     }
 
@@ -34,11 +57,14 @@ const ProtectedAssistantRoute: React.FC<ProtectedAssistantRouteProps> = ({
     const hasAccess = checkAssistantAccess(assistantId);
     
     if (!hasAccess) {
+      console.log('[ProtectedAssistantRoute] Access denied, showing blocked message and redirecting');
       handleBlockedAccess();
       navigate('/select-assistant');
       return;
     }
-  }, [profile, isLoading, assistantId, navigate, checkAssistantAccess, handleBlockedAccess]);
+
+    console.log('[ProtectedAssistantRoute] Access granted for assistant:', assistantId);
+  }, [profile, isLoading, assistantId, navigate, checkAssistantAccess, handleBlockedAccess, handleNoAssistantSelected, hasSelectedAssistant]);
 
   // Mostra loading enquanto verifica permissões
   if (isLoading || !profile) {
@@ -56,7 +82,8 @@ const ProtectedAssistantRoute: React.FC<ProtectedAssistantRouteProps> = ({
   // Verifica novamente se tem acesso (dupla verificação)
   const hasAccess = checkAssistantAccess(assistantId);
   if (!hasAccess) {
-    return null; // Ou um componente de acesso negado
+    console.log('[ProtectedAssistantRoute] Final access check failed, returning null');
+    return null;
   }
 
   return <>{children}</>;

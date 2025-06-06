@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import { Toaster as ShadcnToaster } from '@/components/ui/toaster';
 import { ThemeProvider } from "./components/ThemeProvider"
+import ProtectedAssistantRoute from './components/ProtectedAssistantRoute';
 
 import Home from './pages/Index';
 import Login from './pages/Login';
@@ -48,17 +49,23 @@ function App() {
               } />
               <Route path="/direito-consumidor" element={
                 <ProtectedRoute>
-                  <ConsumerLaw />
+                  <ProtectedAssistantRoute assistantId="direito" assistantName="Mestre do Direito do Consumidor">
+                    <ConsumerLaw />
+                  </ProtectedAssistantRoute>
                 </ProtectedRoute>
               } />
               <Route path="/produtos" element={
                 <ProtectedRoute>
-                  <Produtos />
+                  <ProtectedAssistantRoute assistantId="produtos" assistantName="Mestre dos Produtos">
+                    <Produtos />
+                  </ProtectedAssistantRoute>
                 </ProtectedRoute>
               } />
               <Route path="/supermercado" element={
                 <ProtectedRoute>
-                  <Supermercado />
+                  <ProtectedAssistantRoute assistantId="supermercado" assistantName="Mestre do Supermercado">
+                    <Supermercado />
+                  </ProtectedAssistantRoute>
                 </ProtectedRoute>
               } />
               <Route path="/recomendacoes-salvas" element={
@@ -68,12 +75,16 @@ function App() {
               } />
               <Route path="/financas" element={
                 <ProtectedRoute>
-                  <Finances />
+                  <ProtectedAssistantRoute assistantId="financas" assistantName="Mestre das Finanças">
+                    <Finances />
+                  </ProtectedAssistantRoute>
                 </ProtectedRoute>
               } />
               <Route path="/viagens" element={
                 <ProtectedRoute>
-                  <Travel />
+                  <ProtectedAssistantRoute assistantId="viagens" assistantName="Mestre das Viagens">
+                    <Travel />
+                  </ProtectedAssistantRoute>
                 </ProtectedRoute>
               } />
               <Route path="/assistentes" element={

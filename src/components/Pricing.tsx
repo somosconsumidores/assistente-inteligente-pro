@@ -73,19 +73,19 @@ const Pricing = () => {
                   plan.popular 
                     ? 'ring-2 ring-blue-500/50 hover:ring-blue-400/70 hover:shadow-2xl hover:shadow-blue-500/20' 
                     : 'hover:shadow-xl'
-                } hover:-translate-y-1`}
+                } hover:-translate-y-1 ${plan.popular ? 'mt-6' : ''}`}
               >
                 {/* Popular Badge */}
                 {plan.popular && (
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                    <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-1.5 text-xs font-semibold">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                    <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-1.5 text-xs font-semibold shadow-lg">
                       <Zap className="w-3 h-3 mr-1" />
                       Mais Popular
                     </Badge>
                   </div>
                 )}
 
-                <CardHeader className="p-6 sm:p-8 text-center">
+                <CardHeader className={`p-6 sm:p-8 text-center ${plan.popular ? 'pt-8 sm:pt-10' : ''}`}>
                   <div className={`w-12 h-12 sm:w-16 sm:h-16 mx-auto rounded-2xl bg-gradient-to-br ${plan.gradient} flex items-center justify-center mb-4 sm:mb-6`}>
                     <Icon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                   </div>

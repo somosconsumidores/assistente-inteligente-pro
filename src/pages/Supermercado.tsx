@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +9,6 @@ import { toast } from 'sonner';
 import ProductComparison from '@/components/ProductComparison';
 import { useProductSearch } from '@/hooks/useProductSearch';
 import { useIsMobile } from '@/hooks/use-mobile';
-
 const Supermercado = () => {
   const [activeTab, setActiveTab] = useState('scanner');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -28,7 +26,6 @@ const Supermercado = () => {
     searchProducts,
     clearSearch
   } = useProductSearch();
-
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -38,7 +35,6 @@ const Supermercado = () => {
       setAnalysis(null);
     }
   };
-
   const analyzeProduct = async () => {
     if (!selectedFile) {
       toast.error('Por favor, selecione uma foto primeiro');
@@ -48,23 +44,24 @@ const Supermercado = () => {
     try {
       // Convert file to base64
       const reader = new FileReader();
-      reader.onload = async (e) => {
+      reader.onload = async e => {
         const base64Image = e.target?.result as string;
 
         // Call the edge function to analyze the product
-        const { data, error } = await supabase.functions.invoke('analyze-product', {
+        const {
+          data,
+          error
+        } = await supabase.functions.invoke('analyze-product', {
           body: {
             image: base64Image,
             type: 'barcode_analysis'
           }
         });
-
         if (error) {
           console.error('Error analyzing product:', error);
           toast.error('Erro ao analisar produto');
           return;
         }
-
         setAnalysis(data);
         toast.success('Produto analisado com sucesso!');
       };
@@ -76,20 +73,16 @@ const Supermercado = () => {
       setIsAnalyzing(false);
     }
   };
-
   const clearAnalysis = () => {
     setSelectedFile(null);
     setPreviewUrl(null);
     setAnalysis(null);
   };
-
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     await searchProducts(searchQuery);
   };
-
-  return (
-    <DashboardLayout>
+  return <DashboardLayout>
       <div className="min-h-screen bg-gray-900">
         {/* Mobile-optimized content wrapper */}
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 safe-area-bottom">
@@ -110,35 +103,22 @@ const Supermercado = () => {
 
           {/* Mobile-optimized Navigation Tabs */}
           <div className={`flex ${isMobile ? 'flex-wrap gap-2' : 'space-x-4'} mb-6 sm:mb-8`}>
-            <Button 
-              variant={activeTab === 'scanner' ? 'default' : 'outline'} 
-              onClick={() => setActiveTab('scanner')} 
-              className={`flex items-center space-x-2 ${isMobile ? 'h-10 text-xs px-3' : 'h-10 sm:h-auto'}`}
-            >
+            <Button variant={activeTab === 'scanner' ? 'default' : 'outline'} onClick={() => setActiveTab('scanner')} className={`flex items-center space-x-2 ${isMobile ? 'h-10 text-xs px-3' : 'h-10 sm:h-auto'}`}>
               <Camera className="w-4 h-4" />
               <span>Scanner</span>
             </Button>
-            <Button 
-              variant={activeTab === 'compare' ? 'default' : 'outline'} 
-              onClick={() => setActiveTab('compare')} 
-              className={`flex items-center space-x-2 ${isMobile ? 'h-10 text-xs px-3' : 'h-10 sm:h-auto'}`}
-            >
+            <Button variant={activeTab === 'compare' ? 'default' : 'outline'} onClick={() => setActiveTab('compare')} className={`flex items-center space-x-2 ${isMobile ? 'h-10 text-xs px-3' : 'h-10 sm:h-auto'}`}>
               <Zap className="w-4 h-4" />
               <span>Comparar</span>
             </Button>
-            <Button 
-              variant={activeTab === 'search' ? 'default' : 'outline'} 
-              onClick={() => setActiveTab('search')} 
-              className={`flex items-center space-x-2 ${isMobile ? 'h-10 text-xs px-3' : 'h-10 sm:h-auto'}`}
-            >
+            <Button variant={activeTab === 'search' ? 'default' : 'outline'} onClick={() => setActiveTab('search')} className={`flex items-center space-x-2 ${isMobile ? 'h-10 text-xs px-3' : 'h-10 sm:h-auto'}`}>
               <Search className="w-4 h-4" />
               <span>Buscar</span>
             </Button>
           </div>
 
           {/* Scanner Tab */}
-          {activeTab === 'scanner' && (
-            <div className="space-y-4 sm:space-y-6">
+          {activeTab === 'scanner' && <div className="space-y-4 sm:space-y-6">
               <Card className="border-gray-700 bg-gray-800/50">
                 <CardHeader>
                   <CardTitle className="text-lg sm:text-xl">Scanner de Produtos</CardTitle>
@@ -146,42 +126,23 @@ const Supermercado = () => {
                 </CardHeader>
                 <CardContent className="space-y-4 sm:space-y-6">
                   <div className="border-2 border-dashed border-gray-600 rounded-lg p-6 sm:p-8 text-center">
-                    {previewUrl ? (
-                      <div className="space-y-4">
-                        <img 
-                          src={previewUrl} 
-                          alt="Preview" 
-                          className="max-w-full max-h-48 sm:max-h-64 mx-auto rounded-lg shadow-md" 
-                        />
+                    {previewUrl ? <div className="space-y-4">
+                        <img src={previewUrl} alt="Preview" className="max-w-full max-h-48 sm:max-h-64 mx-auto rounded-lg shadow-md" />
                         <div className={`flex ${isMobile ? 'flex-col space-y-2' : 'space-x-4'} justify-center`}>
-                          <Button 
-                            onClick={analyzeProduct} 
-                            disabled={isAnalyzing}
-                            className="mobile-button mobile-button-primary"
-                          >
-                            {isAnalyzing ? (
-                              <>
+                          <Button onClick={analyzeProduct} disabled={isAnalyzing} className="mobile-button mobile-button-primary">
+                            {isAnalyzing ? <>
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                                 Analisando...
-                              </>
-                            ) : (
-                              <>
+                              </> : <>
                                 <Search className="w-4 h-4 mr-2" />
                                 Analisar Produto
-                              </>
-                            )}
+                              </>}
                           </Button>
-                          <Button 
-                            variant="outline" 
-                            onClick={clearAnalysis}
-                            className="mobile-button mobile-button-secondary"
-                          >
+                          <Button variant="outline" onClick={clearAnalysis} className="mobile-button mobile-button-secondary">
                             Nova Foto
                           </Button>
                         </div>
-                      </div>
-                    ) : (
-                      <>
+                      </div> : <>
                         <ImageIcon className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400 mx-auto mb-4" />
                         <h3 className="text-base sm:text-lg font-medium text-slate-50 mb-2">Selecione uma foto</h3>
                         <p className="text-slate-400 mb-4 text-sm">Envie uma foto do código de barras do produto</p>
@@ -191,24 +152,16 @@ const Supermercado = () => {
                               <Upload className="w-4 h-4" />
                               <span>Enviar da Galeria</span>
                             </div>
-                            <input 
-                              id="file-upload" 
-                              type="file" 
-                              accept="image/*" 
-                              onChange={handleFileSelect} 
-                              className="hidden" 
-                            />
+                            <input id="file-upload" type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
                           </label>
                         </div>
-                      </>
-                    )}
+                      </>}
                   </div>
                 </CardContent>
               </Card>
 
               {/* Analysis Results */}
-              {analysis && (
-                <Card className="bg-gradient-to-r from-emerald-900/40 to-green-900/40 border-emerald-700/50">
+              {analysis && <Card className="bg-gradient-to-r from-emerald-900/40 to-green-900/40 border-emerald-700/50">
                   <CardHeader>
                     <CardTitle className="text-emerald-400 flex items-center space-x-2 text-lg sm:text-xl">
                       <Star className="w-5 h-5" />
@@ -222,34 +175,25 @@ const Supermercado = () => {
                         <p className="text-emerald-200 text-xs sm:text-sm">{analysis.brand && `Marca: ${analysis.brand}`}</p>
                       </div>
                       
-                      {analysis.analysis && (
-                        <div className="bg-gray-800/50 p-3 sm:p-4 rounded-lg border border-emerald-700/30">
+                      {analysis.analysis && <div className="bg-gray-800/50 p-3 sm:p-4 rounded-lg border border-emerald-700/30">
                           <h5 className="font-medium text-emerald-300 mb-2 text-sm sm:text-base">💡 Análise Detalhada:</h5>
                           <p className="text-emerald-200 whitespace-pre-wrap text-xs sm:text-sm leading-relaxed">{analysis.analysis}</p>
-                        </div>
-                      )}
+                        </div>}
 
-                      {analysis.price && (
-                        <div className="bg-gray-800/50 p-3 sm:p-4 rounded-lg border border-emerald-700/30">
+                      {analysis.price && <div className="bg-gray-800/50 p-3 sm:p-4 rounded-lg border border-emerald-700/30">
                           <h5 className="font-medium text-emerald-300 mb-2 text-sm sm:text-base">💰 Preço Estimado:</h5>
                           <p className="text-lg sm:text-xl font-bold text-green-400">{analysis.price}</p>
-                        </div>
-                      )}
+                        </div>}
 
-                      {analysis.recommendations && (
-                        <div className="bg-gray-800/50 p-3 sm:p-4 rounded-lg border border-emerald-700/30">
+                      {analysis.recommendations && <div className="bg-gray-800/50 p-3 sm:p-4 rounded-lg border border-emerald-700/30">
                           <h5 className="font-medium text-emerald-300 mb-2 text-sm sm:text-base">⭐ Recomendações:</h5>
                           <div className="space-y-2">
-                            {analysis.recommendations.map((rec: string, index: number) => (
-                              <p key={index} className="text-emerald-200 text-xs sm:text-sm">✓ {rec}</p>
-                            ))}
+                            {analysis.recommendations.map((rec: string, index: number) => <p key={index} className="text-emerald-200 text-xs sm:text-sm">✓ {rec}</p>)}
                           </div>
-                        </div>
-                      )}
+                        </div>}
                     </div>
                   </CardContent>
-                </Card>
-              )}
+                </Card>}
 
               {/* How it works */}
               <Card className="border-gray-700 bg-gray-800/50">
@@ -282,15 +226,13 @@ const Supermercado = () => {
                   </div>
                 </CardContent>
               </Card>
-            </div>
-          )}
+            </div>}
 
           {/* Compare Tab */}
           {activeTab === 'compare' && <ProductComparison />}
 
           {/* Search Tab */}
-          {activeTab === 'search' && (
-            <div className="space-y-4 sm:space-y-6">
+          {activeTab === 'search' && <div className="space-y-4 sm:space-y-6">
               <Card className="border-gray-700 bg-gray-800/50">
                 <CardHeader>
                   <CardTitle className="text-lg sm:text-xl">Buscar Produtos com IA</CardTitle>
@@ -300,41 +242,24 @@ const Supermercado = () => {
                   <form onSubmit={handleSearch} className={`flex ${isMobile ? 'flex-col space-y-2' : 'space-x-2'}`}>
                     <div className="relative flex-1">
                       <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input 
-                        placeholder="Ex: molho de tomate, azeite, sabão em pó..." 
-                        className="pl-10 mobile-form-input" 
-                        value={searchQuery} 
-                        onChange={(e) => setSearchQuery(e.target.value)} 
-                        disabled={isSearching} 
-                      />
+                      <Input placeholder="Ex: molho de tomate, azeite, sabão em pó..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} disabled={isSearching} className="pl-10 mobile-form-input px-[60px]" />
                     </div>
-                    <Button 
-                      type="submit" 
-                      disabled={isSearching || !searchQuery.trim()}
-                      className="mobile-button mobile-button-primary"
-                    >
-                      {isSearching ? (
-                        <>
+                    <Button type="submit" disabled={isSearching || !searchQuery.trim()} className="mobile-button mobile-button-primary">
+                      {isSearching ? <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                           Buscando...
-                        </>
-                      ) : (
-                        'Buscar'
-                      )}
+                        </> : 'Buscar'}
                     </Button>
                   </form>
 
-                  {searchError && (
-                    <div className="bg-red-900/20 border border-red-700/50 rounded-lg p-3 mt-4">
+                  {searchError && <div className="bg-red-900/20 border border-red-700/50 rounded-lg p-3 mt-4">
                       <p className="text-red-400 text-sm">{searchError}</p>
-                    </div>
-                  )}
+                    </div>}
                 </CardContent>
               </Card>
 
               {/* Search Results */}
-              {searchResult && (
-                <Card className="border-gray-700 bg-gray-800/50">
+              {searchResult && <Card className="border-gray-700 bg-gray-800/50">
                   <CardHeader>
                     <CardTitle className="text-lg sm:text-xl">Recomendações: {searchResult.category}</CardTitle>
                     <CardDescription className="text-sm">3 opções categorizadas pela nossa IA</CardDescription>
@@ -356,16 +281,7 @@ const Supermercado = () => {
                         </div>
                         <div className="flex items-center space-x-2">
                           <div className="flex items-center">
-                            {[...Array(5)].map((_, i) => (
-                              <Star 
-                                key={i} 
-                                className={`w-3 h-3 sm:w-4 sm:h-4 ${
-                                  i < Math.floor(searchResult.products.cost_benefit.rating) 
-                                    ? 'text-yellow-400 fill-current' 
-                                    : 'text-gray-600'
-                                }`} 
-                              />
-                            ))}
+                            {[...Array(5)].map((_, i) => <Star key={i} className={`w-3 h-3 sm:w-4 sm:h-4 ${i < Math.floor(searchResult.products.cost_benefit.rating) ? 'text-yellow-400 fill-current' : 'text-gray-600'}`} />)}
                           </div>
                           <span className="text-xs sm:text-sm text-slate-400">{searchResult.products.cost_benefit.rating}/5</span>
                         </div>
@@ -388,16 +304,7 @@ const Supermercado = () => {
                         </div>
                         <div className="flex items-center space-x-2">
                           <div className="flex items-center">
-                            {[...Array(5)].map((_, i) => (
-                              <Star 
-                                key={i} 
-                                className={`w-3 h-3 sm:w-4 sm:h-4 ${
-                                  i < Math.floor(searchResult.products.best_quality.rating) 
-                                    ? 'text-yellow-400 fill-current' 
-                                    : 'text-gray-600'
-                                }`} 
-                              />
-                            ))}
+                            {[...Array(5)].map((_, i) => <Star key={i} className={`w-3 h-3 sm:w-4 sm:h-4 ${i < Math.floor(searchResult.products.best_quality.rating) ? 'text-yellow-400 fill-current' : 'text-gray-600'}`} />)}
                           </div>
                           <span className="text-xs sm:text-sm text-slate-400">{searchResult.products.best_quality.rating}/5</span>
                         </div>
@@ -420,16 +327,7 @@ const Supermercado = () => {
                         </div>
                         <div className="flex items-center space-x-2">
                           <div className="flex items-center">
-                            {[...Array(5)].map((_, i) => (
-                              <Star 
-                                key={i} 
-                                className={`w-3 h-3 sm:w-4 sm:h-4 ${
-                                  i < Math.floor(searchResult.products.premium.rating) 
-                                    ? 'text-yellow-400 fill-current' 
-                                    : 'text-gray-600'
-                                }`} 
-                              />
-                            ))}
+                            {[...Array(5)].map((_, i) => <Star key={i} className={`w-3 h-3 sm:w-4 sm:h-4 ${i < Math.floor(searchResult.products.premium.rating) ? 'text-yellow-400 fill-current' : 'text-gray-600'}`} />)}
                           </div>
                           <span className="text-xs sm:text-sm text-slate-400">{searchResult.products.premium.rating}/5</span>
                         </div>
@@ -452,20 +350,15 @@ const Supermercado = () => {
                     </Card>
 
                     <div className="flex justify-center mt-4">
-                      <Button 
-                        variant="outline" 
-                        onClick={() => {
-                          clearSearch();
-                          setSearchQuery('');
-                        }}
-                        className="mobile-button mobile-button-secondary"
-                      >
+                      <Button variant="outline" onClick={() => {
+                  clearSearch();
+                  setSearchQuery('');
+                }} className="mobile-button mobile-button-secondary">
                         Nova Busca
                       </Button>
                     </div>
                   </CardContent>
-                </Card>
-              )}
+                </Card>}
 
               {/* How it works */}
               <Card className="border-gray-700 bg-gray-800/50">
@@ -498,12 +391,9 @@ const Supermercado = () => {
                   </div>
                 </CardContent>
               </Card>
-            </div>
-          )}
+            </div>}
         </div>
       </div>
-    </DashboardLayout>
-  );
+    </DashboardLayout>;
 };
-
 export default Supermercado;

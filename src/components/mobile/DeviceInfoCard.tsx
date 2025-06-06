@@ -3,111 +3,95 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Smartphone, Monitor, Cpu, HardDrive } from 'lucide-react';
 import { useDeviceInfo } from '@/hooks/useDeviceInfo';
+import { useMobileDeviceInfo } from '@/hooks/use-mobile';
 import { Skeleton } from '@/components/ui/skeleton';
+import { MobileOptimizedCard } from './MobileOptimizedCard';
 
 export function DeviceInfoCard() {
   const { deviceInfo, isLoading } = useDeviceInfo();
+  const { isMobile, platform, isRetina, viewportWidth, viewportHeight } = useMobileDeviceInfo();
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Smartphone className="w-5 h-5" />
-            Informações do Dispositivo
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-3/4" />
-          <Skeleton className="h-4 w-1/2" />
-        </CardContent>
-      </Card>
+      <MobileOptimizedCard title="Informações do Dispositivo" compact>
+        <div className="space-y-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-4 w-full" />
+          ))}
+        </div>
+      </MobileOptimizedCard>
     );
   }
 
-  if (!deviceInfo) return null;
-
-  const formatBytes = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  const getDeviceIcon = () => {
+    if (isMobile) return <Smartphone className="w-5 h-5 text-blue-600" />;
+    return <Monitor className="w-5 h-5 text-green-600" />;
   };
 
+  const deviceData = [
+    {
+      label: 'Modelo',
+      value: deviceInfo?.model || 'Desconhecido',
+      icon: <Smartphone className="w-4 h-4" />
+    },
+    {
+      label: 'Sistema',
+      value: `${deviceInfo?.operatingSystem || 'Web'} ${deviceInfo?.osVersion || ''}`.trim(),
+      icon: <Cpu className="w-4 h-4" />
+    },
+    {
+      label: 'Plataforma',
+      value: platform.charAt(0).toUpperCase() + platform.slice(1),
+      icon: <Monitor className="w-4 h-4" />
+    },
+    {
+      label: 'Resolução',
+      value: `${viewportWidth}x${viewportHeight}${isRetina ? ' (Retina)' : ''}`,
+      icon: <HardDrive className="w-4 h-4" />
+    }
+  ];
+
+  if (deviceInfo?.manufacturer) {
+    deviceData.splice(1, 0, {
+      label: 'Fabricante',
+      value: deviceInfo.manufacturer,
+      icon: <Cpu className="w-4 h-4" />
+    });
+  }
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg">
-          {deviceInfo.isNative ? (
-            <Smartphone className="w-5 h-5 text-blue-600" />
-          ) : (
-            <Monitor className="w-5 h-5 text-green-600" />
-          )}
-          Informações do Dispositivo
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sm">
-              <Cpu className="w-4 h-4 text-gray-500" />
-              <span className="font-medium">Plataforma:</span>
-              <span className="text-gray-600">{deviceInfo.platform}</span>
+    <MobileOptimizedCard 
+      title="Informações do Dispositivo" 
+      headerAction={getDeviceIcon()}
+      compact
+    >
+      <div className="space-y-3">
+        {deviceData.map((item, index) => (
+          <div key={index} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              {item.icon}
+              <span>{item.label}</span>
             </div>
-            
-            <div className="flex items-center gap-2 text-sm">
-              <Smartphone className="w-4 h-4 text-gray-500" />
-              <span className="font-medium">Modelo:</span>
-              <span className="text-gray-600">{deviceInfo.model}</span>
-            </div>
-
-            {deviceInfo.manufacturer && (
-              <div className="flex items-center gap-2 text-sm">
-                <span className="font-medium">Fabricante:</span>
-                <span className="text-gray-600">{deviceInfo.manufacturer}</span>
-              </div>
-            )}
+            <span className="text-sm font-medium text-gray-900 text-right max-w-[150px] truncate">
+              {item.value}
+            </span>
           </div>
+        ))}
 
-          <div className="space-y-2">
-            {deviceInfo.osVersion && (
-              <div className="flex items-center gap-2 text-sm">
-                <span className="font-medium">OS Version:</span>
-                <span className="text-gray-600">{deviceInfo.osVersion}</span>
-              </div>
-            )}
-
-            {deviceInfo.isNative && deviceInfo.memUsed > 0 && (
-              <div className="flex items-center gap-2 text-sm">
-                <HardDrive className="w-4 h-4 text-gray-500" />
-                <span className="font-medium">Memória Usada:</span>
-                <span className="text-gray-600">{formatBytes(deviceInfo.memUsed)}</span>
-              </div>
-            )}
-
-            <div className="flex items-center gap-2 text-sm">
-              <span className="font-medium">Tipo:</span>
-              <span className={`px-2 py-1 rounded text-xs ${
-                deviceInfo.isNative 
-                  ? 'bg-blue-100 text-blue-800' 
-                  : 'bg-green-100 text-green-800'
-              }`}>
-                {deviceInfo.isNative ? 'App Nativo' : 'Web App'}
+        {deviceInfo?.isNative && (
+          <div className="mt-4 p-3 bg-green-50 rounded-lg">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span className="text-sm font-medium text-green-700">
+                Ambiente Nativo
               </span>
             </div>
-          </div>
-        </div>
-
-        {deviceInfo.isNative && (
-          <div className="pt-2 border-t border-gray-200">
-            <p className="text-xs text-gray-500">
-              Executando como aplicativo nativo com acesso total aos recursos do dispositivo
+            <p className="text-xs text-green-600 mt-1">
+              Todos os recursos nativos estão disponíveis
             </p>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </MobileOptimizedCard>
   );
 }

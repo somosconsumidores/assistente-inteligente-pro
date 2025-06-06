@@ -1,96 +1,110 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Camera, ImageIcon, Loader2 } from 'lucide-react';
+import { Camera, Image, Loader2 } from 'lucide-react';
 import { useNativeCamera, PhotoResult } from '@/hooks/useNativeCamera';
 import { useNativeHaptics } from '@/hooks/useNativeHaptics';
 import { useMobileDeviceInfo } from '@/hooks/use-mobile';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
 interface NativeCameraButtonProps {
   onPhotoTaken?: (photo: PhotoResult) => void;
-  className?: string;
   variant?: 'default' | 'outline' | 'ghost';
   size?: 'sm' | 'default' | 'lg';
+  className?: string;
 }
 
 export function NativeCameraButton({
   onPhotoTaken,
-  className,
-  variant = 'default',
-  size = 'default'
+  variant = 'outline',
+  size = 'sm',
+  className
 }: NativeCameraButtonProps) {
   const { takePhoto, selectFromGallery, isLoading } = useNativeCamera();
-  const { impact, success } = useNativeHaptics();
+  const { impact } = useNativeHaptics();
   const { isMobile } = useMobileDeviceInfo();
   const [isOpen, setIsOpen] = useState(false);
+  const [capturedPhoto, setCapturedPhoto] = useState<PhotoResult | null>(null);
 
   const handleTakePhoto = async () => {
-    await impact('light');
+    await impact('medium');
     const photo = await takePhoto();
-    if (photo && onPhotoTaken) {
-      onPhotoTaken(photo);
-      await success();
+    if (photo) {
+      setCapturedPhoto(photo);
+      onPhotoTaken?.(photo);
+      setIsOpen(false);
     }
-    setIsOpen(false);
   };
 
   const handleSelectFromGallery = async () => {
     await impact('light');
     const photo = await selectFromGallery();
-    if (photo && onPhotoTaken) {
-      onPhotoTaken(photo);
-      await success();
+    if (photo) {
+      setCapturedPhoto(photo);
+      onPhotoTaken?.(photo);
+      setIsOpen(false);
     }
-    setIsOpen(false);
   };
 
-  if (!isMobile) {
-    return (
-      <Button 
-        variant={variant} 
-        size={size} 
-        className={className}
-        disabled
-      >
-        <Camera className="w-4 h-4 mr-2" />
-        Câmera (Mobile)
-      </Button>
-    );
-  }
-
   return (
-    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-      <DropdownMenuTrigger asChild>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
         <Button 
-          variant={variant} 
-          size={size} 
+          variant={variant}
+          size={size}
+          disabled={!isMobile || isLoading}
           className={className}
-          disabled={isLoading}
         >
           {isLoading ? (
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
           ) : (
             <Camera className="w-4 h-4 mr-2" />
           )}
-          Foto
+          {isMobile ? 'Câmera' : 'Câmera (Mobile)'}
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuItem onClick={handleTakePhoto} className="flex items-center gap-2">
-          <Camera className="w-4 h-4" />
-          Tirar foto
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleSelectFromGallery} className="flex items-center gap-2">
-          <ImageIcon className="w-4 h-4" />
-          Escolher da galeria
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Capturar Foto</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <Button 
+            onClick={handleTakePhoto}
+            disabled={isLoading}
+            className="w-full"
+          >
+            <Camera className="w-4 h-4 mr-2" />
+            Tirar Foto
+          </Button>
+          
+          <Button 
+            onClick={handleSelectFromGallery}
+            disabled={isLoading}
+            variant="outline"
+            className="w-full"
+          >
+            <Image className="w-4 h-4 mr-2" />
+            Escolher da Galeria
+          </Button>
+
+          {capturedPhoto?.dataUrl && (
+            <div className="mt-4">
+              <p className="text-sm text-muted-foreground mb-2">Última foto capturada:</p>
+              <img 
+                src={capturedPhoto.dataUrl} 
+                alt="Foto capturada" 
+                className="w-full h-32 object-cover rounded-lg"
+              />
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

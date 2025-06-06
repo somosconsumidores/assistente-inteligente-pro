@@ -215,15 +215,7 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({ data }) => {
                 <Tooltip 
                   formatter={(value: number) => [`R$ ${Math.abs(value).toLocaleString('pt-BR')}`, '']}
                 />
-                <Bar 
-                  dataKey="value" 
-                  fill={(entry) => {
-                    if (entry?.name === 'Reserva de Emergência') return '#10b981';
-                    if (entry?.name === 'Investimentos') return '#3b82f6';
-                    if (entry?.name === 'Dívidas') return '#ef4444';
-                    return '#6b7280';
-                  }}
-                >
+                <Bar dataKey="value">
                   {patrimonioData.map((entry, index) => {
                     let color = '#6b7280';
                     if (entry.name === 'Reserva de Emergência') color = '#10b981';

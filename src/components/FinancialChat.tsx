@@ -4,15 +4,18 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Send, Bot, User, Loader2 } from 'lucide-react';
 import { useFinancialChat } from '@/hooks/useFinancialChat';
+
 interface FinancialChatProps {
   onComplete: (data: any) => void;
 }
+
 const FinancialChat: React.FC<FinancialChatProps> = ({
   onComplete
 }) => {
   const [inputValue, setInputValue] = useState('');
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
   const {
     messages,
     currentStep,
@@ -20,12 +23,9 @@ const FinancialChat: React.FC<FinancialChatProps> = ({
     isCompleted,
     isLoading,
     sendMessage,
-    startChat,
     hasNotifiedCompletion
   } = useFinancialChat();
-  useEffect(() => {
-    startChat();
-  }, [startChat]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
       behavior: 'smooth'
@@ -39,6 +39,7 @@ const FinancialChat: React.FC<FinancialChatProps> = ({
       onComplete(financialData);
     }
   }, [isCompleted, financialData, onComplete, hasNotifiedCompletion]);
+
   const handleSend = async () => {
     if (!inputValue.trim() && (!currentStep || currentStep.type !== 'multiselect')) return;
     let valueToSend = inputValue;
@@ -73,6 +74,7 @@ const FinancialChat: React.FC<FinancialChatProps> = ({
       setInputValue(e.target.value);
     }
   };
+
   return <div className="flex flex-col h-[600px] max-w-4xl mx-auto">
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -132,4 +134,5 @@ const FinancialChat: React.FC<FinancialChatProps> = ({
         </div>}
     </div>;
 };
+
 export default FinancialChat;

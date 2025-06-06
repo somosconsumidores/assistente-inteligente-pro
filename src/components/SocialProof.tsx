@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Star, Users, MessageCircle, ThumbsUp } from 'lucide-react';
@@ -41,7 +40,7 @@ const SocialProof = () => {
         {/* Header */}
         <div className="text-center space-y-3 sm:space-y-4 mb-8 sm:mb-12">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
-            Mais de 10 mil pessoas já confiam em nossos assistentes
+            Diversos consumidores já confiam em nossos assistentes
           </h2>
           <p className="text-base sm:text-lg text-gray-400 max-w-3xl mx-auto">
             Veja o que nossos usuários estão dizendo sobre os assistentes IA

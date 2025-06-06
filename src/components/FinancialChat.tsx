@@ -31,7 +31,6 @@ const FinancialChat: React.FC<FinancialChatProps> = ({ onComplete }) => {
     });
   }, [messages]);
 
-  // Only call onComplete once when chat is completed and we haven't notified yet
   useEffect(() => {
     if (isCompleted && financialData && !hasNotifiedCompletion) {
       onComplete(financialData);

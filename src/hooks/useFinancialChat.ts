@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { useFinancialDataStorage } from './useFinancialDataStorage';
 
 export interface FinancialData {
@@ -107,15 +107,20 @@ const chatSteps: ChatStep[] = [
 ];
 
 export const useFinancialChat = () => {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      type: 'bot',
+      content: chatSteps[0].question,
+      timestamp: new Date()
+    }
+  ]);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [financialData, setFinancialData] = useState<Partial<FinancialData>>({});
   const [isCompleted, setIsCompleted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [hasNotifiedCompletion, setHasNotifiedCompletion] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
 
-  const { saveFinancialData, loadFinancialData } = useFinancialDataStorage();
+  const { saveFinancialData } = useFinancialDataStorage();
 
   const addMessage = useCallback((content: string, type: 'bot' | 'user') => {
     setMessages(prev => [...prev, {
@@ -125,34 +130,6 @@ export const useFinancialChat = () => {
     }]);
   }, []);
 
-  // Initialize chat only once
-  useEffect(() => {
-    if (isInitialized) return;
-
-    const initialize = async () => {
-      try {
-        const existingData = await loadFinancialData();
-        if (existingData) {
-          setFinancialData(existingData);
-          setIsCompleted(true);
-          setCurrentStepIndex(chatSteps.length);
-          setHasNotifiedCompletion(true);
-          addMessage('Bem-vindo de volta! Encontrei seus dados financeiros salvos. Você pode visualizar seu dashboard ou conversar comigo novamente para atualizar suas informações.', 'bot');
-        } else {
-          // Start fresh chat
-          addMessage(chatSteps[0].question, 'bot');
-        }
-      } catch (error) {
-        console.error('Error loading financial data:', error);
-        addMessage(chatSteps[0].question, 'bot');
-      } finally {
-        setIsInitialized(true);
-      }
-    };
-
-    initialize();
-  }, [loadFinancialData, addMessage, isInitialized]);
-
   const sendMessage = useCallback(async (userInput: string) => {
     if (currentStepIndex >= chatSteps.length || isLoading) return;
 
@@ -161,7 +138,6 @@ export const useFinancialChat = () => {
     setIsLoading(true);
 
     try {
-      // Simular processamento
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       let processedValue: any = userInput;
@@ -176,21 +152,18 @@ export const useFinancialChat = () => {
         return;
       }
 
-      // Atualizar dados financeiros
       const updatedData = {
         ...financialData,
         [step.field]: processedValue
       };
       setFinancialData(updatedData);
 
-      // Próximo passo
       const nextStepIndex = currentStepIndex + 1;
       setCurrentStepIndex(nextStepIndex);
 
       if (nextStepIndex < chatSteps.length) {
         addMessage(chatSteps[nextStepIndex].question, 'bot');
       } else {
-        // Chat completed
         const completeData = {
           ...updatedData,
           categoriaGastos: {}
@@ -213,25 +186,16 @@ export const useFinancialChat = () => {
     }
   }, [currentStepIndex, addMessage, financialData, saveFinancialData, isLoading]);
 
-  const startChat = useCallback(() => {
-    if (!isCompleted && isInitialized) {
-      // Only reset if not already completed and initialized
-      setMessages([]);
-      setCurrentStepIndex(0);
-      setFinancialData({});
-      setIsCompleted(false);
-      setHasNotifiedCompletion(false);
-      addMessage(chatSteps[0].question, 'bot');
-    }
-  }, [addMessage, isCompleted, isInitialized]);
-
   const resetChat = useCallback(() => {
-    setMessages([]);
+    setMessages([{
+      type: 'bot',
+      content: chatSteps[0].question,
+      timestamp: new Date()
+    }]);
     setCurrentStepIndex(0);
     setFinancialData({});
     setIsCompleted(false);
     setHasNotifiedCompletion(false);
-    setIsInitialized(false);
   }, []);
 
   return {
@@ -241,7 +205,6 @@ export const useFinancialChat = () => {
     isCompleted,
     isLoading,
     sendMessage,
-    startChat,
     resetChat,
     hasNotifiedCompletion
   };

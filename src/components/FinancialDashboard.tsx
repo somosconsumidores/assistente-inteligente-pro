@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -49,9 +48,9 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({ data }) => {
   ];
 
   const patrimonioData = [
-    { name: 'Reserva de Emergência', value: data.reservaEmergencia, color: '#10b981' },
-    { name: 'Investimentos', value: data.investimentos, color: '#3b82f6' },
-    { name: 'Dívidas', value: data.dividas, color: '#ef4444' }
+    { name: 'Reserva de Emergência', value: data.reservaEmergencia },
+    { name: 'Investimentos', value: data.investimentos },
+    { name: 'Dívidas', value: data.dividas }
   ];
 
   const metasData = [
@@ -205,18 +204,35 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({ data }) => {
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={patrimonioData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" fontSize={12} />
+                <XAxis 
+                  dataKey="name" 
+                  fontSize={12}
+                  angle={-45}
+                  textAnchor="end"
+                  height={80}
+                />
                 <YAxis />
                 <Tooltip 
                   formatter={(value: number) => [`R$ ${Math.abs(value).toLocaleString('pt-BR')}`, '']}
                 />
-                {patrimonioData.map((entry, index) => (
-                  <Bar 
-                    key={index}
-                    dataKey="value" 
-                    fill={entry.color}
-                  />
-                ))}
+                <Bar 
+                  dataKey="value" 
+                  fill={(entry) => {
+                    if (entry?.name === 'Reserva de Emergência') return '#10b981';
+                    if (entry?.name === 'Investimentos') return '#3b82f6';
+                    if (entry?.name === 'Dívidas') return '#ef4444';
+                    return '#6b7280';
+                  }}
+                >
+                  {patrimonioData.map((entry, index) => {
+                    let color = '#6b7280';
+                    if (entry.name === 'Reserva de Emergência') color = '#10b981';
+                    if (entry.name === 'Investimentos') color = '#3b82f6';
+                    if (entry.name === 'Dívidas') color = '#ef4444';
+                    
+                    return <Cell key={`cell-${index}`} fill={color} />;
+                  })}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </CardContent>

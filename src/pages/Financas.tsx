@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart3, Lightbulb, RefreshCw, MessageCircle } from 'lucide-react';
 import FinancialChat from '@/components/FinancialChat';
 import FinancialDashboard from '@/components/FinancialDashboard';
@@ -95,7 +96,7 @@ const Financas = () => {
           </div>
 
           {/* Welcome Card - Apenas se não completou o chat */}
-          {!hasCompletedChat && activeTab === 'chat' && (
+          {!hasCompletedChat && (
             <Card className="mb-6 sm:mb-8 bg-gradient-to-r from-green-500 to-blue-600 text-white border-0">
               <CardHeader className="pb-4 sm:pb-6">
                 <CardTitle className="text-lg sm:text-xl lg:text-2xl">Bem-vindo ao seu Consultor Financeiro Pessoal! 🎯</CardTitle>
@@ -108,7 +109,7 @@ const Financas = () => {
           )}
 
           {/* Welcome back card for returning users */}
-          {hasCompletedChat && activeTab === 'dashboard' && (
+          {hasCompletedChat && (
             <Card className="mb-6 sm:mb-8 bg-gradient-to-r from-blue-500 to-green-600 text-white border-0">
               <CardHeader className="pb-4 sm:pb-6">
                 <CardTitle className="text-lg sm:text-xl lg:text-2xl">Bem-vindo de volta! 🎉</CardTitle>
@@ -120,72 +121,49 @@ const Financas = () => {
             </Card>
           )}
 
-          {/* Navigation Tabs - Apenas após completar o chat */}
-          {hasCompletedChat && (
-            <div className={`flex ${isMobile ? 'flex-wrap gap-2' : 'space-x-4'} mb-6 sm:mb-8`}>
-              <Button 
-                variant={activeTab === 'dashboard' ? 'default' : 'outline'} 
-                onClick={() => setActiveTab('dashboard')} 
-                className={`flex items-center space-x-2 ${isMobile ? 'h-10 text-xs px-3' : 'h-10 sm:h-auto'}`}
-              >
-                <BarChart3 className="w-4 h-4" />
-                <span>Dashboard</span>
-              </Button>
-              <Button 
-                variant={activeTab === 'insights' ? 'default' : 'outline'} 
-                onClick={() => setActiveTab('insights')} 
-                className={`flex items-center space-x-2 ${isMobile ? 'h-10 text-xs px-3' : 'h-10 sm:h-auto'}`}
-              >
-                <Lightbulb className="w-4 h-4" />
-                <span>Análises</span>
-              </Button>
-              <Button 
-                variant={activeTab === 'chat' ? 'default' : 'outline'} 
-                onClick={() => setActiveTab('chat')} 
-                className={`flex items-center space-x-2 ${isMobile ? 'h-10 text-xs px-3' : 'h-10 sm:h-auto'}`}
-              >
-                <MessageCircle className="w-4 h-4" />
-                <span>Conversar</span>
-              </Button>
-            </div>
-          )}
+          {/* Content */}
+          {hasCompletedChat ? (
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-3 bg-gray-800 border-gray-700">
+                <TabsTrigger 
+                  value="dashboard" 
+                  className="data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-300"
+                >
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  Dashboard
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="insights" 
+                  className="data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-300"
+                >
+                  <Lightbulb className="w-4 h-4 mr-2" />
+                  Análises
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="chat" 
+                  className="data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-300"
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Conversar
+                </TabsTrigger>
+              </TabsList>
 
-          {/* Content based on active tab */}
-          {activeTab === 'chat' && (
+              <TabsContent value="dashboard" className="mt-6">
+                {financialData && <FinancialDashboard data={financialData} />}
+              </TabsContent>
+
+              <TabsContent value="insights" className="mt-6">
+                {financialData && <FinancialInsights data={financialData} />}
+              </TabsContent>
+
+              <TabsContent value="chat" className="mt-6">
+                <FinancialChat onComplete={handleChatComplete} />
+              </TabsContent>
+            </Tabs>
+          ) : (
             <div className="space-y-4 sm:space-y-6">
               <FinancialChat onComplete={handleChatComplete} />
             </div>
-          )}
-
-          {activeTab === 'dashboard' && financialData && (
-            <div className="space-y-4 sm:space-y-6">
-              <FinancialDashboard data={financialData} />
-            </div>
-          )}
-
-          {activeTab === 'insights' && financialData && (
-            <div className="space-y-4 sm:space-y-6">
-              <FinancialInsights data={financialData} />
-            </div>
-          )}
-
-          {/* Placeholder se não há dados e tentou acessar dashboard/insights */}
-          {(activeTab === 'dashboard' || activeTab === 'insights') && !financialData && (
-            <Card className="max-w-md mx-auto text-center border-gray-700 bg-gray-800/50">
-              <CardContent className="p-6 sm:p-8">
-                <MessageCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2 text-slate-50">Primeiro, vamos conversar!</h3>
-                <p className="text-slate-400 mb-4 text-sm">
-                  Para gerar seu dashboard personalizado, preciso conhecer sua situação financeira.
-                </p>
-                <Button 
-                  onClick={() => setActiveTab('chat')}
-                  className="mobile-button mobile-button-primary w-full"
-                >
-                  Começar Conversa
-                </Button>
-              </CardContent>
-            </Card>
           )}
         </div>
       </div>

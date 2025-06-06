@@ -20,6 +20,8 @@ const SelectAssistant = () => {
     const canceled = searchParams.get('canceled');
     const sessionId = searchParams.get('session_id');
 
+    console.log('SelectAssistant URL params:', { success, canceled, sessionId });
+
     if (success === 'true') {
       console.log('Payment successful, session ID:', sessionId);
       toast({
@@ -27,16 +29,29 @@ const SelectAssistant = () => {
         description: "Bem-vindo ao plano Premium! Verificando status da assinatura...",
       });
       
-      // Check subscription status after successful payment
-      setTimeout(async () => {
-        await checkSubscription();
-        toast({
-          title: "Plano atualizado!",
-          description: "Agora você tem acesso a todos os assistentes premium!",
-        });
-      }, 2000);
+      // Check subscription status after successful payment with a delay
+      const checkAndUpdate = async () => {
+        try {
+          console.log('Checking subscription status after payment...');
+          await checkSubscription();
+          toast({
+            title: "Plano atualizado!",
+            description: "Agora você tem acesso a todos os assistentes premium!",
+          });
+        } catch (error) {
+          console.error('Error checking subscription:', error);
+          toast({
+            title: "Atenção",
+            description: "Pagamento processado, mas houve um erro ao atualizar o plano. Tente recarregar a página.",
+            variant: "destructive"
+          });
+        }
+      };
       
-      // Clean URL
+      // Wait a bit for Stripe to process and then check
+      setTimeout(checkAndUpdate, 3000);
+      
+      // Clean URL after handling
       navigate('/select-assistant', { replace: true });
     }
 

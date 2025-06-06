@@ -47,8 +47,18 @@ serve(async (req) => {
       logStep("No existing customer found");
     }
 
-    const origin = req.headers.get("origin") || "http://localhost:3000";
-    logStep("Creating checkout session", { origin });
+    // Get the correct origin for redirects
+    const origin = req.headers.get("origin") || req.headers.get("referer");
+    let baseUrl = "https://assistente-inteligente.netlify.app";
+    
+    // Check if we're in development
+    if (origin?.includes("localhost") || origin?.includes("127.0.0.1")) {
+      baseUrl = origin;
+    } else if (origin?.includes("netlify.app") || origin?.includes("lovable.app")) {
+      baseUrl = origin;
+    }
+    
+    logStep("Creating checkout session", { baseUrl, origin });
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -68,8 +78,8 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
-      success_url: `${origin}/select-assistant?success=true&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/select-assistant?canceled=true`,
+      success_url: `${baseUrl}/select-assistant?success=true&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${baseUrl}/select-assistant?canceled=true`,
       allow_promotion_codes: true,
       billing_address_collection: "required",
       locale: "pt-BR",

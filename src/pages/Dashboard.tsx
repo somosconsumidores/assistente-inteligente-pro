@@ -45,6 +45,8 @@ const Dashboard: React.FC = () => {
     );
   }
 
+  const isPremiumUser = profile?.plan === 'premium';
+
   return (
     <DashboardLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-zinc-800">
@@ -74,7 +76,10 @@ const Dashboard: React.FC = () => {
               selectedAssistant={profile?.selected_assistant_id} 
             />
             
-            <SelectedAssistantCard selectedAssistantId={profile?.selected_assistant_id} />
+            {/* Só mostra o card do assistente selecionado se não for usuário premium */}
+            {!isPremiumUser && (
+              <SelectedAssistantCard selectedAssistantId={profile?.selected_assistant_id} />
+            )}
           </div>
 
           {/* Coluna 2 - Petições e Recomendações */}

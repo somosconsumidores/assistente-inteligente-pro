@@ -79,13 +79,9 @@ export function AppSidebar() {
   };
   
   const getPlanBadge = (isPremium: boolean) => {
-    if (!isPremium) return null;
-    if (isPremiumUser) {
-      return <Badge variant="secondary" className="ml-auto bg-yellow-100 text-yellow-800 border-yellow-200">
-          <Crown className="w-3 h-3 mr-1" />
-          Premium
-        </Badge>;
-    }
+    // Não mostra badge para usuários premium
+    if (!isPremium || isPremiumUser) return null;
+    
     return;
   };
 

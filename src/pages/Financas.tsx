@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,6 +6,7 @@ import { BarChart3, Lightbulb, RefreshCw, MessageCircle } from 'lucide-react';
 import FinancialChat from '@/components/FinancialChat';
 import FinancialDashboard from '@/components/FinancialDashboard';
 import FinancialInsights from '@/components/FinancialInsights';
+import FinancialAIChat from '@/components/FinancialAIChat';
 import { FinancialData } from '@/hooks/useFinancialChat';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -140,7 +140,7 @@ const Financas = () => {
                   className="data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200 flex items-center justify-center gap-2"
                 >
                   <MessageCircle className="w-4 h-4" />
-                  <span className="hidden sm:inline">Conversar</span>
+                  <span className="hidden sm:inline">Consultor Financeiro</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -165,7 +165,7 @@ const Financas = () => {
               </TabsContent>
 
               <TabsContent value="chat" className="mt-0 focus-visible:outline-none">
-                <FinancialChat onComplete={handleChatComplete} />
+                <FinancialAIChat />
               </TabsContent>
             </Tabs>
           ) : (

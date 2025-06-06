@@ -50,6 +50,11 @@ const Financas = () => {
     setActiveTab('chat');
   };
 
+  const handleTabChange = (value: string) => {
+    console.log('Tab change requested:', value);
+    setActiveTab(value);
+  };
+
   if (isLoadingData) {
     return (
       <DashboardLayout>
@@ -62,6 +67,8 @@ const Financas = () => {
       </DashboardLayout>
     );
   }
+
+  console.log('Current state:', { activeTab, hasCompletedChat, financialData: !!financialData });
 
   return (
     <DashboardLayout>
@@ -123,45 +130,45 @@ const Financas = () => {
 
           {/* Content */}
           {hasCompletedChat ? (
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-3 bg-gray-800 border-gray-700 mb-6">
-                <TabsTrigger 
-                  value="dashboard" 
-                  className="data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-300 hover:text-white"
-                >
-                  <BarChart3 className="w-4 h-4 mr-2" />
-                  Dashboard
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="insights" 
-                  className="data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-300 hover:text-white"
-                >
-                  <Lightbulb className="w-4 h-4 mr-2" />
-                  Análises
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="chat" 
-                  className="data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-300 hover:text-white"
-                >
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Conversar
-                </TabsTrigger>
-              </TabsList>
+            <div className="w-full">
+              <Tabs value={activeTab} onValueChange={handleTabChange}>
+                <TabsList className="grid w-full grid-cols-3 bg-gray-800/50 backdrop-blur-sm border border-gray-700 mb-6 h-12">
+                  <TabsTrigger 
+                    value="dashboard" 
+                    className="data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200 flex items-center justify-center gap-2"
+                  >
+                    <BarChart3 className="w-4 h-4" />
+                    <span className="hidden sm:inline">Dashboard</span>
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="insights" 
+                    className="data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200 flex items-center justify-center gap-2"
+                  >
+                    <Lightbulb className="w-4 h-4" />
+                    <span className="hidden sm:inline">Análises</span>
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="chat" 
+                    className="data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200 flex items-center justify-center gap-2"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    <span className="hidden sm:inline">Conversar</span>
+                  </TabsTrigger>
+                </TabsList>
 
-              <div className="tab-content">
-                <TabsContent value="dashboard" className="mt-0">
+                <TabsContent value="dashboard" className="mt-0 focus-visible:outline-none">
                   {financialData && <FinancialDashboard data={financialData} />}
                 </TabsContent>
 
-                <TabsContent value="insights" className="mt-0">
+                <TabsContent value="insights" className="mt-0 focus-visible:outline-none">
                   {financialData && <FinancialInsights data={financialData} />}
                 </TabsContent>
 
-                <TabsContent value="chat" className="mt-0">
+                <TabsContent value="chat" className="mt-0 focus-visible:outline-none">
                   <FinancialChat onComplete={handleChatComplete} />
                 </TabsContent>
-              </div>
-            </Tabs>
+              </Tabs>
+            </div>
           ) : (
             <div className="space-y-4 sm:space-y-6">
               <FinancialChat onComplete={handleChatComplete} />

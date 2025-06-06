@@ -31,10 +31,13 @@ const Dashboard: React.FC = () => {
     refetch
   } = useDashboardData();
 
+  console.log('Dashboard render:', { profile, isLoading, petitions, productRecommendations, financialData, savedItineraries });
+
   if (isLoading) {
+    console.log('Dashboard is loading...');
     return (
       <DashboardLayout>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-background text-foreground">
           <div className="flex items-center gap-4 mb-8">
             <Skeleton className="h-8 w-8" />
             <Skeleton className="h-8 w-48" />
@@ -51,6 +54,7 @@ const Dashboard: React.FC = () => {
     );
   }
 
+  console.log('Dashboard loaded, rendering content...');
   const isPremiumUser = profile?.plan === 'premium';
 
   return (

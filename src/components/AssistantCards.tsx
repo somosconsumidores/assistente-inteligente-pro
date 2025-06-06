@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -151,14 +150,7 @@ const AssistantCards = ({ userPlan, onUpgrade, isFirstAccess = false }: Assistan
                       </Button>
                     </Link>
                   ) : (
-                    <Button 
-                      onClick={onUpgrade}
-                      variant="outline" 
-                      className="w-full border-2 border-orange-500/30 text-orange-300 hover:bg-orange-500/10 font-medium py-2.5 sm:py-3 text-sm sm:text-base transition-all duration-200 touch-target"
-                    >
-                      <Lock className="w-4 h-4 mr-2" />
-                      Fazer Upgrade
-                    </Button>
+                    <SubscriptionButton className="w-full" />
                   )
                 ) : (
                   // Landing page view

@@ -3,14 +3,14 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Crown, CheckCircle } from 'lucide-react';
+import SubscriptionButton from '@/components/SubscriptionButton';
 
 interface UserPlanCardProps {
   userPlan: 'free' | 'premium';
   selectedAssistant?: string | null;
-  onUpgrade: () => void;
 }
 
-const UserPlanCard: React.FC<UserPlanCardProps> = ({ userPlan, selectedAssistant, onUpgrade }) => {
+const UserPlanCard: React.FC<UserPlanCardProps> = ({ userPlan, selectedAssistant }) => {
   const assistantNames = {
     direito: 'Mestre do Direito do Consumidor',
     financas: 'Mestre das Finanças',
@@ -83,14 +83,7 @@ const UserPlanCard: React.FC<UserPlanCardProps> = ({ userPlan, selectedAssistant
           </ul>
         </div>
 
-        {userPlan === 'free' && (
-          <Button 
-            onClick={onUpgrade}
-            className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
-          >
-            Upgrade para Premium
-          </Button>
-        )}
+        <SubscriptionButton className="w-full" />
       </CardContent>
     </Card>
   );

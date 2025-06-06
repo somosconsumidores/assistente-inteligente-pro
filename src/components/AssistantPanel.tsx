@@ -183,16 +183,13 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({ userPlan, onUpgrade, se
                     <p className="text-sm text-gray-600 mb-4 font-medium">
                       Você já selecionou outro assistente gratuito.
                     </p>
-                    <Button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onUpgrade();
-                      }}
+                    <SubscriptionButton 
                       size="sm"
-                      className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
-                    >
-                      Upgrade para Premium
-                    </Button>
+                      className=""
+                      onClick={(e: React.MouseEvent) => {
+                        e.stopPropagation();
+                      }}
+                    />
                   </div>
                 </div>
               )}

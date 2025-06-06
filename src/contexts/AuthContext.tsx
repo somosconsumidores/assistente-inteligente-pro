@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -50,6 +49,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // Fetch user profile when authenticated
           setTimeout(async () => {
             await fetchUserProfile(session.user.id);
+            // Check subscription status after profile is loaded
+            await checkSubscriptionStatus();
           }, 0);
         } else {
           setProfile(null);
@@ -65,7 +66,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        fetchUserProfile(session.user.id);
+        fetchUserProfile(session.user.id).then(() => {
+          checkSubscriptionStatus();
+        });
       }
       
       setIsLoading(false);
@@ -98,6 +101,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
+    }
+  };
+
+  const checkSubscriptionStatus = async () => {
+    try {
+      await supabase.functions.invoke('check-subscription');
+      // Refetch profile to get updated plan
+      if (user) {
+        await fetchUserProfile(user.id);
+      }
+    } catch (error) {
+      console.error('Error checking subscription status:', error);
     }
   };
 

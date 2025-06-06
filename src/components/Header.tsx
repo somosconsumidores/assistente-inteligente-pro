@@ -45,8 +45,8 @@ const Header = () => {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-2 touch-target" onClick={closeMobileMenu}>
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm sm:text-base">Assist IA</span>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center text-sm text-center">
+                <span className="text-white font-bold text-sm sm:text-base">BI</span>
               </div>
               <span className="font-bold text-lg sm:text-xl text-white">Assistentes IA</span>
             </Link>

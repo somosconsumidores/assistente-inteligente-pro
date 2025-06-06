@@ -37,16 +37,14 @@ const Dashboard: React.FC = () => {
     console.log('Dashboard is loading...');
     return (
       <DashboardLayout>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-background text-foreground">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center gap-4 mb-8">
             <Skeleton className="h-8 w-8" />
             <Skeleton className="h-8 w-48" />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 6 }).map((_, i) => (
-              <MobileOptimizedCard key={i} isLoading={true}>
-                <div />
-              </MobileOptimizedCard>
+              <div key={i} className="h-48 bg-gray-100 rounded-lg animate-pulse" />
             ))}
           </div>
         </div>
@@ -59,19 +57,26 @@ const Dashboard: React.FC = () => {
 
   return (
     <DashboardLayout onRefresh={refetch} enablePullToRefresh={true}>
-      <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-background text-foreground ${isMobile ? 'mobile-safe-area' : ''}`}>
+      <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 ${isMobile ? 'mobile-safe-area' : ''}`}>
+        {/* Debug info */}
+        <div className="mb-4 p-4 bg-red-100 border border-red-300 rounded">
+          <p>DEBUG: Profile: {profile?.name || 'No profile'}</p>
+          <p>DEBUG: Loading: {isLoading ? 'true' : 'false'}</p>
+          <p>DEBUG: Mobile: {isMobile ? 'true' : 'false'}</p>
+        </div>
+
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary rounded-lg">
-                <LayoutDashboard className="w-6 h-6 text-primary-foreground" />
+              <div className="p-2 bg-blue-600 rounded-lg">
+                <LayoutDashboard className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className={`font-bold text-foreground ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
+                <h1 className={`font-bold text-gray-900 ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
                   Meu Painel
                 </h1>
-                <p className={`text-muted-foreground ${isMobile ? 'text-sm' : ''}`}>
+                <p className={`text-gray-600 ${isMobile ? 'text-sm' : ''}`}>
                   Bem-vindo, {profile?.name || 'Usuário'}! Aqui está o resumo das suas atividades.
                 </p>
               </div>
@@ -87,56 +92,47 @@ const Dashboard: React.FC = () => {
         }`}>
           {/* Coluna 1 - Informações do usuário e assistente */}
           <div className="space-y-6">
-            <LazyLoadWrapper enabled={isSlowConnection} height="200px">
-              <UserPlanCard 
-                userPlan={profile?.plan || 'free'} 
-                selectedAssistant={profile?.selected_assistant_id} 
-              />
-            </LazyLoadWrapper>
+            <div className="p-4 bg-white border rounded-lg shadow">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Plano do Usuário</h3>
+              <p className="text-gray-600">Plano: {profile?.plan || 'free'}</p>
+              <p className="text-gray-600">Assistente: {profile?.selected_assistant_id || 'nenhum'}</p>
+            </div>
             
             {/* Só mostra o card do assistente selecionado se não for usuário premium */}
             {!isPremiumUser && (
-              <LazyLoadWrapper enabled={isSlowConnection} height="150px">
-                <SelectedAssistantCard selectedAssistantId={profile?.selected_assistant_id} />
-              </LazyLoadWrapper>
+              <div className="p-4 bg-white border rounded-lg shadow">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Assistente Selecionado</h3>
+                <p className="text-gray-600">ID: {profile?.selected_assistant_id || 'nenhum selecionado'}</p>
+              </div>
             )}
           </div>
 
           {/* Coluna 2 - Petições e Recomendações */}
           <div className="space-y-6">
-            <LazyLoadWrapper enabled={isSlowConnection} height="250px">
-              <SavedPetitionsCard 
-                petitions={petitions} 
-                onViewAll={() => navigate('/peticoes-salvas')} 
-              />
-            </LazyLoadWrapper>
+            <div className="p-4 bg-white border rounded-lg shadow">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Petições Salvas</h3>
+              <p className="text-gray-600">Total: {petitions?.length || 0}</p>
+            </div>
             
-            <LazyLoadWrapper enabled={isSlowConnection} height="250px">
-              <SavedRecommendationsCard 
-                recommendations={productRecommendations} 
-                onViewAll={() => navigate('/recomendacoes-salvas')} 
-                onUpdate={refetch} 
-              />
-            </LazyLoadWrapper>
+            <div className="p-4 bg-white border rounded-lg shadow">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Recomendações Salvas</h3>
+              <p className="text-gray-600">Total: {productRecommendations?.length || 0}</p>
+            </div>
           </div>
 
           {/* Coluna 3 - Finanças e Viagens */}
           <div className="space-y-6">
-            <LazyLoadWrapper enabled={isSlowConnection} height="200px">
-              <FinancialSummaryCard 
-                financialData={financialData} 
-                onViewDashboard={() => navigate('/financas')} 
-              />
-            </LazyLoadWrapper>
+            <div className="p-4 bg-white border rounded-lg shadow">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Dados Financeiros</h3>
+              <p className="text-gray-600">
+                {financialData ? `Renda: R$ ${financialData.renda}` : 'Nenhum dado financeiro'}
+              </p>
+            </div>
             
-            <LazyLoadWrapper enabled={isSlowConnection} height="200px">
-              <RecentTravelCard 
-                travelPlans={savedItineraries} 
-                onViewAll={() => {
-                  navigate('/viagens?tab=saved');
-                }} 
-              />
-            </LazyLoadWrapper>
+            <div className="p-4 bg-white border rounded-lg shadow">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Roteiros Salvos</h3>
+              <p className="text-gray-600">Total: {savedItineraries?.length || 0}</p>
+            </div>
           </div>
         </div>
       </div>

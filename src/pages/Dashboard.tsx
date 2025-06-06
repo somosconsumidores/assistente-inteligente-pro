@@ -63,6 +63,10 @@ const Dashboard: React.FC = () => {
     navigate('/viagens');
   };
 
+  const handleViewFinancialDashboard = () => {
+    navigate('/financas');
+  };
+
   return (
     <DashboardLayout onRefresh={refetch} enablePullToRefresh={true}>
       <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 ${isMobile ? 'mobile-safe-area' : ''}`}>
@@ -101,7 +105,7 @@ const Dashboard: React.FC = () => {
             {/* Só mostra o card do assistente selecionado se não for usuário premium */}
             {!isPremiumUser && (
               <SelectedAssistantCard 
-                selectedAssistant={profile?.selected_assistant_id}
+                selectedAssistantId={profile?.selected_assistant_id}
               />
             )}
           </div>
@@ -124,6 +128,7 @@ const Dashboard: React.FC = () => {
           <div className="space-y-6">
             <FinancialSummaryCard 
               financialData={financialData}
+              onViewDashboard={handleViewFinancialDashboard}
             />
             
             <RecentTravelCard 

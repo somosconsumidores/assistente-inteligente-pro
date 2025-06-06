@@ -1,11 +1,9 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Upload, X, Loader2, Trophy, Star, DollarSign } from 'lucide-react';
 import { useProductComparison } from '@/hooks/useProductComparison';
-
 const ProductComparison = () => {
   const {
     selectedImages,
@@ -17,16 +15,13 @@ const ProductComparison = () => {
     compareProducts,
     clearComparison
   } = useProductComparison();
-
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     files.forEach(file => addImage(file));
     // Reset input
     event.target.value = '';
   };
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       {/* Upload Section */}
       <Card>
         <CardHeader>
@@ -38,89 +33,54 @@ const ProductComparison = () => {
         <CardContent>
           {/* Image Upload Area */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            {[0, 1, 2].map(index => (
-              <div key={index} className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                {selectedImages[index] ? (
-                  <div className="relative">
-                    <img 
-                      src={selectedImages[index].preview} 
-                      alt={`Produto ${index + 1}`}
-                      className="w-full h-32 object-cover rounded-lg"
-                    />
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      className="absolute -top-2 -right-2 rounded-full p-1 h-6 w-6"
-                      onClick={() => removeImage(selectedImages[index].id)}
-                    >
+            {[0, 1, 2].map(index => <div key={index} className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                {selectedImages[index] ? <div className="relative">
+                    <img src={selectedImages[index].preview} alt={`Produto ${index + 1}`} className="w-full h-32 object-cover rounded-lg" />
+                    <Button variant="destructive" size="sm" className="absolute -top-2 -right-2 rounded-full p-1 h-6 w-6" onClick={() => removeImage(selectedImages[index].id)}>
                       <X className="w-3 h-3" />
                     </Button>
                     <Badge className="absolute bottom-2 left-2">
                       Produto {index + 1}
                     </Badge>
-                  </div>
-                ) : (
-                  <label htmlFor={`file-upload-${index}`} className="cursor-pointer">
+                  </div> : <label htmlFor={`file-upload-${index}`} className="cursor-pointer">
                     <div className="flex flex-col items-center py-6">
                       <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-slate-50">
                         Produto {index + 1}
                         {index < 2 && <span className="text-gray-400"> (opcional)</span>}
                       </span>
                     </div>
-                    <input
-                      id={`file-upload-${index}`}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileSelect}
-                      className="hidden"
-                      disabled={selectedImages.length >= 3}
-                    />
-                  </label>
-                )}
-              </div>
-            ))}
+                    <input id={`file-upload-${index}`} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" disabled={selectedImages.length >= 3} />
+                  </label>}
+              </div>)}
           </div>
 
           {/* Error Display */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+          {error && <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
               <p className="text-red-700 text-sm">{error}</p>
-            </div>
-          )}
+            </div>}
 
           {/* Action Buttons */}
           <div className="flex space-x-4 justify-center">
-            <Button 
-              onClick={compareProducts}
-              disabled={selectedImages.length < 2 || isAnalyzing}
-              className="flex items-center space-x-2"
-            >
-              {isAnalyzing ? (
-                <>
+            <Button onClick={compareProducts} disabled={selectedImages.length < 2 || isAnalyzing} className="flex items-center space-x-2">
+              {isAnalyzing ? <>
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span>Comparando...</span>
-                </>
-              ) : (
-                <>
+                </> : <>
                   <Trophy className="w-4 h-4" />
                   <span>Comparar Produtos</span>
-                </>
-              )}
+                </>}
             </Button>
             
-            {(selectedImages.length > 0 || comparisonResult) && (
-              <Button variant="outline" onClick={clearComparison}>
+            {(selectedImages.length > 0 || comparisonResult) && <Button variant="outline" onClick={clearComparison}>
                 Nova Comparação
-              </Button>
-            )}
+              </Button>}
           </div>
         </CardContent>
       </Card>
 
       {/* Results Section */}
-      {comparisonResult && (
-        <Card className="bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-200">
+      {comparisonResult && <Card className="bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-200">
           <CardHeader>
             <CardTitle className="text-emerald-800 flex items-center space-x-2">
               <Trophy className="w-5 h-5" />
@@ -130,8 +90,7 @@ const ProductComparison = () => {
           <CardContent className="space-y-6">
             {/* Individual Products */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {comparisonResult.products.map((product, index) => (
-                <div key={index} className="bg-white p-4 rounded-lg border border-emerald-200">
+              {comparisonResult.products.map((product, index) => <div key={index} className="bg-white p-4 rounded-lg border border-emerald-200">
                   <div className="space-y-3">
                     <div>
                       <h4 className="font-semibold text-emerald-900">{product.name}</h4>
@@ -145,20 +104,14 @@ const ProductComparison = () => {
                     
                     <div className="flex items-center space-x-2">
                       <div className="flex items-center">
-                        {[...Array(5)].map((_, i) => (
-                          <Star 
-                            key={i} 
-                            className={`w-4 h-4 ${i < Math.floor(product.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
-                          />
-                        ))}
+                        {[...Array(5)].map((_, i) => <Star key={i} className={`w-4 h-4 ${i < Math.floor(product.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />)}
                       </div>
                       <span className="text-sm text-gray-600">{product.rating}/5</span>
                     </div>
                     
                     <p className="text-sm text-emerald-800">{product.analysis}</p>
                   </div>
-                </div>
-              ))}
+                </div>)}
             </div>
 
             {/* Comparison Summary */}
@@ -190,10 +143,7 @@ const ProductComparison = () => {
               </div>
             </div>
           </CardContent>
-        </Card>
-      )}
-    </div>
-  );
+        </Card>}
+    </div>;
 };
-
 export default ProductComparison;

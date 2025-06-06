@@ -48,7 +48,7 @@ const Header = () => {
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center text-sm text-center">
                 <span className="text-white font-bold text-sm sm:text-base">BI</span>
               </div>
-              <span className="font-bold text-lg sm:text-xl text-white">Assistentes IA</span>
+              <span className="font-bold text-lg sm:text-xl text-white">Biblioteca IA</span>
             </Link>
             
             {/* Desktop Navigation */}

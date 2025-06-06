@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +13,7 @@ const Pricing = () => {
     description: 'Perfeito para começar',
     icon: Star,
     gradient: 'from-gray-600 to-gray-800',
-    features: ['1 Assistente especializado', 'Mestre do Direito do Consumidor', 'Consultas ilimitadas', 'Suporte por email', 'Histórico de 30 dias'],
+    features: ['1 Assistente especializado', 'Escolha seu Assistente Preferido', 'Consultas ilimitadas', 'Suporte por email', 'Histórico de 30 dias'],
     cta: 'Começar Gratuitamente',
     ctaVariant: 'outline' as const,
     popular: false
@@ -44,13 +45,15 @@ const Pricing = () => {
         <div className="grid md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto">
           {plans.map((plan, index) => {
           const Icon = plan.icon;
-          return <Card key={index} className={`relative overflow-hidden border-gray-800 bg-gray-900/50 backdrop-blur-sm transition-all duration-300 ${plan.popular ? 'ring-2 ring-blue-500/50 hover:ring-blue-400/70 hover:shadow-2xl hover:shadow-blue-500/20' : 'hover:shadow-xl'} hover:-translate-y-1`}>
+          return <Card key={index} className={`relative overflow-hidden border-gray-800 bg-gray-900/50 backdrop-blur-sm transition-all duration-300 ${plan.popular ? 'ring-2 ring-blue-500/50 hover:ring-blue-400/70 hover:shadow-2xl hover:shadow-blue-500/20' : 'hover:shadow-xl'} hover:-translate-y-1 ${plan.popular ? 'mt-4 sm:mt-6' : ''}`}>
                 {/* Popular Badge */}
-                {plan.popular && <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                    
+                {plan.popular && <div className="absolute top-2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+                    <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-1 text-sm font-semibold">
+                      ⭐ Mais Popular
+                    </Badge>
                   </div>}
 
-                <CardHeader className="p-6 sm:p-8 text-center">
+                <CardHeader className={`p-6 sm:p-8 text-center ${plan.popular ? 'pt-8 sm:pt-10' : ''}`}>
                   <div className={`w-12 h-12 sm:w-16 sm:h-16 mx-auto rounded-2xl bg-gradient-to-br ${plan.gradient} flex items-center justify-center mb-4 sm:mb-6`}>
                     <Icon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                   </div>

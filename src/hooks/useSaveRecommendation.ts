@@ -22,7 +22,8 @@ export const useSaveRecommendation = () => {
   const saveRecommendation = async (
     query: string,
     recommendations: any,
-    featuredProducts: FeaturedProduct[]
+    featuredProducts: FeaturedProduct[],
+    customName?: string
   ) => {
     if (!user) {
       toast({
@@ -50,7 +51,7 @@ export const useSaveRecommendation = () => {
         .from('saved_product_recommendations')
         .insert({
           user_id: user.id,
-          query,
+          query: customName || query,
           recommendations: recommendations as any,
           featured_products: featuredProductsJson as any
         });

@@ -1,8 +1,7 @@
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Save, Check } from 'lucide-react';
 import ProductCard from './product/ProductCard';
+import SaveRecommendationDialog from './SaveRecommendationDialog';
 import { useSaveRecommendation } from '@/hooks/useSaveRecommendation';
 
 interface FeaturedProduct {
@@ -50,13 +49,13 @@ const FeaturedProducts = ({
     );
   }
 
-  const handleSaveRecommendation = async () => {
+  const handleSaveRecommendation = async (customName?: string) => {
     if (!query || !recommendations) {
       console.warn('Query ou recommendations não disponíveis para salvar');
       return;
     }
     
-    const success = await saveRecommendation(query, recommendations, validProducts);
+    const success = await saveRecommendation(query, recommendations, validProducts, customName);
     if (success) {
       setIsSaved(true);
       setTimeout(() => setIsSaved(false), 3000);
@@ -71,25 +70,12 @@ const FeaturedProducts = ({
         </p>
         
         {query && recommendations && (
-          <Button 
-            onClick={handleSaveRecommendation} 
-            disabled={isLoading || isSaved}
-            size="sm"
-            className="w-full flex items-center gap-2" 
-            variant={isSaved ? "default" : "outline"}
-          >
-            {isSaved ? (
-              <>
-                <Check className="w-3 h-3" />
-                Salvo no Painel
-              </>
-            ) : (
-              <>
-                <Save className="w-3 h-3" />
-                Salvar no Painel
-              </>
-            )}
-          </Button>
+          <SaveRecommendationDialog
+            onSave={handleSaveRecommendation}
+            isLoading={isLoading}
+            isSaved={isSaved}
+            disabled={!query || !recommendations}
+          />
         )}
       </div>
       

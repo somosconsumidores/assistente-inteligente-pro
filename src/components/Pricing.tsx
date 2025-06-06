@@ -1,112 +1,97 @@
+
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Crown, Star, Zap } from 'lucide-react';
+import { Check, Clock } from 'lucide-react';
+import SubscriptionButton from './SubscriptionButton';
+
 const Pricing = () => {
-  const plans = [{
-    name: 'Gratuito',
-    price: 'R$ 0',
-    period: '/mês',
-    description: 'Perfeito para começar',
-    icon: Star,
-    gradient: 'from-gray-600 to-gray-800',
-    features: ['1 Assistente especializado', 'Escolha seu Assistente Preferido', 'Consultas ilimitadas', 'Suporte por email', 'Histórico de 30 dias'],
-    cta: 'Começar Gratuitamente',
-    ctaVariant: 'outline' as const,
-    popular: false
-  }, {
-    name: 'Premium',
-    price: 'R$ 9,90',
-    period: '/mês',
-    description: 'Acesso completo a todos os assistentes',
-    icon: Crown,
-    gradient: 'from-blue-600 to-purple-600',
-    features: ['Todos os 5 assistentes', 'Consultas ilimitadas', 'Suporte prioritário 24/7', 'Histórico completo', 'Exportação de documentos', 'Análises avançadas', 'Atualizações em primeira mão'],
-    cta: 'Upgrade para Premium',
-    ctaVariant: 'default' as const,
-    popular: true
-  }];
-  return <section id="precos" className="mobile-padding py-12 sm:py-16 lg:py-20">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="text-center space-y-3 sm:space-y-4 mb-8 sm:mb-12 lg:mb-16">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
-            Planos que se adaptam às suas necessidades
-          </h2>
-          <p className="text-base sm:text-lg text-gray-400 max-w-3xl mx-auto leading-relaxed">
-            Comece gratuitamente e faça upgrade quando precisar de mais assistentes
-          </p>
+  return (
+    <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <div className="text-center mb-12">
+        <h2 className="text-3xl font-bold text-white mb-4">
+          Escolha Seu Plano
+        </h2>
+        <p className="text-gray-300 max-w-2xl mx-auto">
+          Comece gratuitamente ou desbloqueie todo o potencial com nosso plano premium
+        </p>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        {/* Plano Gratuito */}
+        <div className="relative bg-white rounded-lg shadow-xl overflow-hidden">
+          {/* Selo de tempo limitado */}
+          <div className="absolute top-4 right-4 z-10">
+            <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg animate-pulse">
+              <Clock className="w-3 h-3" />
+              Acesso gratuito por tempo limitado
+            </div>
+          </div>
+
+          <div className="p-8">
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">Plano Gratuito</h3>
+            <div className="mb-6">
+              <span className="text-4xl font-bold text-gray-900">R$ 0</span>
+              <span className="text-gray-600">/mês</span>
+            </div>
+            <ul className="space-y-4 mb-8">
+              <li className="flex items-center">
+                <Check className="w-5 h-5 text-green-500 mr-3" />
+                <span className="text-gray-700">1 assistente de sua escolha</span>
+              </li>
+              <li className="flex items-center">
+                <Check className="w-5 h-5 text-green-500 mr-3" />
+                <span className="text-gray-700">Histórico básico</span>
+              </li>
+              <li className="flex items-center">
+                <Check className="w-5 h-5 text-green-500 mr-3" />
+                <span className="text-gray-700">Suporte por email</span>
+              </li>
+            </ul>
+            <SubscriptionButton 
+              className="w-full bg-gray-900 hover:bg-gray-800 text-white"
+              variant="outline"
+            />
+          </div>
         </div>
 
-        {/* Pricing Cards */}
-        <div className="grid md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto">
-          {plans.map((plan, index) => {
-          const Icon = plan.icon;
-          return <Card key={index} className={`relative overflow-hidden border-gray-800 bg-gray-900/50 backdrop-blur-sm transition-all duration-300 ${plan.popular ? 'ring-2 ring-blue-500/50 hover:ring-blue-400/70 hover:shadow-2xl hover:shadow-blue-500/20' : 'hover:shadow-xl'} hover:-translate-y-1 ${plan.popular ? 'mt-4 sm:mt-6' : ''}`}>
-                {/* Popular Badge */}
-                {plan.popular && <div className="absolute top-2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-                    <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-1 text-sm font-semibold">
-                      ⭐ Mais Popular
-                    </Badge>
-                  </div>}
-
-                <CardHeader className={`p-6 sm:p-8 text-center ${plan.popular ? 'pt-8 sm:pt-10' : ''}`}>
-                  <div className={`w-12 h-12 sm:w-16 sm:h-16 mx-auto rounded-2xl bg-gradient-to-br ${plan.gradient} flex items-center justify-center mb-4 sm:mb-6`}>
-                    <Icon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-                  </div>
-                  
-                  <CardTitle className="text-xl sm:text-2xl text-white mb-2">
-                    {plan.name}
-                  </CardTitle>
-                  
-                  <div className="mb-3 sm:mb-4">
-                    <span className="text-3xl sm:text-4xl font-bold text-white">{plan.price}</span>
-                    <span className="text-base sm:text-lg text-gray-400">{plan.period}</span>
-                  </div>
-                  
-                  <p className="text-sm sm:text-base text-gray-400">
-                    {plan.description}
-                  </p>
-                </CardHeader>
-
-                <CardContent className="p-6 sm:p-8 pt-0">
-                  <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
-                    {plan.features.map((feature, featureIndex) => <li key={featureIndex} className="flex items-start space-x-3">
-                        <div className="w-5 h-5 rounded-full bg-gradient-to-r from-green-500 to-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <CheckCircle className="w-3 h-3 text-white" />
-                        </div>
-                        <span className="text-sm sm:text-base text-gray-300 leading-relaxed">
-                          {feature}
-                        </span>
-                      </li>)}
-                  </ul>
-
-                  <Button asChild variant={plan.ctaVariant} size="lg" className={`w-full font-semibold py-3 sm:py-4 text-sm sm:text-base touch-target ${plan.popular ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white' : 'border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white'}`}>
-                    <Link to="/register">
-                      {plan.cta}
-                    </Link>
-                  </Button>
-
-                  {plan.popular && <p className="text-xs sm:text-sm text-center text-gray-500 mt-3 sm:mt-4">
-                      Cancele a qualquer momento
-                    </p>}
-                </CardContent>
-              </Card>;
-        })}
-        </div>
-
-        {/* Additional Info */}
-        <div className="text-center mt-8 sm:mt-12">
-          <p className="text-sm sm:text-base text-gray-400 mb-4">
-            💳 Aceitamos cartão de crédito, PIX e boleto bancário
-          </p>
-          <p className="text-xs sm:text-sm text-gray-500">
-            Todos os preços são em reais (BRL) e incluem impostos
-          </p>
+        {/* Plano Premium */}
+        <div className="bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg shadow-xl overflow-hidden transform hover:scale-105 transition-transform">
+          <div className="p-8">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-2xl font-bold text-white">Plano Premium</h3>
+              <span className="bg-yellow-400 text-gray-900 px-3 py-1 rounded-full text-sm font-bold">
+                Mais Popular
+              </span>
+            </div>
+            <div className="mb-6">
+              <span className="text-4xl font-bold text-white">R$ 29,90</span>
+              <span className="text-purple-100">/mês</span>
+            </div>
+            <ul className="space-y-4 mb-8">
+              <li className="flex items-center">
+                <Check className="w-5 h-5 text-green-400 mr-3" />
+                <span className="text-white">Todos os assistentes disponíveis</span>
+              </li>
+              <li className="flex items-center">
+                <Check className="w-5 h-5 text-green-400 mr-3" />
+                <span className="text-white">Histórico completo salvos</span>
+              </li>
+              <li className="flex items-center">
+                <Check className="w-5 h-5 text-green-400 mr-3" />
+                <span className="text-white">Suporte prioritário</span>
+              </li>
+              <li className="flex items-center">
+                <Check className="w-5 h-5 text-green-400 mr-3" />
+                <span className="text-white">Recursos exclusivos</span>
+              </li>
+            </ul>
+            <SubscriptionButton 
+              className="w-full bg-white text-purple-600 hover:bg-gray-100"
+            />
+          </div>
         </div>
       </div>
-    </section>;
+    </section>
+  );
 };
+
 export default Pricing;

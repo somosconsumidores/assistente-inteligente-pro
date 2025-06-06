@@ -113,6 +113,7 @@ export const useFinancialChat = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [hasLoadedData, setHasLoadedData] = useState(false);
+  const [hasNotifiedCompletion, setHasNotifiedCompletion] = useState(false);
 
   const { saveFinancialData, loadFinancialData } = useFinancialDataStorage();
 
@@ -135,6 +136,7 @@ export const useFinancialChat = () => {
         setIsCompleted(true);
         setCurrentStep(chatSteps.length);
         setHasLoadedData(true);
+        setHasNotifiedCompletion(true);
         addMessage('Bem-vindo de volta! Encontrei seus dados financeiros salvos. Você pode visualizar seu dashboard ou conversar comigo novamente para atualizar suas informações.', 'bot');
       } else {
         setHasLoadedData(true);
@@ -201,12 +203,16 @@ export const useFinancialChat = () => {
   const startChat = useCallback(() => {
     if (!hasLoadedData) return;
     
-    setMessages([]);
-    setCurrentStep(0);
-    setFinancialData({});
-    setIsCompleted(false);
-    addMessage(chatSteps[0].question, 'bot');
-  }, [addMessage, hasLoadedData]);
+    // Reset only if not already completed
+    if (!isCompleted) {
+      setMessages([]);
+      setCurrentStep(0);
+      setFinancialData({});
+      setIsCompleted(false);
+      setHasNotifiedCompletion(false);
+      addMessage(chatSteps[0].question, 'bot');
+    }
+  }, [addMessage, hasLoadedData, isCompleted]);
 
   const resetChat = useCallback(() => {
     setMessages([]);
@@ -214,6 +220,7 @@ export const useFinancialChat = () => {
     setFinancialData({});
     setIsCompleted(false);
     setHasLoadedData(false);
+    setHasNotifiedCompletion(false);
   }, []);
 
   return {
@@ -224,6 +231,7 @@ export const useFinancialChat = () => {
     isLoading,
     sendMessage,
     startChat,
-    resetChat
+    resetChat,
+    hasNotifiedCompletion
   };
 };

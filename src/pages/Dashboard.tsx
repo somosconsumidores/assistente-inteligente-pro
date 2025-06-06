@@ -2,7 +2,6 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDashboardData } from '@/hooks/useDashboardData';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import UserPlanCard from '@/components/dashboard/UserPlanCard';
 import SavedPetitionsCard from '@/components/dashboard/SavedPetitionsCard';
@@ -10,16 +9,19 @@ import SavedRecommendationsCard from '@/components/dashboard/SavedRecommendation
 import FinancialSummaryCard from '@/components/dashboard/FinancialSummaryCard';
 import RecentTravelCard from '@/components/dashboard/RecentTravelCard';
 import SelectedAssistantCard from '@/components/dashboard/SelectedAssistantCard';
-import AssistantCards from '@/components/AssistantCards';
 import { DashboardLayout } from '@/components/DashboardLayout';
+import { MobileOptimizedCard } from '@/components/mobile/MobileOptimizedCard';
+import { LazyLoadWrapper } from '@/components/mobile/LazyLoadWrapper';
 import { useNavigate } from 'react-router-dom';
 import { LayoutDashboard } from 'lucide-react';
 import { useMobileDeviceInfo } from '@/hooks/use-mobile';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 
 const Dashboard: React.FC = () => {
   const { profile } = useAuth();
   const navigate = useNavigate();
   const { isMobile } = useMobileDeviceInfo();
+  const { isSlowConnection } = useNetworkStatus();
   const {
     petitions,
     productRecommendations,
@@ -39,7 +41,7 @@ const Dashboard: React.FC = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-64" />
+              <MobileOptimizedCard key={i} isLoading={true} />
             ))}
           </div>
         </div>
@@ -50,7 +52,7 @@ const Dashboard: React.FC = () => {
   const isPremiumUser = profile?.plan === 'premium';
 
   return (
-    <DashboardLayout>
+    <DashboardLayout onRefresh={refetch} enablePullToRefresh={true}>
       <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-zinc-800 ${isMobile ? 'mobile-safe-area' : ''}`}>
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -79,44 +81,56 @@ const Dashboard: React.FC = () => {
         }`}>
           {/* Coluna 1 - Informações do usuário e assistente */}
           <div className="space-y-6">
-            <UserPlanCard 
-              userPlan={profile?.plan || 'free'} 
-              selectedAssistant={profile?.selected_assistant_id} 
-            />
+            <LazyLoadWrapper enabled={isSlowConnection} height="200px">
+              <UserPlanCard 
+                userPlan={profile?.plan || 'free'} 
+                selectedAssistant={profile?.selected_assistant_id} 
+              />
+            </LazyLoadWrapper>
             
             {/* Só mostra o card do assistente selecionado se não for usuário premium */}
             {!isPremiumUser && (
-              <SelectedAssistantCard selectedAssistantId={profile?.selected_assistant_id} />
+              <LazyLoadWrapper enabled={isSlowConnection} height="150px">
+                <SelectedAssistantCard selectedAssistantId={profile?.selected_assistant_id} />
+              </LazyLoadWrapper>
             )}
           </div>
 
           {/* Coluna 2 - Petições e Recomendações */}
           <div className="space-y-6">
-            <SavedPetitionsCard 
-              petitions={petitions} 
-              onViewAll={() => navigate('/peticoes-salvas')} 
-            />
+            <LazyLoadWrapper enabled={isSlowConnection} height="250px">
+              <SavedPetitionsCard 
+                petitions={petitions} 
+                onViewAll={() => navigate('/peticoes-salvas')} 
+              />
+            </LazyLoadWrapper>
             
-            <SavedRecommendationsCard 
-              recommendations={productRecommendations} 
-              onViewAll={() => navigate('/recomendacoes-salvas')} 
-              onUpdate={refetch} 
-            />
+            <LazyLoadWrapper enabled={isSlowConnection} height="250px">
+              <SavedRecommendationsCard 
+                recommendations={productRecommendations} 
+                onViewAll={() => navigate('/recomendacoes-salvas')} 
+                onUpdate={refetch} 
+              />
+            </LazyLoadWrapper>
           </div>
 
           {/* Coluna 3 - Finanças e Viagens */}
           <div className="space-y-6">
-            <FinancialSummaryCard 
-              financialData={financialData} 
-              onViewDashboard={() => navigate('/financas')} 
-            />
+            <LazyLoadWrapper enabled={isSlowConnection} height="200px">
+              <FinancialSummaryCard 
+                financialData={financialData} 
+                onViewDashboard={() => navigate('/financas')} 
+              />
+            </LazyLoadWrapper>
             
-            <RecentTravelCard 
-              travelPlans={savedItineraries} 
-              onViewAll={() => {
-                navigate('/viagens?tab=saved');
-              }} 
-            />
+            <LazyLoadWrapper enabled={isSlowConnection} height="200px">
+              <RecentTravelCard 
+                travelPlans={savedItineraries} 
+                onViewAll={() => {
+                  navigate('/viagens?tab=saved');
+                }} 
+              />
+            </LazyLoadWrapper>
           </div>
         </div>
       </div>

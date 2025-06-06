@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useProductChat } from '@/hooks/useProductChat';
 import ChatHeader from './chat/ChatHeader';
@@ -75,7 +74,7 @@ const ProductChat = () => {
     return (
       <div className="w-full max-w-7xl mx-auto flex flex-col h-full">
         {/* Chat Area - Full width on mobile */}
-        <Card className="flex-1 bg-gray-800 border-gray-700 rounded-lg shadow-xl overflow-hidden mb-4">
+        <Card className="flex-1 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden mb-4">
           <ChatHeader onClearChat={handleClearChat} />
           
           <div className="flex-1 flex flex-col" style={{ height: 'calc(100vh - 280px)' }}>
@@ -97,7 +96,7 @@ const ProductChat = () => {
 
         {/* Recommendations Toggle - Only show when there are products */}
         {validProducts.length > 0 && (
-          <Card className="bg-gray-800 border-gray-700 rounded-lg shadow-xl overflow-hidden">
+          <Card className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
             <CardHeader 
               className="bg-gradient-to-r from-orange-500 to-red-600 text-white cursor-pointer"
               onClick={() => setShowRecommendations(!showRecommendations)}
@@ -118,7 +117,7 @@ const ProductChat = () => {
             </CardHeader>
             
             {showRecommendations && (
-              <CardContent className="p-4 max-h-96 overflow-y-auto bg-gray-800">
+              <CardContent className="p-4 max-h-96 overflow-y-auto">
                 <FeaturedProducts 
                   products={featuredProducts}
                   query={lastQuery}
@@ -138,7 +137,7 @@ const ProductChat = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-[700px]">
         {/* Chat Area - 2/3 da tela */}
         <div className="lg:col-span-2">
-          <Card className="h-full bg-gray-800 border-gray-700 rounded-lg shadow-xl overflow-hidden">
+          <Card className="h-full bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
             <ChatHeader onClearChat={handleClearChat} />
             
             <div className="flex-1 flex flex-col h-[600px]">
@@ -161,7 +160,7 @@ const ProductChat = () => {
 
         {/* Recommendations Area - 1/3 da tela */}
         <div className="lg:col-span-1">
-          <Card className="h-full bg-gray-800 border-gray-700 rounded-lg shadow-xl overflow-hidden">
+          <Card className="h-full bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
             <CardHeader className="bg-gradient-to-r from-orange-500 to-red-600 text-white">
               <CardTitle className="text-lg font-semibold flex items-center gap-2">
                 🏆 Produtos Recomendados
@@ -173,7 +172,7 @@ const ProductChat = () => {
               </CardTitle>
             </CardHeader>
             
-            <CardContent className="p-4 h-[600px] overflow-y-auto bg-gray-800">
+            <CardContent className="p-4 h-[600px] overflow-y-auto">
               {validProducts.length > 0 ? (
                 <FeaturedProducts 
                   products={featuredProducts}
@@ -183,8 +182,8 @@ const ProductChat = () => {
               ) : (
                 <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
                   <div className="text-6xl mb-4">🔍</div>
-                  <h3 className="text-lg font-medium mb-2 text-gray-400">Nenhuma recomendação ainda</h3>
-                  <p className="text-sm leading-relaxed text-gray-500">
+                  <h3 className="text-lg font-medium mb-2 text-gray-700">Nenhuma recomendação ainda</h3>
+                  <p className="text-sm leading-relaxed">
                     Faça uma pergunta sobre produtos no chat ao lado e receba recomendações personalizadas aqui!
                   </p>
                 </div>

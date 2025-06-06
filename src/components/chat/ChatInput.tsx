@@ -17,7 +17,7 @@ const ChatInput = ({ inputValue, setInputValue, onSend, onKeyPress, isLoading }:
   const isMobile = useIsMobile();
 
   return (
-    <div className="border-t border-gray-600 bg-gray-800 p-3 sm:p-4 mt-auto">
+    <div className="border-t bg-white p-3 sm:p-4 mt-auto">
       <div className={`flex gap-2 sm:gap-3 ${isMobile ? 'max-w-none' : 'max-w-4xl mx-auto'}`}>
         <Input
           value={inputValue}
@@ -25,7 +25,7 @@ const ChatInput = ({ inputValue, setInputValue, onSend, onKeyPress, isLoading }:
           onKeyPress={onKeyPress}
           placeholder="Pergunte sobre qualquer produto..."
           disabled={isLoading}
-          className={`flex-1 ${isMobile ? 'h-11 px-3 text-base' : 'h-12 px-4 text-base'} border-2 border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 rounded-lg`}
+          className={`flex-1 ${isMobile ? 'h-11 px-3 text-base' : 'h-12 px-4 text-base'} border-2 border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 rounded-lg`}
         />
         <Button 
           onClick={onSend} 

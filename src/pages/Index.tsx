@@ -5,6 +5,7 @@ import Hero from '@/components/Hero';
 import AssistantCards from '@/components/AssistantCards';
 import Features from '@/components/Features';
 import Pricing from '@/components/Pricing';
+import SocialProof from '@/components/SocialProof';
 import Footer from '@/components/Footer';
 
 const Index = () => {
@@ -18,6 +19,7 @@ const Index = () => {
         </section>
         <Features />
         <Pricing />
+        <SocialProof />
       </main>
       <Footer />
     </div>

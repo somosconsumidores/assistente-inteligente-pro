@@ -22,13 +22,8 @@ const FinancialChat: React.FC<FinancialChatProps> = ({ onComplete }) => {
     isCompleted,
     isLoading,
     sendMessage,
-    startChat,
     hasNotifiedCompletion
   } = useFinancialChat();
-
-  useEffect(() => {
-    startChat();
-  }, [startChat]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
@@ -39,7 +34,6 @@ const FinancialChat: React.FC<FinancialChatProps> = ({ onComplete }) => {
   // Only call onComplete once when chat is completed and we haven't notified yet
   useEffect(() => {
     if (isCompleted && financialData && !hasNotifiedCompletion) {
-      console.log('Chat completed with data:', financialData);
       onComplete(financialData);
     }
   }, [isCompleted, financialData, onComplete, hasNotifiedCompletion]);
@@ -103,8 +97,8 @@ const FinancialChat: React.FC<FinancialChatProps> = ({ onComplete }) => {
             
             <Card className={`max-w-sm ${message.type === 'user' ? 'bg-blue-500 text-white' : 'bg-white border-gray-200'}`}>
               <CardContent className="p-3">
-                <p className="text-sm text-zinc-800">{message.content}</p>
-                <span className="text-xs opacity-70 mt-1 block text-zinc-800">
+                <p className="text-sm">{message.content}</p>
+                <span className="text-xs opacity-70 mt-1 block">
                   {message.timestamp.toLocaleTimeString()}
                 </span>
               </CardContent>

@@ -1,11 +1,9 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Crown, Star, Zap, Clock } from 'lucide-react';
-
 const Pricing = () => {
   const plans = [{
     name: 'Gratuito',
@@ -30,15 +28,11 @@ const Pricing = () => {
     ctaVariant: 'default' as const,
     popular: true
   }];
-
-  return (
-    <section id="precos" className="mobile-padding py-12 sm:py-16 lg:py-20">
+  return <section id="precos" className="mobile-padding py-12 sm:py-16 lg:py-20">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center space-y-3 sm:space-y-4 mb-8 sm:mb-12 lg:mb-16">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
-            Planos que se adaptam às suas necessidades
-          </h2>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">Acesso gratuito. Upgrade opcional. Liberdade total.</h2>
           <p className="text-base sm:text-lg text-gray-400 max-w-3xl mx-auto leading-relaxed">
             Comece gratuitamente e faça upgrade quando precisar de mais assistentes
           </p>
@@ -47,41 +41,28 @@ const Pricing = () => {
         {/* Pricing Cards */}
         <div className="grid md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto">
           {plans.map((plan, index) => {
-            const Icon = plan.icon;
-            const isFree = plan.name === 'Gratuito';
-            
-            return (
-              <Card 
-                key={index} 
-                className={`relative overflow-hidden border-gray-800 bg-gray-900/50 backdrop-blur-sm transition-all duration-300 ${
-                  plan.popular 
-                    ? 'ring-2 ring-blue-500/50 hover:ring-blue-400/70 hover:shadow-2xl hover:shadow-blue-500/20' 
-                    : 'hover:shadow-xl'
-                } hover:-translate-y-1`}
-              >
+          const Icon = plan.icon;
+          const isFree = plan.name === 'Gratuito';
+          return <Card key={index} className={`relative overflow-hidden border-gray-800 bg-gray-900/50 backdrop-blur-sm transition-all duration-300 ${plan.popular ? 'ring-2 ring-blue-500/50 hover:ring-blue-400/70 hover:shadow-2xl hover:shadow-blue-500/20' : 'hover:shadow-xl'} hover:-translate-y-1`}>
                 <CardHeader className="p-6 sm:p-8 text-center">
                   <div className={`w-12 h-12 sm:w-16 sm:h-16 mx-auto rounded-2xl bg-gradient-to-br ${plan.gradient} flex items-center justify-center mb-4`}>
                     <Icon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                   </div>
                   
                   {/* Selo "Acesso gratuito por tempo limitado" - logo abaixo do ícone */}
-                  {isFree && (
-                    <div className="mb-4">
+                  {isFree && <div className="mb-4">
                       <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center justify-center gap-1 shadow-lg animate-pulse mx-auto w-fit">
                         <Clock className="w-3 h-3" />
                         Acesso gratuito por tempo limitado
                       </div>
-                    </div>
-                  )}
+                    </div>}
 
                   {/* Selo "Mais Popular" - logo abaixo do ícone */}
-                  {plan.popular && (
-                    <div className="mb-4">
+                  {plan.popular && <div className="mb-4">
                       <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 py-1 text-sm font-semibold mx-auto">
                         ⭐ Mais Popular
                       </Badge>
-                    </div>
-                  )}
+                    </div>}
                   
                   <CardTitle className="text-xl sm:text-2xl text-white mb-2">
                     {plan.name}
@@ -99,42 +80,28 @@ const Pricing = () => {
 
                 <CardContent className="p-6 sm:p-8 pt-0">
                   <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
-                    {plan.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-start space-x-3">
+                    {plan.features.map((feature, featureIndex) => <li key={featureIndex} className="flex items-start space-x-3">
                         <div className="w-5 h-5 rounded-full bg-gradient-to-r from-green-500 to-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">
                           <CheckCircle className="w-3 h-3 text-white" />
                         </div>
                         <span className="text-sm sm:text-base text-gray-300 leading-relaxed">
                           {feature}
                         </span>
-                      </li>
-                    ))}
+                      </li>)}
                   </ul>
 
-                  <Button 
-                    asChild 
-                    variant={plan.ctaVariant} 
-                    size="lg" 
-                    className={`w-full font-semibold py-3 sm:py-4 text-sm sm:text-base touch-target ${
-                      plan.popular 
-                        ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white' 
-                        : 'border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white'
-                    }`}
-                  >
+                  <Button asChild variant={plan.ctaVariant} size="lg" className={`w-full font-semibold py-3 sm:py-4 text-sm sm:text-base touch-target ${plan.popular ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white' : 'border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white'}`}>
                     <Link to="/register">
                       {plan.cta}
                     </Link>
                   </Button>
 
-                  {plan.popular && (
-                    <p className="text-xs sm:text-sm text-center text-gray-500 mt-3 sm:mt-4">
+                  {plan.popular && <p className="text-xs sm:text-sm text-center text-gray-500 mt-3 sm:mt-4">
                       Cancele a qualquer momento
-                    </p>
-                  )}
+                    </p>}
                 </CardContent>
-              </Card>
-            );
-          })}
+              </Card>;
+        })}
         </div>
 
         {/* Additional Info */}
@@ -147,8 +114,6 @@ const Pricing = () => {
           </p>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default Pricing;

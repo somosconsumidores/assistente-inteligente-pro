@@ -7,6 +7,7 @@ import Features from '@/components/Features';
 import Pricing from '@/components/Pricing';
 import SocialProof from '@/components/SocialProof';
 import Footer from '@/components/Footer';
+import { AddToHomeScreenDialog } from '@/components/AddToHomeScreenDialog';
 
 const Index = () => {
   return (
@@ -22,6 +23,7 @@ const Index = () => {
         <SocialProof />
       </main>
       <Footer />
+      <AddToHomeScreenDialog />
     </div>
   );
 };

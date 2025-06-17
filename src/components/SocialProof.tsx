@@ -5,7 +5,7 @@ const SocialProof = () => {
   const testimonials = [{
     name: "Maria Silva",
     role: "Empreendedora",
-    comment: "Os assistentes de IA mudaram completamente como eu gerencio meus negócios. Especialmente o assistente financeiro tem me ajudado muito!",
+    comment: "Fiz minha viagem pra Gramado com ajuda do assistente. Tudo planejado, datas certas, economia no hotel. E o melhor: sem passar horas vendo blog de mochileiro.",
     rating: 5,
     avatar: "MS"
   }, {

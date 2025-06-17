@@ -33,7 +33,7 @@ const Hero = () => {
               </span>
             </h1>
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
-              5 especialistas digitais para resolver seus problemas do dia a dia.
+              Resolva problemas do dia a dia com 5 especialistas digitais que funcionam 24h por dia — de graça.
               <span className="block mt-2 text-sm sm:text-base md:text-lg text-gray-400">
                 Direito, Finanças, Produtos, Viagens e muito mais.
               </span>

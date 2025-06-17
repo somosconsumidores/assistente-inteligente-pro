@@ -64,9 +64,7 @@ const AssistantCards = ({
   return <div id="assistentes" className="space-y-6 sm:space-y-8">
       <div className="text-center space-y-3 sm:space-y-4">
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">5 especialistas digitais para te ajudar no que importa.</h2>
-        <p className="text-base sm:text-lg text-gray-400 max-w-3xl mx-auto leading-relaxed">
-          Cada assistente é especializado em uma área específica para oferecer o melhor suporte possível
-        </p>
+        <p className="text-base sm:text-lg text-gray-400 max-w-3xl mx-auto leading-relaxed">Cada assistente foi treinado com base em conteúdo validado e está pronto pra responder com precisão. Você escolhe um e recebe orientação sob medida.</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">

@@ -13,7 +13,7 @@ const Pricing = () => {
     description: 'Perfeito para começar',
     icon: Star,
     gradient: 'from-gray-600 to-gray-800',
-    features: ['1 Assistente especializado', 'Escolha seu Assistente Preferido', 'Consultas ilimitadas', 'Suporte por email', 'Histórico de 30 dias'],
+    features: ['1 Assistente especializado', 'Escolha seu Assistente Preferido', 'Consultas ilimitadas', 'Suporte por email', 'Histórico de 30 dias', 'Sem Cartão de Crédito'],
     cta: 'Começar Gratuitamente',
     ctaVariant: 'outline' as const,
     popular: false

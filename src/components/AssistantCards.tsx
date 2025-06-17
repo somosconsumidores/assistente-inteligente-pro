@@ -26,8 +26,8 @@ const AssistantCards = ({ userPlan, onUpgrade, isFirstAccess = false }: Assistan
   const assistants = [
     {
       id: 'direito-consumidor',
-      title: 'Mestre do Direito do Consumidor',
-      description: 'Receba orientações para contratos, reembolsos, trocas, cancelamentos e seus direitos como consumidor.',
+      title: 'Advogado do Consumidor',
+      description: 'Especialista em defesa dos direitos do consumidor, análise de contratos e orientações legais.',
       icon: Scale,
       path: '/direito-consumidor',
       gradient: 'from-blue-500 to-blue-700',
@@ -37,7 +37,7 @@ const AssistantCards = ({ userPlan, onUpgrade, isFirstAccess = false }: Assistan
     {
       id: 'financas',
       title: 'Consultor Financeiro',
-      description: 'Gestão financeira pessoal, investimentos e planejamento econômico inteligente.',
+      description: 'Planejamento financeiro pessoal, organização de dívidas e controle de gastos na palma da mão.',
       icon: Calculator,
       path: '/financas',
       gradient: 'from-green-500 to-green-700',
@@ -47,7 +47,7 @@ const AssistantCards = ({ userPlan, onUpgrade, isFirstAccess = false }: Assistan
     {
       id: 'produtos',
       title: 'Mestre dos Produtos',
-      description: 'Comparação de produtos, análise de custo-benefício e recomendações personalizadas.',
+      description: 'Ajuda para escolher o melhor produto pelo melhor preço com base em avaliações e comparativos reais.',
       icon: Package,
       path: '/produtos',
       gradient: 'from-purple-500 to-purple-700',
@@ -57,7 +57,7 @@ const AssistantCards = ({ userPlan, onUpgrade, isFirstAccess = false }: Assistan
     {
       id: 'viagens',
       title: 'Consultor de Viagens',
-      description: 'Planejamento de viagens, dicas de destinos e otimização de roteiros turísticos.',
+      description: 'Planejamento de viagens, economia em passagens, melhores épocas e destinos com base no seu perfil.',
       icon: MapPin,
       path: '/viagens',
       gradient: 'from-orange-500 to-orange-700',
@@ -66,8 +66,8 @@ const AssistantCards = ({ userPlan, onUpgrade, isFirstAccess = false }: Assistan
     },
     {
       id: 'supermercado',
-      title: 'Assistente de Compras',
-      description: 'Listas inteligentes de compras, comparação de preços e economia doméstica.',
+      title: 'Assistente de Compras Domésticas',
+      description: 'Listas inteligentes, sugestões econômicas e comparativos de mercado.',
       icon: ShoppingCart,
       path: '/supermercado',
       gradient: 'from-red-500 to-red-700',

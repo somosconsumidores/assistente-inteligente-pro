@@ -1,13 +1,15 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Sparkles, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+
 const Hero = () => {
-  const {
-    user
-  } = useAuth();
-  return <section className="relative mobile-padding py-12 sm:py-16 lg:py-20 xl:py-24 overflow-hidden">
+  const { user } = useAuth();
+  
+  return (
+    <section className="relative mobile-padding py-12 sm:py-16 lg:py-20 xl:py-24 overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-purple-900/20 to-pink-900/20" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full bg-gradient-to-r from-transparent via-blue-500/5 to-transparent" />
@@ -31,9 +33,33 @@ const Hero = () => {
               </span>
             </h1>
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
-              5 especialistas digitais para resolver seus problemas do dia a dia.
+              Resolva problemas do dia a dia com 5 especialistas digitais que funcionam 24h por dia — de graça.
               <span className="block mt-2 text-sm sm:text-base md:text-lg text-gray-400">Direito, finanças, produtos, compras, viagens… Tudo em um só lugar. E tudo pronto para responder com precisão, em segundos.</span>
             </p>
+            
+            {/* Impact Bullet Points */}
+            <div className="mt-6 sm:mt-8 space-y-3 text-left max-w-2xl mx-auto">
+              <div className="flex items-start gap-3 text-sm sm:text-base text-gray-300">
+                <span className="text-green-400 font-semibold">🔐</span>
+                <span>Consultas ilimitadas com IA treinada para te dar respostas reais</span>
+              </div>
+              <div className="flex items-start gap-3 text-sm sm:text-base text-gray-300">
+                <span className="text-green-400 font-semibold">💸</span>
+                <span>Economia de tempo, dinheiro e paciência</span>
+              </div>
+              <div className="flex items-start gap-3 text-sm sm:text-base text-gray-300">
+                <span className="text-green-400 font-semibold">⚖️</span>
+                <span>Dúvidas jurídicas? Compras? Planejamento financeiro? Temos um especialista pra isso.</span>
+              </div>
+              <div className="flex items-start gap-3 text-sm sm:text-base text-gray-300">
+                <span className="text-green-400 font-semibold">📲</span>
+                <span>Acesse do celular, quando quiser, onde estiver</span>
+              </div>
+              <div className="flex items-start gap-3 text-sm sm:text-base text-gray-300">
+                <span className="text-green-400 font-semibold">💬</span>
+                <span>5.000+ consultas já realizadas com 98% de satisfação</span>
+              </div>
+            </div>
           </div>
 
           {/* CTA Buttons */}
@@ -76,6 +102,8 @@ const Hero = () => {
           </div>
         </div>
       </div>
-    </section>;
+    </section>
+  );
 };
+
 export default Hero;

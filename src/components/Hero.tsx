@@ -72,7 +72,7 @@ const Hero = () => {
               </Button> : <>
                 <Button asChild size="lg" className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg touch-target">
                   <Link to="/register" className="flex items-center">
-                    Começar Gratuitamente
+                    Acessar gratuitamente agora
                     <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
                   </Link>
                 </Button>

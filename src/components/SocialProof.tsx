@@ -11,7 +11,7 @@ const SocialProof = () => {
   }, {
     name: "João Santos",
     role: "Advogado",
-    comment: "O assistente de direito do consumidor é incrível. Me ajuda a entender processos complexos de forma simples e rápida.",
+    comment: "Usei o assistente jurídico pra resolver uma treta com operadora de internet. Em 3 minutos tinha um modelo de mensagem pra enviar no Procon. Economizei tempo e ganhei respeito.",
     rating: 5,
     avatar: "JS"
   }, {

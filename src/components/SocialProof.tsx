@@ -1,6 +1,8 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
-import { Star, Users, MessageCircle, ThumbsUp } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Star, Users, MessageCircle, ThumbsUp, ArrowRight, Rocket } from 'lucide-react';
 
 const SocialProof = () => {
   const testimonials = [{
@@ -145,6 +147,36 @@ const SocialProof = () => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Final CTA Section */}
+        <div className="mt-16 sm:mt-20">
+          <div className="bg-gradient-to-br from-blue-900/30 via-purple-900/30 to-pink-900/30 border border-blue-500/20 rounded-2xl p-8 sm:p-12 text-center backdrop-blur-sm">
+            <div className="flex items-center justify-center mb-6">
+              <Rocket className="w-8 h-8 text-blue-400 mr-3" />
+              <span className="text-2xl">🚀</span>
+            </div>
+            
+            <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">
+              Comece agora com zero custo. Resolva mais, se preocupe menos.
+            </h3>
+            
+            <div className="flex items-center justify-center gap-2 mb-6 text-base sm:text-lg text-gray-300">
+              <span className="text-blue-400">📌</span>
+              <p>Em menos de 2 minutos você já pode ter seu especialista digital respondendo suas perguntas.</p>
+            </div>
+            
+            <Button asChild size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-8 py-4 text-lg mb-4 touch-target">
+              <Link to="/register" className="flex items-center">
+                Acessar gratuitamente agora
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+            </Button>
+            
+            <p className="text-gray-400 text-sm">
+              Tenha mais inteligência à sua disposição.
+            </p>
           </div>
         </div>
 

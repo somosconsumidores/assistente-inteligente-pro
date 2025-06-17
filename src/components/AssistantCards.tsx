@@ -17,7 +17,7 @@ const AssistantCards = ({
 }: AssistantCardsProps) => {
   const assistants = [{
     id: 'direito-consumidor',
-    title: 'Mestre do Direito do Consumidor',
+    title: 'Advogado do Consumidor',
     description: 'Especialista em defesa dos direitos do consumidor, análise de contratos e orientações legais.',
     icon: Scale,
     path: '/direito-consumidor',

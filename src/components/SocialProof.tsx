@@ -16,8 +16,8 @@ const SocialProof = () => {
     avatar: "JS"
   }, {
     name: "Ana Costa",
-    role: "Consultora de Viagens",
-    comment: "Nunca foi tão fácil planejar viagens! O assistente de viagens cria roteiros perfeitos em segundos.",
+    role: "Assistente Administrativa",
+    comment: "Meu maior desafio era entender onde estava gastando errado. O assistente financeiro me deu um plano em 5 minutos. Comecei a guardar 400 reais por mês.",
     rating: 5,
     avatar: "AC"
   }];

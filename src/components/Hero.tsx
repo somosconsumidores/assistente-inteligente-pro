@@ -85,6 +85,13 @@ const Hero = () => {
               </>}
           </div>
 
+          {/* Additional Text */}
+          <div className="pt-4">
+            <p className="text-lg sm:text-xl text-gray-300 font-medium">
+              Tenha especialistas de bolso. Sem mensalidade. Sem complicação.
+            </p>
+          </div>
+
           {/* Stats */}
           <div className="pt-8 sm:pt-12 grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-3xl mx-auto">
             <div className="text-center">

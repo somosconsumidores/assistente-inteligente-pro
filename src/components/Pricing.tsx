@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Crown, Star, Zap, Clock } from 'lucide-react';
+
 const Pricing = () => {
   const plans = [{
     name: 'Gratuito',
@@ -90,7 +91,7 @@ const Pricing = () => {
                       </li>)}
                   </ul>
 
-                  <Button asChild variant={plan.ctaVariant} size="lg" className={`w-full font-semibold py-3 sm:py-4 text-sm sm:text-base touch-target ${plan.popular ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white' : 'border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white'}`}>
+                  <Button asChild variant={plan.ctaVariant} size="lg" className={`w-full font-semibold py-3 sm:py-4 text-sm sm:text-base touch-target ${plan.popular ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white' : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0'}`}>
                     <Link to="/register">
                       {plan.cta}
                     </Link>

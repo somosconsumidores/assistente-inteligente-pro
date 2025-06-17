@@ -1,15 +1,13 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Sparkles, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-
 const Hero = () => {
-  const { user } = useAuth();
-
-  return (
-    <section className="relative mobile-padding py-12 sm:py-16 lg:py-20 xl:py-24 overflow-hidden">
+  const {
+    user
+  } = useAuth();
+  return <section className="relative mobile-padding py-12 sm:py-16 lg:py-20 xl:py-24 overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-purple-900/20 to-pink-900/20" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full bg-gradient-to-r from-transparent via-blue-500/5 to-transparent" />
@@ -33,51 +31,32 @@ const Hero = () => {
               </span>
             </h1>
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
-              Resolva problemas do dia a dia com 5 especialistas digitais que funcionam 24h por dia — de graça.
-              <span className="block mt-2 text-sm sm:text-base md:text-lg text-gray-400">
-                Direito, Finanças, Produtos, Viagens e muito mais.
-              </span>
+              5 especialistas digitais para resolver seus problemas do dia a dia.
+              <span className="block mt-2 text-sm sm:text-base md:text-lg text-gray-400">Direito, finanças, produtos, compras, viagens… Tudo em um só lugar. E tudo pronto para responder com precisão, em segundos.</span>
             </p>
           </div>
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-4 sm:pt-6">
-            {user ? (
-              <Button 
-                asChild 
-                size="lg"
-                className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg touch-target"
-              >
+            {user ? <Button asChild size="lg" className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg touch-target">
                 <Link to="/dashboard" className="flex items-center">
                   <LayoutDashboard className="mr-2 w-4 h-4 sm:w-5 sm:h-5" />
                   Acessar meu Painel
                 </Link>
-              </Button>
-            ) : (
-              <>
-                <Button 
-                  asChild 
-                  size="lg"
-                  className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg touch-target"
-                >
+              </Button> : <>
+                <Button asChild size="lg" className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg touch-target">
                   <Link to="/register" className="flex items-center">
                     Começar Gratuitamente
                     <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
                   </Link>
                 </Button>
                 
-                <Button 
-                  variant="outline" 
-                  size="lg"
-                  asChild
-                  className="w-full sm:w-auto border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg touch-target"
-                >
+                <Button variant="outline" size="lg" asChild className="w-full sm:w-auto border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg touch-target">
                   <Link to="/login">
                     Já tenho conta
                   </Link>
                 </Button>
-              </>
-            )}
+              </>}
           </div>
 
           {/* Stats */}
@@ -97,8 +76,6 @@ const Hero = () => {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default Hero;

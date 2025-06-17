@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Star, Users, MessageCircle, ThumbsUp } from 'lucide-react';
+
 const SocialProof = () => {
   const testimonials = [{
     name: "Maria Silva",
@@ -38,7 +39,31 @@ const SocialProof = () => {
     label: "Satisfação",
     icon: ThumbsUp
   }];
-  return <section className="mobile-padding py-12 sm:py-16 lg:py-20">
+  const faqs = [
+    {
+      question: "É realmente grátis?",
+      answer: "Sim. O plano inicial é 100% gratuito. Você só paga se quiser liberar todos os assistentes."
+    },
+    {
+      question: "Isso é melhor que usar o ChatGPT?",
+      answer: "Muito. Aqui, os assistentes são especializados, já vêm com conhecimento específico, e te poupam horas ajustando prompt."
+    },
+    {
+      question: "É seguro colocar minhas informações?",
+      answer: "Sim. Seus dados são criptografados e privados."
+    },
+    {
+      question: "Preciso instalar algo?",
+      answer: "Nada. Funciona direto do navegador, no celular ou computador."
+    },
+    {
+      question: "E se eu não gostar?",
+      answer: "Cancele a qualquer momento. Sem taxas. Sem perguntas."
+    }
+  ];
+
+  return (
+    <section className="mobile-padding py-12 sm:py-16 lg:py-20">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center space-y-3 sm:space-y-4 mb-8 sm:mb-12">
@@ -100,6 +125,29 @@ const SocialProof = () => {
             </Card>)}
         </div>
 
+        {/* FAQ Section */}
+        <div className="mt-16 sm:mt-20">
+          <div className="text-center space-y-3 sm:space-y-4 mb-8 sm:mb-12">
+            <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
+              Ainda com dúvidas? Então vamos acabar com elas:
+            </h3>
+          </div>
+
+          <div className="space-y-6 max-w-4xl mx-auto">
+            {faqs.map((faq, index) => (
+              <div key={index} className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 backdrop-blur-sm">
+                <div className="flex items-start gap-4">
+                  <div className="text-blue-400 font-bold text-lg flex-shrink-0">→</div>
+                  <div className="space-y-2">
+                    <h4 className="text-white font-semibold text-lg">{faq.question}</h4>
+                    <p className="text-gray-300 leading-relaxed">{faq.answer}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Bottom CTA */}
         <div className="text-center mt-8 sm:mt-12">
           <p className="text-sm sm:text-base text-gray-400">
@@ -107,6 +155,8 @@ const SocialProof = () => {
           </p>
         </div>
       </div>
-    </section>;
+    </section>
+  );
 };
+
 export default SocialProof;

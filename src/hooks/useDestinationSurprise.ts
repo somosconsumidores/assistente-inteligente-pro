@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -37,6 +36,7 @@ interface DestinationSuggestion {
   accommodationQuotationDate?: string;
   isEstimate?: boolean;
   isRealData?: boolean;
+  estimationReason?: string;
 }
 
 export const useDestinationSurprise = () => {

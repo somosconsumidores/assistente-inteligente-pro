@@ -11,11 +11,29 @@ export const DestinationSurprise = () => {
   const [budget, setBudget] = useState('');
   const { searchDestination, isSearching, suggestion, clearSuggestion } = useDestinationSurprise();
 
+  const parseBudgetValue = (formattedValue: string): number => {
+    // Remove "R$", espaços e converte vírgula para ponto
+    // "R$ 10.000,00" -> "10.000,00" -> "10000.00" -> 10000
+    const cleanValue = formattedValue
+      .replace(/[R$\s]/g, '')  // Remove R$ e espaços
+      .replace(/\./g, '')      // Remove pontos (separadores de milhares)
+      .replace(/,/g, '.');     // Converte vírgula para ponto decimal
+    
+    const numericValue = parseFloat(cleanValue);
+    return isNaN(numericValue) ? 0 : numericValue;
+  };
+
   const handleSearch = async () => {
-    const budgetValue = parseFloat(budget.replace(/\D/g, ''));
+    const budgetValue = parseBudgetValue(budget);
+    
     if (!budgetValue || budgetValue < 1000) {
       return;
     }
+    
+    if (budgetValue > 50000) {
+      return;
+    }
+    
     await searchDestination(budgetValue);
   };
 
@@ -40,6 +58,9 @@ export const DestinationSurprise = () => {
     }
     setBudget(value);
   };
+
+  const budgetValue = parseBudgetValue(budget);
+  const isBudgetValid = budgetValue >= 1000 && budgetValue <= 50000;
 
   return (
     <Card className="border-gray-700 bg-gray-800/50">
@@ -70,14 +91,24 @@ export const DestinationSurprise = () => {
                 className="bg-gray-900 border-gray-600 text-white placeholder-gray-400"
                 disabled={isSearching}
               />
-              <p className="text-xs text-gray-400">
-                Orçamento mínimo: R$ 1.000 (inclui voo, hospedagem e gastos extras)
-              </p>
+              <div className="text-xs space-y-1">
+                <p className="text-gray-400">
+                  Orçamento: R$ 1.000 - R$ 50.000 (inclui voo, hospedagem e gastos extras)
+                </p>
+                {budget && !isBudgetValid && (
+                  <p className="text-red-400">
+                    {budgetValue < 1000 
+                      ? "Orçamento mínimo: R$ 1.000" 
+                      : "Orçamento máximo: R$ 50.000"
+                    }
+                  </p>
+                )}
+              </div>
             </div>
 
             <Button
               onClick={handleSearch}
-              disabled={isSearching || !budget || parseFloat(budget.replace(/\D/g, '')) < 100000}
+              disabled={isSearching || !budget || !isBudgetValid}
               className="w-full bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold"
             >
               {isSearching ? (

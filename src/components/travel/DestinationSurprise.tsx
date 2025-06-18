@@ -83,7 +83,8 @@ export const DestinationSurprise = () => {
   const renderDataSourceIndicator = () => {
     if (!suggestion) return null;
 
-    if (suggestion.isRealData) {
+    // Dados completamente reais
+    if (suggestion.isRealData && suggestion.hasRealFlightData && suggestion.hasRealAccommodationData) {
       return (
         <div className="flex items-center justify-center gap-2 mb-4">
           <div className="inline-flex items-center gap-2 text-green-400 text-sm bg-green-400/10 px-3 py-2 rounded-full">
@@ -92,7 +93,26 @@ export const DestinationSurprise = () => {
           </div>
         </div>
       );
-    } else if (suggestion.isEstimate) {
+    }
+    // Dados híbridos (voo real + hospedagem estimada)
+    else if (suggestion.hasRealFlightData && !suggestion.hasRealAccommodationData) {
+      return (
+        <div className="flex flex-col items-center gap-2 mb-4">
+          <div className="inline-flex items-center gap-2 text-blue-400 text-sm bg-blue-400/10 px-3 py-2 rounded-full">
+            <CheckCircle className="w-4 h-4" />
+            <span className="font-medium">Voos Reais + Hospedagem Estimada</span>
+          </div>
+          {suggestion.estimationReason && (
+            <div className="inline-flex items-center gap-2 text-gray-400 text-xs bg-gray-400/10 px-2 py-1 rounded">
+              <Info className="w-3 h-3" />
+              <span>{suggestion.estimationReason}</span>
+            </div>
+          )}
+        </div>
+      );
+    }
+    // Dados completamente estimados
+    else if (suggestion.isEstimate) {
       return (
         <div className="flex flex-col items-center gap-2 mb-4">
           <div className="inline-flex items-center gap-2 text-yellow-400 text-sm bg-yellow-400/10 px-3 py-2 rounded-full">
@@ -194,6 +214,9 @@ export const DestinationSurprise = () => {
                 <div className="flex items-center gap-2 text-sky-400">
                   <Plane className="w-4 h-4" />
                   <span className="font-semibold">Voos</span>
+                  {suggestion.hasRealFlightData && (
+                    <CheckCircle className="w-3 h-3 text-green-400 ml-auto" />
+                  )}
                 </div>
                 <p className="text-white font-bold">
                   {formatCurrency(suggestion.flightCost)}
@@ -211,10 +234,10 @@ export const DestinationSurprise = () => {
                         Código: {suggestion.flightDetails.airlineCode}
                       </p>
                     )}
-                    {suggestion.isRealData && (
+                    {suggestion.hasRealFlightData && (
                       <div className="flex items-center gap-1 mt-1">
                         <CheckCircle className="w-3 h-3 text-green-400" />
-                        <p className="text-xs text-green-400">Preço atual da API</p>
+                        <p className="text-xs text-green-400">Preço real da API</p>
                       </div>
                     )}
                   </div>
@@ -235,6 +258,12 @@ export const DestinationSurprise = () => {
                 <div className="flex items-center gap-2 text-green-400">
                   <Hotel className="w-4 h-4" />
                   <span className="font-semibold">Hospedagem</span>
+                  {suggestion.hasRealAccommodationData && (
+                    <CheckCircle className="w-3 h-3 text-green-400 ml-auto" />
+                  )}
+                  {!suggestion.hasRealAccommodationData && suggestion.hasRealFlightData && (
+                    <AlertTriangle className="w-3 h-3 text-yellow-400 ml-auto" />
+                  )}
                 </div>
                 <p className="text-white font-bold">
                   {formatCurrency(suggestion.accommodationCost)}
@@ -267,10 +296,16 @@ export const DestinationSurprise = () => {
                         {suggestion.hotelDetails.roomType}
                       </p>
                     )}
-                    {suggestion.isRealData && (
+                    {suggestion.hasRealAccommodationData && (
                       <div className="flex items-center gap-1 mt-1">
                         <CheckCircle className="w-3 h-3 text-green-400" />
-                        <p className="text-xs text-green-400">Preço atual da API</p>
+                        <p className="text-xs text-green-400">Preço real da API</p>
+                      </div>
+                    )}
+                    {!suggestion.hasRealAccommodationData && (
+                      <div className="flex items-center gap-1 mt-1">
+                        <AlertTriangle className="w-3 h-3 text-yellow-400" />
+                        <p className="text-xs text-yellow-400">Preço estimado</p>
                       </div>
                     )}
                   </div>
@@ -306,11 +341,16 @@ export const DestinationSurprise = () => {
                     {formatCurrency(suggestion.remainingBudget)}
                   </span>
                 </div>
-                {!suggestion.isRealData && (
+                {(!suggestion.isRealData || !suggestion.hasRealAccommodationData) && (
                   <div className="text-xs text-yellow-400 mt-2 p-2 bg-yellow-400/10 rounded">
                     <div className="flex items-center gap-1">
                       <AlertTriangle className="w-3 h-3" />
-                      <span>Valores estimados - preços reais podem variar</span>
+                      <span>
+                        {suggestion.hasRealFlightData && !suggestion.hasRealAccommodationData
+                          ? 'Preços de voos reais, hospedagem estimada'
+                          : 'Valores estimados - preços reais podem variar'
+                        }
+                      </span>
                     </div>
                   </div>
                 )}

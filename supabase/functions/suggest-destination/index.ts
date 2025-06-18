@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const corsHeaders = {
@@ -284,6 +283,87 @@ const getTravelStyle = (budget: number): string => {
   return 'Luxo';
 };
 
+// Função para gerar hospedagem estimada baseada no destino e estilo
+const createEstimatedAccommodation = (destination: DestinationOption, travelStyle: string, flightCost: number) => {
+  // Aplicar multiplicadores baseado no estilo de viagem
+  let accommodationMultiplier = 1;
+  
+  switch (travelStyle.toLowerCase()) {
+    case 'econômica':
+      accommodationMultiplier = 0.7;
+      break;
+    case 'conforto':
+      accommodationMultiplier = 1;
+      break;
+    case 'luxo':
+      accommodationMultiplier = 1.5;
+      break;
+  }
+  
+  const estimatedAccommodationCost = Math.round(destination.estimatedAccommodationCost * accommodationMultiplier);
+  
+  // Gerar nome de hotel estimado baseado no destino
+  const getEstimatedHotel = (destName: string, style: string) => {
+    const baseNames = ['Hotel', 'Resort', 'Pousada', 'Inn'];
+    const styleSuffixes = {
+      'Econômica': ['Express', 'Budget', 'Smart'],
+      'Conforto': ['Comfort', 'Plaza', 'Central'],
+      'Luxo': ['Grand', 'Premium', 'Luxury', 'Palace']
+    };
+    
+    const baseName = baseNames[Math.floor(Math.random() * baseNames.length)];
+    const suffix = styleSuffixes[style][Math.floor(Math.random() * styleSuffixes[style].length)];
+    return `${baseName} ${suffix} ${destName}`;
+  };
+  
+  return {
+    totalPrice: estimatedAccommodationCost,
+    hotelDetails: {
+      name: getEstimatedHotel(destination.name, travelStyle),
+      location: destination.name,
+      description: `Hotel categoria ${travelStyle.toLowerCase()} no centro de ${destination.name}`,
+      rating: travelStyle === 'Luxo' ? '5' : travelStyle === 'Conforto' ? '4' : '3',
+      roomType: travelStyle === 'Luxo' ? 'Suíte Executiva' : 'Quarto Padrão'
+    },
+    quotationDate: new Date().toISOString(),
+    isEstimate: true
+  };
+};
+
+// Função para criar resposta híbrida (voo real + hospedagem estimada)
+const createHybridSuggestion = (destination: DestinationOption, flightData: any, travelStyle: string, budget: number) => {
+  console.log(`🔄 Criando sugestão híbrida para ${destination.name}: voo real + hospedagem estimada`);
+  
+  const accommodationData = createEstimatedAccommodation(destination, travelStyle, flightData.pricePerPerson);
+  const totalFlightCost = flightData.totalPrice || flightData.pricePerPerson;
+  const totalAccommodationCost = accommodationData.totalPrice;
+  const totalTravelCost = totalFlightCost + totalAccommodationCost;
+  const remainingBudget = budget - totalTravelCost;
+  
+  return {
+    destination: destination,
+    flightCost: totalFlightCost,
+    accommodationCost: totalAccommodationCost,
+    totalTravelCost: totalTravelCost,
+    remainingBudget: remainingBudget,
+    currency: flightData.currency || 'BRL',
+    travelStyle: travelStyle,
+    hotelDetails: accommodationData.hotelDetails,
+    flightDetails: {
+      airlineCode: flightData.airlineCode,
+      airlineName: flightData.airlineName,
+      quotationDate: flightData.quotationDate
+    },
+    accommodationQuotationDate: accommodationData.quotationDate,
+    success: true,
+    isRealData: false, // Parcialmente real
+    isEstimate: true,
+    estimationReason: 'Voos com preços reais da API, hospedagem estimada (API indisponível)',
+    hasRealFlightData: true, // Novo campo para indicar que tem dados reais de voo
+    hasRealAccommodationData: false
+  };
+};
+
 // Função para criar fallback com dados estimados mais realistas
 const createEstimatedSuggestion = (destination: DestinationOption, budget: number, travelStyle: string) => {
   // Aplicar multiplicadores baseado no estilo de viagem
@@ -382,6 +462,9 @@ const suggestDestination = async (budget: number) => {
   const travelStyle = getTravelStyle(budget);
   console.log(`🎨 Estilo de viagem determinado: ${travelStyle}`);
   
+  let bestRealDataOption = null;
+  let bestHybridOption = null;
+  
   // Tentar até 5 destinos para aumentar chances de sucesso
   for (let i = 0; i < Math.min(5, suitableDestinations.length); i++) {
     const destination = suitableDestinations[i];
@@ -393,7 +476,7 @@ const suggestDestination = async (budget: number) => {
       searchAccommodation(destination.name, travelStyle)
     ]);
 
-    // Se conseguiu dados reais para ambos
+    // Prioridade 1: Se conseguiu dados reais para ambos
     if (flightData && accommodationData) {
       const totalFlightCost = flightData.totalPrice || flightData.pricePerPerson;
       const totalAccommodationCost = accommodationData.totalPrice;
@@ -404,7 +487,7 @@ const suggestDestination = async (budget: number) => {
       
       // Verificar se cabe no orçamento (deixando pelo menos R$ 500 para alimentação/atividades)
       if (totalTravelCost <= budget - 500) {
-        console.log(`✅ ${destination.name} selecionado com dados REAIS!`);
+        console.log(`✅ ${destination.name} selecionado com dados COMPLETAMENTE REAIS!`);
         
         return {
           destination: destination,
@@ -423,19 +506,46 @@ const suggestDestination = async (budget: number) => {
           accommodationQuotationDate: accommodationData.quotationDate,
           success: true,
           isRealData: true,
-          isEstimate: false
+          isEstimate: false,
+          hasRealFlightData: true,
+          hasRealAccommodationData: true
         };
       } else {
         console.log(`❌ ${destination.name} excede orçamento: R$ ${totalTravelCost} > R$ ${budget - 500}`);
+      }
+    } 
+    // Prioridade 2: Se tem voo real mas hospedagem falhou, criar opção híbrida
+    else if (flightData && !accommodationData) {
+      console.log(`🔄 ${destination.name}: voo real encontrado, hospedagem será estimada`);
+      
+      const hybridSuggestion = createHybridSuggestion(destination, flightData, travelStyle, budget);
+      
+      // Verificar se cabe no orçamento
+      if (hybridSuggestion.totalTravelCost <= budget - 500) {
+        console.log(`🎯 Opção híbrida válida para ${destination.name}: R$ ${hybridSuggestion.totalTravelCost}`);
+        
+        // Salvar a melhor opção híbrida (menor custo real de voo)
+        if (!bestHybridOption || flightData.pricePerPerson < bestHybridOption.flightCost) {
+          bestHybridOption = hybridSuggestion;
+          console.log(`🏆 Nova melhor opção híbrida: ${destination.name} (voo R$ ${flightData.pricePerPerson})`);
+        }
+      } else {
+        console.log(`❌ Opção híbrida para ${destination.name} excede orçamento: R$ ${hybridSuggestion.totalTravelCost}`);
       }
     } else {
       console.log(`⚠️ Dados incompletos para ${destination.name}: voo=${!!flightData}, hospedagem=${!!accommodationData}`);
     }
   }
   
-  // Se nenhum destino com preços reais funcionou, usar estimativa do melhor destino possível
+  // Se encontrou opção híbrida (voo real + hospedagem estimada), usar ela
+  if (bestHybridOption) {
+    console.log(`🎉 Retornando melhor opção híbrida: ${bestHybridOption.destination.name}`);
+    return bestHybridOption;
+  }
+  
+  // Se nenhum destino com dados reais funcionou, usar estimativa do melhor destino possível
   const fallbackDestination = suitableDestinations[0];
-  console.log(`📊 Usando estimativa para: ${fallbackDestination.name}`);
+  console.log(`📊 Usando estimativa completa para: ${fallbackDestination.name}`);
   
   return createEstimatedSuggestion(fallbackDestination, budget, travelStyle);
 };
@@ -465,6 +575,8 @@ serve(async (req) => {
     console.log('🎉 Sugestão gerada com sucesso:', {
       destino: suggestion.destination.name,
       isRealData: suggestion.isRealData,
+      hasRealFlightData: suggestion.hasRealFlightData,
+      hasRealAccommodationData: suggestion.hasRealAccommodationData,
       totalCost: suggestion.totalTravelCost
     });
 

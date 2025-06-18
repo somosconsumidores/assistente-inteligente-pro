@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -37,6 +38,8 @@ interface DestinationSuggestion {
   isEstimate?: boolean;
   isRealData?: boolean;
   estimationReason?: string;
+  hasRealFlightData?: boolean;
+  hasRealAccommodationData?: boolean;
 }
 
 export const useDestinationSurprise = () => {
@@ -89,11 +92,18 @@ export const useDestinationSurprise = () => {
 
       const hotelName = response.data.hotelDetails?.name || 'hotel selecionado';
       const airlineName = response.data.flightDetails?.airlineName || 'companhia aérea';
-      const dataType = response.data.isRealData ? 'preços reais' : 'estimativa';
+      
+      // Determinar tipo de dados para o toast
+      let dataType = 'estimativa';
+      if (response.data.isRealData) {
+        dataType = 'preços reais';
+      } else if (response.data.hasRealFlightData && !response.data.hasRealAccommodationData) {
+        dataType = 'voos reais, hospedagem estimada';
+      }
       
       toast({
         title: "Destino encontrado!",
-        description: `Que tal ${response.data.destination.name}? Voo com ${airlineName}, hospedagem no ${hotelName}. Dados baseados em ${dataType}.`,
+        description: `Que tal ${response.data.destination.name}? Voo com ${airlineName}, hospedagem no ${hotelName}. Dados: ${dataType}.`,
       });
 
       return response.data;

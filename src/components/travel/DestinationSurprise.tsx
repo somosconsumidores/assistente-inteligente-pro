@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useDestinationSurprise } from '@/hooks/useDestinationSurprise';
-import { Loader2, MapPin, Plane, Hotel, DollarSign, RefreshCw, Star, MapPin as LocationIcon } from 'lucide-react';
+import { Loader2, MapPin, Plane, Hotel, DollarSign, RefreshCw, Star, MapPin as LocationIcon, Calendar, Clock } from 'lucide-react';
 
 export const DestinationSurprise = () => {
   const [budget, setBudget] = useState('');
@@ -46,6 +46,23 @@ export const DestinationSurprise = () => {
       style: 'currency',
       currency: 'BRL'
     }).format(value);
+  };
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '';
+    
+    try {
+      const date = new Date(dateString);
+      return new Intl.DateTimeFormat('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }).format(date);
+    } catch {
+      return '';
+    }
   };
 
   const handleBudgetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -136,11 +153,21 @@ export const DestinationSurprise = () => {
               <p className="text-gray-300 text-sm">
                 {suggestion.destination.description}
               </p>
-              {suggestion.isEstimate && (
-                <p className="text-yellow-400 text-xs">
-                  ⚠️ Preços estimados - valores reais podem variar
-                </p>
-              )}
+              
+              {/* Status dos dados */}
+              <div className="flex justify-center">
+                {suggestion.isRealData ? (
+                  <span className="inline-flex items-center gap-1 text-green-400 text-xs bg-green-400/10 px-2 py-1 rounded-full">
+                    <Clock className="w-3 h-3" />
+                    Preços reais da API
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-yellow-400 text-xs bg-yellow-400/10 px-2 py-1 rounded-full">
+                    <Clock className="w-3 h-3" />
+                    Preços estimados
+                  </span>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -153,6 +180,30 @@ export const DestinationSurprise = () => {
                   {formatCurrency(suggestion.flightCost)}
                 </p>
                 <p className="text-xs text-gray-400">Ida e volta</p>
+                
+                {/* Informações da companhia aérea */}
+                {suggestion.flightDetails?.airlineName && (
+                  <div className="mt-2 pt-2 border-t border-gray-700">
+                    <p className="text-sm font-medium text-white">
+                      {suggestion.flightDetails.airlineName}
+                    </p>
+                    {suggestion.flightDetails.airlineCode && (
+                      <p className="text-xs text-gray-400">
+                        Código: {suggestion.flightDetails.airlineCode}
+                      </p>
+                    )}
+                  </div>
+                )}
+                
+                {/* Data da cotação de voo */}
+                {suggestion.flightDetails?.quotationDate && (
+                  <div className="flex items-center gap-1 mt-1">
+                    <Calendar className="w-3 h-3 text-gray-400" />
+                    <p className="text-xs text-gray-400">
+                      Cotado em: {formatDate(suggestion.flightDetails.quotationDate)}
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="bg-gray-900/50 rounded-lg p-4 space-y-2">
@@ -191,6 +242,16 @@ export const DestinationSurprise = () => {
                         {suggestion.hotelDetails.roomType}
                       </p>
                     )}
+                  </div>
+                )}
+                
+                {/* Data da cotação de hospedagem */}
+                {suggestion.accommodationQuotationDate && (
+                  <div className="flex items-center gap-1 mt-1">
+                    <Calendar className="w-3 h-3 text-gray-400" />
+                    <p className="text-xs text-gray-400">
+                      Cotado em: {formatDate(suggestion.accommodationQuotationDate)}
+                    </p>
                   </div>
                 )}
               </div>

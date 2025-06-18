@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const corsHeaders = {
@@ -25,6 +24,15 @@ interface FlightOffer {
     total: string;
     currency: string;
   };
+  validatingAirlineCodes?: string[];
+  itineraries?: Array<{
+    segments?: Array<{
+      carrierCode?: string;
+      operating?: {
+        carrierCode?: string;
+      };
+    }>;
+  }>;
 }
 
 interface AmadeusFlightResponse {
@@ -61,6 +69,63 @@ const getAmadeusToken = async (): Promise<string> => {
 
   const data: AmadeusTokenResponse = await response.json();
   return data.access_token;
+};
+
+// Função para mapear códigos IATA em nomes de companhias aéreas
+const getAirlineName = (code: string): string => {
+  const airlineMap: Record<string, string> = {
+    // Companhias Brasileiras
+    'LA': 'LATAM Airlines',
+    'G3': 'GOL Linhas Aéreas',
+    'AD': 'Azul Linhas Aéreas',
+    'JJ': 'TAM Linhas Aéreas',
+    
+    // Companhias Internacionais
+    'LH': 'Lufthansa',
+    'AF': 'Air France',
+    'KL': 'KLM',
+    'BA': 'British Airways',
+    'IB': 'Iberia',
+    'TP': 'TAP Air Portugal',
+    'LX': 'Swiss International Air Lines',
+    'OS': 'Austrian Airlines',
+    'SN': 'Brussels Airlines',
+    'AZ': 'ITA Airways',
+    'AA': 'American Airlines',
+    'DL': 'Delta Air Lines',
+    'UA': 'United Airlines',
+    'AC': 'Air Canada',
+    'AR': 'Aerolíneas Argentinas',
+    'JL': 'Japan Airlines',
+    'NH': 'ANA',
+    'SQ': 'Singapore Airlines',
+    'TG': 'Thai Airways',
+    'QF': 'Qantas',
+    'EK': 'Emirates',
+    'QR': 'Qatar Airways',
+    'TK': 'Turkish Airlines',
+  };
+
+  return airlineMap[code] || `${code} Airlines`;
+};
+
+// Função para extrair código da companhia aérea do voo
+const extractAirlineCode = (offer: FlightOffer): string => {
+  // Primeiro tenta validatingAirlineCodes
+  if (offer.validatingAirlineCodes && offer.validatingAirlineCodes.length > 0) {
+    return offer.validatingAirlineCodes[0];
+  }
+  
+  // Se não encontrar, tenta nos segmentos
+  if (offer.itineraries && offer.itineraries.length > 0) {
+    const firstItinerary = offer.itineraries[0];
+    if (firstItinerary.segments && firstItinerary.segments.length > 0) {
+      const firstSegment = firstItinerary.segments[0];
+      return firstSegment.operating?.carrierCode || firstSegment.carrierCode || 'XX';
+    }
+  }
+  
+  return 'XX'; // Código padrão se não encontrar
 };
 
 // Função para mapear destinos para códigos IATA
@@ -125,7 +190,14 @@ const getIATACode = (destination: string): string => {
 };
 
 // Função para buscar voos na Amadeus
-const searchFlights = async (params: FlightSearchParams): Promise<{ pricePerPerson: number; currency: string; source: string }> => {
+const searchFlights = async (params: FlightSearchParams): Promise<{ 
+  pricePerPerson: number; 
+  currency: string; 
+  source: string;
+  airlineCode?: string;
+  airlineName?: string;
+  quotationDate: string;
+}> => {
   console.log('Buscando voos para:', params);
   
   try {
@@ -167,16 +239,24 @@ const searchFlights = async (params: FlightSearchParams): Promise<{ pricePerPers
       throw new Error('Nenhum voo encontrado para as datas especificadas');
     }
 
-    // Pegar o menor preço disponível
-    const prices = data.data.map(offer => parseFloat(offer.price.total));
-    const minPrice = Math.min(...prices);
+    // Encontrar o voo com menor preço
+    const cheapestOffer = data.data.reduce((prev, current) => 
+      parseFloat(current.price.total) < parseFloat(prev.price.total) ? current : prev
+    );
     
-    console.log(`Menor preço encontrado: ${minPrice} ${data.data[0].price.currency}`);
+    const minPrice = parseFloat(cheapestOffer.price.total);
+    const airlineCode = extractAirlineCode(cheapestOffer);
+    const airlineName = getAirlineName(airlineCode);
+    
+    console.log(`Menor preço encontrado: ${minPrice} ${cheapestOffer.price.currency}, Companhia: ${airlineName}`);
     
     return {
       pricePerPerson: minPrice,
-      currency: data.data[0].price.currency,
-      source: 'amadeus_api'
+      currency: cheapestOffer.price.currency,
+      source: 'amadeus_api',
+      airlineCode,
+      airlineName,
+      quotationDate: new Date().toISOString()
     };
     
   } catch (error) {
@@ -224,6 +304,9 @@ serve(async (req) => {
         totalPrice: flightData.pricePerPerson * passengers,
         currency: flightData.currency,
         source: flightData.source,
+        airlineCode: flightData.airlineCode,
+        airlineName: flightData.airlineName,
+        quotationDate: flightData.quotationDate,
         searchParams: { origin, destination, departureDate, returnDate, passengers }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

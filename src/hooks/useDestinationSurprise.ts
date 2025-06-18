@@ -13,6 +13,12 @@ interface HotelDetails {
   address?: string;
 }
 
+interface FlightDetails {
+  airlineCode?: string;
+  airlineName?: string;
+  quotationDate?: string;
+}
+
 interface DestinationSuggestion {
   destination: {
     name: string;
@@ -27,7 +33,10 @@ interface DestinationSuggestion {
   currency: string;
   travelStyle: string;
   hotelDetails?: HotelDetails;
+  flightDetails?: FlightDetails;
+  accommodationQuotationDate?: string;
   isEstimate?: boolean;
+  isRealData?: boolean;
 }
 
 export const useDestinationSurprise = () => {
@@ -79,9 +88,12 @@ export const useDestinationSurprise = () => {
       setSuggestion(response.data);
 
       const hotelName = response.data.hotelDetails?.name || 'hotel selecionado';
+      const airlineName = response.data.flightDetails?.airlineName || 'companhia aérea';
+      const dataType = response.data.isRealData ? 'preços reais' : 'estimativa';
+      
       toast({
         title: "Destino encontrado!",
-        description: `Que tal ${response.data.destination.name}? Hospedagem no ${hotelName}. Confira os detalhes abaixo.`,
+        description: `Que tal ${response.data.destination.name}? Voo com ${airlineName}, hospedagem no ${hotelName}. Dados baseados em ${dataType}.`,
       });
 
       return response.data;

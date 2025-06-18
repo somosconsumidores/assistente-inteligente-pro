@@ -226,6 +226,57 @@ const searchFlights = async (destination: string, budget: number, retryCount = 0
   }
 };
 
+// Função para chamar API de busca de hospedagem com retry
+const searchAccommodation = async (destination: string, travelStyle: string, retryCount = 0): Promise<any> => {
+  const checkInDate = new Date();
+  checkInDate.setDate(checkInDate.getDate() + 30);
+  const checkOutDate = new Date(checkInDate);
+  checkOutDate.setDate(checkOutDate.getDate() + 7);
+
+  try {
+    console.log(`Tentativa ${retryCount + 1} de busca de hospedagem para ${destination}`);
+    
+    const response = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/search-accommodation-prices`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+      },
+      body: JSON.stringify({
+        destination: destination,
+        checkInDate: checkInDate.toISOString().split('T')[0],
+        checkOutDate: checkOutDate.toISOString().split('T')[0],
+        adults: 1,
+        travelStyle: travelStyle
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Accommodation search failed: ${response.status} - ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error || 'Accommodation search returned error');
+    }
+    
+    console.log(`✅ Hospedagem encontrada para ${destination}: R$ ${data.totalPrice} (${data.hotelDetails?.name})`);
+    return data;
+    
+  } catch (error) {
+    console.error(`❌ Erro ao buscar hospedagem para ${destination} (tentativa ${retryCount + 1}):`, error.message);
+    
+    // Retry até 2 vezes com delay
+    if (retryCount < 2) {
+      await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1))); // Delay crescente
+      return searchAccommodation(destination, travelStyle, retryCount + 1);
+    }
+    
+    return null;
+  }
+};
+
 // Função para determinar estilo de viagem baseado no orçamento
 const getTravelStyle = (budget: number): string => {
   if (budget <= 4000) return 'Econômica';
@@ -233,135 +284,30 @@ const getTravelStyle = (budget: number): string => {
   return 'Luxo';
 };
 
-// Função para gerar detalhes de hospedagem estimados mais realistas
-const generateAccommodationDetails = (destination: DestinationOption, travelStyle: string) => {
+// Função para criar fallback com dados estimados mais realistas
+const createEstimatedSuggestion = (destination: DestinationOption, budget: number, travelStyle: string) => {
   // Aplicar multiplicadores baseado no estilo de viagem
+  let flightMultiplier = 1;
   let accommodationMultiplier = 1;
   
   switch (travelStyle.toLowerCase()) {
     case 'econômica':
+      flightMultiplier = 0.8;
       accommodationMultiplier = 0.7;
       break;
     case 'conforto':
+      flightMultiplier = 1;
       accommodationMultiplier = 1;
       break;
     case 'luxo':
+      flightMultiplier = 1.3;
       accommodationMultiplier = 1.5;
       break;
   }
   
-  const estimatedAccommodationCost = Math.round(destination.estimatedAccommodationCost * accommodationMultiplier);
-  
-  // Gerar nomes de hotéis mais realistas baseados no destino e estilo
-  const getRealisticHotelName = (destName: string, country: string, style: string) => {
-    const hotelChains = {
-      'Econômica': ['Ibis', 'Sleep Inn', 'Comfort Inn', 'B&B Hotels', 'Go Inn'],
-      'Conforto': ['Novotel', 'Mercure', 'Holiday Inn', 'Radisson', 'Best Western'],
-      'Luxo': ['Sofitel', 'Marriott', 'Hilton', 'InterContinental', 'Grand Hyatt']
-    };
-    
-    const chains = hotelChains[style] || hotelChains['Conforto'];
-    const selectedChain = chains[Math.floor(Math.random() * chains.length)];
-    
-    // Adicionar sufixos baseados na localização
-    const locationSuffixes = {
-      'Brasil': ['Centro', 'Copacabana', 'Ipanema', 'Centro Histórico'],
-      'Argentina': ['Puerto Madero', 'Palermo', 'Recoleta', 'Centro'],
-      'Chile': ['Las Condes', 'Providencia', 'Centro', 'Vitacura'],
-      'Portugal': ['Centro', 'Chiado', 'Avenidas Novas', 'Príncipe Real'],
-      'Espanha': ['Gran Vía', 'Sol', 'Salamanca', 'Centro'],
-      'Estados Unidos': ['Downtown', 'Beach', 'Airport', 'Center'],
-      'França': ['Champs-Élysées', 'Opéra', 'Marais', 'Louvre'],
-      'Reino Unido': ['Covent Garden', 'Westminster', 'Kensington', 'City'],
-      'Japão': ['Shibuya', 'Shinjuku', 'Ginza', 'Asakusa'],
-      'Tailândia': ['Sukhumvit', 'Silom', 'Siam', 'Riverside']
-    };
-    
-    const suffixes = locationSuffixes[country] || ['Centro'];
-    const selectedSuffix = suffixes[Math.floor(Math.random() * suffixes.length)];
-    
-    return `${selectedChain} ${destName} ${selectedSuffix}`;
-  };
-  
-  // Determinar rating baseado no estilo
-  const getRating = (style: string) => {
-    switch (style.toLowerCase()) {
-      case 'econômica': return '3';
-      case 'conforto': return '4';
-      case 'luxo': return '5';
-      default: return '4';
-    }
-  };
-  
-  return {
-    cost: estimatedAccommodationCost,
-    details: {
-      name: getRealisticHotelName(destination.name, destination.country, travelStyle),
-      location: `Centro de ${destination.name}`,
-      description: `Hotel categoria ${travelStyle.toLowerCase()} no coração de ${destination.name}`,
-      rating: getRating(travelStyle),
-      roomType: 'Acomodação Standard', // Sempre Standard conforme solicitado
-      amenities: travelStyle === 'Luxo' 
-        ? ['Wi-Fi gratuito', 'Café da manhã', 'Academia', 'Spa', 'Concierge']
-        : travelStyle === 'Conforto'
-        ? ['Wi-Fi gratuito', 'Café da manhã', 'Academia', 'Centro de negócios']
-        : ['Wi-Fi gratuito', 'Recepção 24h'],
-      address: `Centro de ${destination.name}, ${destination.country}`
-    }
-  };
-};
-
-// Função para criar sugestão com dados mistos (voos reais + hospedagem estimada)
-const createMixedDataSuggestion = (destination: DestinationOption, budget: number, travelStyle: string, flightData: any) => {
-  const accommodationData = generateAccommodationDetails(destination, travelStyle);
-  
-  const totalFlightCost = flightData.totalPrice || flightData.pricePerPerson;
-  const totalAccommodationCost = accommodationData.cost;
-  const totalTravelCost = totalFlightCost + totalAccommodationCost;
-  const remainingBudget = budget - totalTravelCost;
-  
-  return {
-    destination: destination,
-    flightCost: totalFlightCost,
-    accommodationCost: totalAccommodationCost,
-    totalTravelCost: totalTravelCost,
-    remainingBudget: remainingBudget,
-    currency: flightData.currency || 'BRL',
-    travelStyle: travelStyle,
-    hotelDetails: accommodationData.details,
-    flightDetails: {
-      airlineCode: flightData.airlineCode,
-      airlineName: flightData.airlineName,
-      quotationDate: flightData.quotationDate
-    },
-    accommodationQuotationDate: new Date().toISOString(),
-    success: true,
-    isEstimate: false, // Voos são reais
-    isRealData: true, // Voos são reais
-    estimationReason: 'Hospedagem baseada em dados históricos - voos com preços reais'
-  };
-};
-
-// Função para criar fallback com dados completamente estimados
-const createEstimatedSuggestion = (destination: DestinationOption, budget: number, travelStyle: string) => {
-  // Aplicar multiplicadores baseado no estilo de viagem para voos também
-  let flightMultiplier = 1;
-  
-  switch (travelStyle.toLowerCase()) {
-    case 'econômica':
-      flightMultiplier = 0.8;
-      break;
-    case 'conforto':
-      flightMultiplier = 1;
-      break;
-    case 'luxo':
-      flightMultiplier = 1.3;
-      break;
-  }
-  
   const estimatedFlightCost = Math.round(destination.estimatedFlightCost * flightMultiplier);
-  const accommodationData = generateAccommodationDetails(destination, travelStyle);
-  const totalEstimated = estimatedFlightCost + accommodationData.cost;
+  const estimatedAccommodationCost = Math.round(destination.estimatedAccommodationCost * accommodationMultiplier);
+  const totalEstimated = estimatedFlightCost + estimatedAccommodationCost;
   
   // Encontrar companhia aérea comum para o destino
   const getEstimatedAirline = (destName: string, country: string) => {
@@ -376,15 +322,35 @@ const createEstimatedSuggestion = (destination: DestinationOption, budget: numbe
     return 'Companhia Aérea Internacional';
   };
   
+  // Gerar nome de hotel estimado baseado no destino
+  const getEstimatedHotel = (destName: string, style: string) => {
+    const baseNames = ['Hotel', 'Resort', 'Pousada', 'Inn'];
+    const styleSuffixes = {
+      'Econômica': ['Express', 'Budget', 'Smart'],
+      'Conforto': ['Comfort', 'Plaza', 'Central'],
+      'Luxo': ['Grand', 'Premium', 'Luxury', 'Palace']
+    };
+    
+    const baseName = baseNames[Math.floor(Math.random() * baseNames.length)];
+    const suffix = styleSuffixes[style][Math.floor(Math.random() * styleSuffixes[style].length)];
+    return `${baseName} ${suffix} ${destName}`;
+  };
+  
   return {
     destination: destination,
     flightCost: estimatedFlightCost,
-    accommodationCost: accommodationData.cost,
+    accommodationCost: estimatedAccommodationCost,
     totalTravelCost: totalEstimated,
     remainingBudget: budget - totalEstimated,
     currency: 'BRL',
     travelStyle: travelStyle,
-    hotelDetails: accommodationData.details,
+    hotelDetails: {
+      name: getEstimatedHotel(destination.name, travelStyle),
+      location: destination.name,
+      description: `Hotel categoria ${travelStyle.toLowerCase()} no centro de ${destination.name}`,
+      rating: travelStyle === 'Luxo' ? '5' : travelStyle === 'Conforto' ? '4' : '3',
+      roomType: travelStyle === 'Luxo' ? 'Suíte Executiva' : 'Quarto Padrão'
+    },
     flightDetails: {
       airlineName: getEstimatedAirline(destination.name, destination.country),
       airlineCode: 'EST',
@@ -394,7 +360,7 @@ const createEstimatedSuggestion = (destination: DestinationOption, budget: numbe
     success: true,
     isEstimate: true,
     isRealData: false,
-    estimationReason: 'Estimativas baseadas em dados históricos - APIs indisponíveis'
+    estimationReason: 'APIs indisponíveis - usando estimativas baseadas em dados históricos'
   };
 };
 
@@ -416,38 +382,60 @@ const suggestDestination = async (budget: number) => {
   const travelStyle = getTravelStyle(budget);
   console.log(`🎨 Estilo de viagem determinado: ${travelStyle}`);
   
-  // Tentar até 3 destinos para buscar dados reais de voo
-  for (let i = 0; i < Math.min(3, suitableDestinations.length); i++) {
+  // Tentar até 5 destinos para aumentar chances de sucesso
+  for (let i = 0; i < Math.min(5, suitableDestinations.length); i++) {
     const destination = suitableDestinations[i];
-    console.log(`🔍 Testando destino ${i + 1}/${Math.min(3, suitableDestinations.length)}: ${destination.name}`);
+    console.log(`🔍 Testando destino ${i + 1}/${Math.min(5, suitableDestinations.length)}: ${destination.name}`);
     
-    // Buscar apenas dados de voo (hospedagem sempre estimada)
-    const flightData = await searchFlights(destination.name, budget);
+    // Buscar voos e hospedagem em paralelo
+    const [flightData, accommodationData] = await Promise.all([
+      searchFlights(destination.name, budget),
+      searchAccommodation(destination.name, travelStyle)
+    ]);
 
-    // Se conseguiu dados reais de voo, usar dados mistos
-    if (flightData) {
-      const accommodationData = generateAccommodationDetails(destination, travelStyle);
+    // Se conseguiu dados reais para ambos
+    if (flightData && accommodationData) {
       const totalFlightCost = flightData.totalPrice || flightData.pricePerPerson;
-      const totalTravelCost = totalFlightCost + accommodationData.cost;
+      const totalAccommodationCost = accommodationData.totalPrice;
+      const totalTravelCost = totalFlightCost + totalAccommodationCost;
+      const remainingBudget = budget - totalTravelCost;
       
-      console.log(`💰 Custos MISTOS para ${destination.name}: Voo REAL R$ ${totalFlightCost}, Hospedagem ESTIMADA R$ ${accommodationData.cost}, Total R$ ${totalTravelCost}`);
+      console.log(`💰 Custos REAIS para ${destination.name}: Voo R$ ${totalFlightCost}, Hospedagem R$ ${totalAccommodationCost}, Total R$ ${totalTravelCost}`);
       
       // Verificar se cabe no orçamento (deixando pelo menos R$ 500 para alimentação/atividades)
       if (totalTravelCost <= budget - 500) {
-        console.log(`✅ ${destination.name} selecionado com dados MISTOS (voo real + hospedagem estimada)!`);
+        console.log(`✅ ${destination.name} selecionado com dados REAIS!`);
         
-        return createMixedDataSuggestion(destination, budget, travelStyle, flightData);
+        return {
+          destination: destination,
+          flightCost: totalFlightCost,
+          accommodationCost: totalAccommodationCost,
+          totalTravelCost: totalTravelCost,
+          remainingBudget: remainingBudget,
+          currency: flightData.currency || 'BRL',
+          travelStyle: travelStyle,
+          hotelDetails: accommodationData.hotelDetails,
+          flightDetails: {
+            airlineCode: flightData.airlineCode,
+            airlineName: flightData.airlineName,
+            quotationDate: flightData.quotationDate
+          },
+          accommodationQuotationDate: accommodationData.quotationDate,
+          success: true,
+          isRealData: true,
+          isEstimate: false
+        };
       } else {
         console.log(`❌ ${destination.name} excede orçamento: R$ ${totalTravelCost} > R$ ${budget - 500}`);
       }
     } else {
-      console.log(`⚠️ Sem dados de voo para ${destination.name}, tentando próximo destino`);
+      console.log(`⚠️ Dados incompletos para ${destination.name}: voo=${!!flightData}, hospedagem=${!!accommodationData}`);
     }
   }
   
-  // Se nenhum destino com voos reais funcionou, usar estimativa completa do melhor destino possível
+  // Se nenhum destino com preços reais funcionou, usar estimativa do melhor destino possível
   const fallbackDestination = suitableDestinations[0];
-  console.log(`📊 Usando estimativa completa para: ${fallbackDestination.name}`);
+  console.log(`📊 Usando estimativa para: ${fallbackDestination.name}`);
   
   return createEstimatedSuggestion(fallbackDestination, budget, travelStyle);
 };
@@ -477,9 +465,7 @@ serve(async (req) => {
     console.log('🎉 Sugestão gerada com sucesso:', {
       destino: suggestion.destination.name,
       isRealData: suggestion.isRealData,
-      totalCost: suggestion.totalTravelCost,
-      flightSource: suggestion.isRealData ? 'API_REAL' : 'ESTIMATIVA',
-      accommodationSource: 'ESTIMATIVA_HISTORICA'
+      totalCost: suggestion.totalTravelCost
     });
 
     return new Response(

@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const corsHeaders = {
@@ -155,7 +154,7 @@ const suggestDestination = async (budget: number) => {
       const totalTravelCost = totalFlightCost + totalAccommodationCost;
       const remainingBudget = budget - totalTravelCost;
       
-      console.log(`Custos para ${destination.name}: Voo R$ ${totalFlightCost}, Hospedagem R$ ${totalAccommodationCost}, Total R$ ${totalTravelCost}`);
+      console.log(`Custos para ${destination.name}: Voo R$ ${totalFlightCost}, Hospedagem R$ ${totalAccommodationCost}, Hotel: ${accommodationData.hotelDetails?.name}, Total R$ ${totalTravelCost}`);
       
       // Verificar se cabe no orçamento (deixando pelo menos R$ 500 para alimentação/atividades)
       if (totalTravelCost <= budget - 500) {
@@ -167,6 +166,7 @@ const suggestDestination = async (budget: number) => {
           remainingBudget: remainingBudget,
           currency: flightData.currency || 'BRL',
           travelStyle: travelStyle,
+          hotelDetails: accommodationData.hotelDetails,
           success: true
         };
       }
@@ -187,6 +187,11 @@ const suggestDestination = async (budget: number) => {
     remainingBudget: budget - totalEstimated,
     currency: 'BRL',
     travelStyle: getTravelStyle(budget),
+    hotelDetails: {
+      name: 'Hotel estimado',
+      location: fallbackDestination.name,
+      description: 'Preços estimados baseados na categoria do destino'
+    },
     success: true,
     isEstimate: true
   };

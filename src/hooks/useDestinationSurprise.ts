@@ -3,6 +3,16 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+interface HotelDetails {
+  name: string;
+  rating?: string;
+  location?: string;
+  description?: string;
+  roomType?: string;
+  amenities?: string[];
+  address?: string;
+}
+
 interface DestinationSuggestion {
   destination: {
     name: string;
@@ -16,6 +26,7 @@ interface DestinationSuggestion {
   remainingBudget: number;
   currency: string;
   travelStyle: string;
+  hotelDetails?: HotelDetails;
   isEstimate?: boolean;
 }
 
@@ -67,9 +78,10 @@ export const useDestinationSurprise = () => {
       
       setSuggestion(response.data);
 
+      const hotelName = response.data.hotelDetails?.name || 'hotel selecionado';
       toast({
         title: "Destino encontrado!",
-        description: `Que tal ${response.data.destination.name}? Confira os detalhes abaixo.`,
+        description: `Que tal ${response.data.destination.name}? Hospedagem no ${hotelName}. Confira os detalhes abaixo.`,
       });
 
       return response.data;

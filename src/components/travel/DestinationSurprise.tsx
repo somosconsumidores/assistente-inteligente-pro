@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useDestinationSurprise } from '@/hooks/useDestinationSurprise';
-import { Loader2, MapPin, Plane, Hotel, DollarSign, RefreshCw } from 'lucide-react';
+import { Loader2, MapPin, Plane, Hotel, DollarSign, RefreshCw, Star, MapPin as LocationIcon } from 'lucide-react';
 
 export const DestinationSurprise = () => {
   const [budget, setBudget] = useState('');
@@ -164,6 +164,35 @@ export const DestinationSurprise = () => {
                   {formatCurrency(suggestion.accommodationCost)}
                 </p>
                 <p className="text-xs text-gray-400">7 noites - {suggestion.travelStyle}</p>
+                
+                {suggestion.hotelDetails && (
+                  <div className="mt-2 pt-2 border-t border-gray-700">
+                    <p className="text-sm font-medium text-white">
+                      {suggestion.hotelDetails.name}
+                    </p>
+                    {suggestion.hotelDetails.location && (
+                      <div className="flex items-center gap-1 mt-1">
+                        <LocationIcon className="w-3 h-3 text-gray-400" />
+                        <p className="text-xs text-gray-400">
+                          {suggestion.hotelDetails.location}
+                        </p>
+                      </div>
+                    )}
+                    {suggestion.hotelDetails.rating && (
+                      <div className="flex items-center gap-1 mt-1">
+                        <Star className="w-3 h-3 text-yellow-400" />
+                        <p className="text-xs text-gray-400">
+                          {suggestion.hotelDetails.rating} estrelas
+                        </p>
+                      </div>
+                    )}
+                    {suggestion.hotelDetails.roomType && (
+                      <p className="text-xs text-gray-400 mt-1">
+                        {suggestion.hotelDetails.roomType}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 

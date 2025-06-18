@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const corsHeaders = {
@@ -23,6 +22,20 @@ interface AmadeusTokenResponse {
 interface HotelOffer {
   hotel: {
     name: string;
+    rating?: string;
+    cityCode?: string;
+    address?: {
+      lines?: string[];
+      cityName?: string;
+      countryCode?: string;
+    };
+    contact?: {
+      phone?: string;
+    };
+    description?: {
+      text?: string;
+    };
+    amenities?: string[];
   };
   offers: Array<{
     price: {
@@ -31,7 +44,18 @@ interface HotelOffer {
     };
     room: {
       type: string;
+      typeEstimated?: {
+        category?: string;
+        beds?: number;
+        bedType?: string;
+      };
     };
+    ratePlans?: Array<{
+      paymentType?: string;
+      cancellation?: {
+        deadline?: string;
+      };
+    }>;
   }>;
 }
 
@@ -154,6 +178,15 @@ const searchHotels = async (params: AccommodationSearchParams): Promise<{
   totalPrice: number;
   source: string;
   currency: string;
+  hotelDetails: {
+    name: string;
+    rating?: string;
+    location?: string;
+    description?: string;
+    roomType?: string;
+    amenities?: string[];
+    address?: string;
+  };
 } | null> => {
   console.log('Buscando hotéis para:', params);
   
@@ -233,49 +266,56 @@ const searchHotels = async (params: AccommodationSearchParams): Promise<{
     const checkOut = new Date(params.checkOutDate);
     const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
 
-    // Extrair preços e calcular média
-    const prices: number[] = [];
-    offersData.data.forEach(hotel => {
-      hotel.offers.forEach(offer => {
-        const totalPrice = parseFloat(offer.price.total);
-        if (!isNaN(totalPrice)) {
-          prices.push(totalPrice);
-        }
-      });
-    });
+    // Extrair preços e dados dos hotéis
+    const hotelOffers = offersData.data.map(hotel => ({
+      ...hotel,
+      totalPrice: parseFloat(hotel.offers[0]?.price?.total || '0')
+    })).filter(hotel => !isNaN(hotel.totalPrice));
 
-    if (prices.length === 0) {
+    if (hotelOffers.length === 0) {
       throw new Error('Nenhum preço válido encontrado');
     }
 
-    // Calcular estatísticas baseado no estilo de viagem
-    prices.sort((a, b) => a - b);
-    let selectedPrice: number;
+    // Ordenar por preço e selecionar baseado no estilo de viagem
+    hotelOffers.sort((a, b) => a.totalPrice - b.totalPrice);
+    let selectedHotel: typeof hotelOffers[0];
 
     switch (params.travelStyle.toLowerCase()) {
       case 'econômica':
       case 'economica':
         // 25% mais baratos
-        selectedPrice = prices[Math.floor(prices.length * 0.25)];
+        selectedHotel = hotelOffers[Math.floor(hotelOffers.length * 0.25)];
         break;
       case 'luxo':
         // 25% mais caros
-        selectedPrice = prices[Math.floor(prices.length * 0.75)];
+        selectedHotel = hotelOffers[Math.floor(hotelOffers.length * 0.75)];
         break;
       default:
         // Mediana
-        selectedPrice = prices[Math.floor(prices.length * 0.5)];
+        selectedHotel = hotelOffers[Math.floor(hotelOffers.length * 0.5)];
     }
 
-    const pricePerDay = Math.round(selectedPrice / nights);
+    const pricePerDay = Math.round(selectedHotel.totalPrice / nights);
     
-    console.log(`Preço selecionado: R$ ${selectedPrice} total, R$ ${pricePerDay} por dia para ${nights} noites`);
+    // Construir detalhes do hotel
+    const hotelDetails = {
+      name: selectedHotel.hotel.name || 'Hotel não especificado',
+      rating: selectedHotel.hotel.rating,
+      location: selectedHotel.hotel.address?.cityName || params.destination,
+      description: selectedHotel.hotel.description?.text,
+      roomType: selectedHotel.offers[0]?.room?.type || 'Quarto padrão',
+      amenities: selectedHotel.hotel.amenities || [],
+      address: selectedHotel.hotel.address?.lines?.join(', ')
+    };
+    
+    console.log(`Hotel selecionado: ${selectedHotel.hotel.name}, Preço: R$ ${selectedHotel.totalPrice} total, R$ ${pricePerDay} por dia para ${nights} noites`);
     
     return {
       pricePerDay: pricePerDay,
-      totalPrice: selectedPrice,
+      totalPrice: selectedHotel.totalPrice,
       source: 'amadeus_api',
-      currency: 'BRL'
+      currency: 'BRL',
+      hotelDetails
     };
     
   } catch (error) {
@@ -323,6 +363,7 @@ serve(async (req) => {
         totalPrice: accommodationData.totalPrice,
         currency: accommodationData.currency,
         source: accommodationData.source,
+        hotelDetails: accommodationData.hotelDetails,
         searchParams: { destination, checkInDate, checkOutDate, adults, travelStyle }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

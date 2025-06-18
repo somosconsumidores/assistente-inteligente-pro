@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -11,7 +10,7 @@ import GeneratedItinerary from '@/components/GeneratedItinerary';
 import { TravelHeader } from '@/components/travel/TravelHeader';
 import { TravelTabs } from '@/components/travel/TravelTabs';
 import { TravelPlannerForm } from '@/components/travel/TravelPlannerForm';
-import { TravelInspirations } from '@/components/travel/TravelInspirations';
+import { DestinationSurprise } from '@/components/travel/DestinationSurprise';
 import { ExampleItinerary } from '@/components/travel/ExampleItinerary';
 import { SavedItinerariesTab } from '@/components/travel/SavedItinerariesTab';
 
@@ -189,7 +188,7 @@ const Viagens = () => {
                       onCreateItinerary={handleCreateItinerary}
                       isGenerating={isGenerating}
                     />
-                    <TravelInspirations />
+                    <DestinationSurprise />
                   </div>
                 )}
 

@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, Mail, X } from 'lucide-react';
-
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,7 +19,6 @@ const Login = () => {
     toast
   } = useToast();
   const navigate = useNavigate();
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
@@ -46,11 +44,9 @@ const Login = () => {
       });
     }
   };
-
   const handleClose = () => {
     navigate('/');
   };
-
   return <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md relative">
         {/* Logo */}
@@ -59,18 +55,13 @@ const Login = () => {
             <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold">BI</span>
             </div>
-            <span className="font-bold text-2xl text-gray-900 dark:text-white">Biblioteca AI</span>
+            <span className="font-bold text-2xl text-gray-900 dark:text-white">Biblioteca IA</span>
           </Link>
         </div>
 
         <Card className="border-2 border-gray-200 dark:border-gray-700 shadow-xl relative">
           {/* Close button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleClose}
-            className="absolute right-2 top-2 z-10 h-8 w-8 p-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-          >
+          <Button variant="ghost" size="sm" onClick={handleClose} className="absolute right-2 top-2 z-10 h-8 w-8 p-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
             <X className="h-4 w-4" />
           </Button>
 
@@ -121,5 +112,4 @@ const Login = () => {
       </div>
     </div>;
 };
-
 export default Login;

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -20,6 +19,7 @@ import Assistants from './pages/SelectAssistant';
 import SavedPetitions from './pages/SavedPetitions';
 import Produtos from './pages/Produtos';
 import Supermercado from './pages/Supermercado';
+import ChatInteligente from './pages/ChatInteligente';
 
 const queryClient = new QueryClient();
 
@@ -45,6 +45,13 @@ function App() {
               <Route path="/dashboard" element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/chat-inteligente" element={
+                <ProtectedRoute>
+                  <ProtectedAssistantRoute assistantId="chat-inteligente" assistantName="Chat Inteligente Premium">
+                    <ChatInteligente />
+                  </ProtectedAssistantRoute>
                 </ProtectedRoute>
               } />
               <Route path="/direito-consumidor" element={

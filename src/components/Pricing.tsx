@@ -21,10 +21,10 @@ const Pricing = () => {
     name: 'Premium',
     price: 'R$ 9,90',
     period: '/mês',
-    description: 'Acesso completo a todos os assistentes',
+    description: 'Acesso completo + Chat GPT-4',
     icon: Crown,
     gradient: 'from-blue-600 to-purple-600',
-    features: ['Todos os 5 assistentes', 'Consultas ilimitadas', 'Suporte prioritário 24/7', 'Histórico completo', 'Exportação de documentos', 'Análises avançadas', 'Atualizações em primeira mão'],
+    features: ['Chat Inteligente Premium (GPT-4)', 'Todos os 5 assistentes especializados', 'Consultas ilimitadas', 'Suporte prioritário 24/7', 'Histórico completo', 'Exportação de documentos', 'Análises avançadas', 'Atualizações em primeira mão'],
     cta: 'Upgrade para Premium',
     ctaVariant: 'default' as const,
     popular: true

@@ -3,7 +3,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarFooter, useSidebar } from '@/components/ui/sidebar';
-import { LayoutDashboard, Scale, TrendingUp, Package, ShoppingCart, MapPin, LogOut, Crown } from 'lucide-react';
+import { LayoutDashboard, Scale, TrendingUp, Package, ShoppingCart, MapPin, LogOut, Crown, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
@@ -12,6 +12,11 @@ const menuItems = [{
   url: '/dashboard',
   icon: LayoutDashboard,
   isPremium: false
+}, {
+  title: 'Chat Inteligente',
+  url: '/chat-inteligente',
+  icon: MessageCircle,
+  isPremium: true
 }, {
   title: 'Mestre do Direito do Consumidor',
   url: '/direito-consumidor',

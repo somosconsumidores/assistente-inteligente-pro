@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -311,7 +310,7 @@ const IntelligentChat: React.FC = () => {
                     onChange={(e) => setInputMessage(e.target.value)}
                     placeholder="Envie uma mensagem para o ChatGPT"
                     disabled={isLoading}
-                    className="w-full pl-12 pr-4 py-3 min-h-[48px] text-base bg-white border border-gray-300 rounded-xl focus:border-gray-400 focus:ring-2 focus:ring-gray-200 resize-none"
+                    className="w-full pl-12 pr-4 py-3 min-h-[48px] text-base bg-white border border-gray-300 rounded-xl focus:border-gray-400 focus:ring-2 focus:ring-gray-200 resize-none text-black placeholder:text-gray-500"
                     style={{ paddingTop: '12px', paddingBottom: '12px' }}
                   />
                 </div>

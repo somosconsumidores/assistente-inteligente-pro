@@ -212,7 +212,7 @@ const IntelligentChat: React.FC = () => {
                   onChange={(e) => setInputMessage(e.target.value)}
                   placeholder="Envie uma mensagem para o ChatGPT"
                   disabled={isLoading}
-                  className="pr-12 py-3 text-base border-gray-300 rounded-xl focus:border-gray-400 focus:ring-0"
+                  className="pr-12 py-3 text-base bg-white text-black border-gray-300 rounded-xl focus:border-gray-400 focus:ring-0"
                 />
                 <Button 
                   type="submit" 

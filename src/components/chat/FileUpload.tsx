@@ -22,9 +22,9 @@ export function FileUpload({ onFileSelect, selectedFiles, onFileRemove, disabled
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
+  const processFiles = (files: File[]) => {
     const validFiles: FileWithPreview[] = [];
+    let processedCount = 0;
 
     files.forEach(file => {
       // Validar tipo de arquivo
@@ -40,6 +40,10 @@ export function FileUpload({ onFileSelect, selectedFiles, onFileRemove, disabled
           description: `${file.name} não é um tipo de arquivo suportado.`,
           variant: "destructive"
         });
+        processedCount++;
+        if (processedCount === files.length && validFiles.length > 0) {
+          onFileSelect(validFiles);
+        }
         return;
       }
 
@@ -50,6 +54,10 @@ export function FileUpload({ onFileSelect, selectedFiles, onFileRemove, disabled
           description: `${file.name} é maior que 10MB.`,
           variant: "destructive"
         });
+        processedCount++;
+        if (processedCount === files.length && validFiles.length > 0) {
+          onFileSelect(validFiles);
+        }
         return;
       }
 
@@ -64,20 +72,26 @@ export function FileUpload({ onFileSelect, selectedFiles, onFileRemove, disabled
         reader.onload = (e) => {
           fileWithPreview.preview = e.target?.result as string;
           validFiles.push(fileWithPreview);
-          if (validFiles.length === files.length) {
+          processedCount++;
+          if (processedCount === files.length && validFiles.length > 0) {
             onFileSelect(validFiles);
           }
         };
         reader.readAsDataURL(file);
       } else {
         validFiles.push(fileWithPreview);
+        processedCount++;
+        if (processedCount === files.length && validFiles.length > 0) {
+          onFileSelect(validFiles);
+        }
       }
     });
+  };
 
-    // Para documentos, adicionar imediatamente
-    const documentsOnly = validFiles.filter(f => f.type === 'document');
-    if (documentsOnly.length > 0) {
-      onFileSelect(documentsOnly);
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    if (files.length > 0) {
+      processFiles(files);
     }
 
     // Reset input
@@ -89,13 +103,9 @@ export function FileUpload({ onFileSelect, selectedFiles, onFileRemove, disabled
   const handleDrop = (event: React.DragEvent) => {
     event.preventDefault();
     const files = Array.from(event.dataTransfer.files);
-    
-    // Simular evento de input
-    const mockEvent = {
-      target: { files }
-    } as React.ChangeEvent<HTMLInputElement>;
-    
-    handleFileSelect(mockEvent);
+    if (files.length > 0) {
+      processFiles(files);
+    }
   };
 
   const handleDragOver = (event: React.DragEvent) => {

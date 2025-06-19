@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -7,6 +6,15 @@ interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  attachments?: MessageAttachment[];
+}
+
+interface MessageAttachment {
+  name: string;
+  type: 'image' | 'document';
+  url?: string;
+  base64?: string;
+  size: number;
 }
 
 interface ChatSession {
@@ -34,13 +42,49 @@ export const useIntelligentChat = () => {
       : firstMessage;
   };
 
-  const sendMessage = useCallback(async (content: string) => {
-    if (!content.trim()) return;
+  const processFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const sendMessage = useCallback(async (content: string, files?: File[]) => {
+    if (!content.trim() && (!files || files.length === 0)) return;
+
+    let attachments: MessageAttachment[] = [];
+
+    // Processar arquivos se fornecidos
+    if (files && files.length > 0) {
+      try {
+        attachments = await Promise.all(
+          files.map(async (file) => {
+            const base64 = await processFileToBase64(file);
+            return {
+              name: file.name,
+              type: file.type.startsWith('image/') ? 'image' as const : 'document' as const,
+              base64,
+              size: file.size
+            };
+          })
+        );
+      } catch (error) {
+        toast({
+          title: "Erro",
+          description: "Erro ao processar arquivos. Tente novamente.",
+          variant: "destructive"
+        });
+        return;
+      }
+    }
 
     const userMessage: ChatMessage = {
       role: 'user',
-      content: content.trim(),
-      timestamp: new Date()
+      content: content.trim() || (attachments.length > 0 ? 'Arquivo(s) enviado(s)' : ''),
+      timestamp: new Date(),
+      attachments: attachments.length > 0 ? attachments : undefined
     };
 
     // Se for a primeira mensagem, criar nova sessão
@@ -54,12 +98,17 @@ export const useIntelligentChat = () => {
     setIsLoading(true);
 
     try {
+      // Preparar dados para a API
+      const apiMessages = [...messages, userMessage].map(msg => ({
+        role: msg.role,
+        content: msg.content,
+        attachments: msg.attachments
+      }));
+
       const { data, error } = await supabase.functions.invoke('intelligent-chat', {
         body: {
-          messages: [...messages, userMessage].map(msg => ({
-            role: msg.role,
-            content: msg.content
-          }))
+          messages: apiMessages,
+          hasAttachments: attachments.length > 0
         }
       });
 
@@ -92,7 +141,7 @@ export const useIntelligentChat = () => {
       // Salvar sessão no localStorage
       const session: ChatSession = {
         id: sessionId,
-        title: messages.length === 0 ? generateSessionTitle(content) : 
+        title: messages.length === 0 ? generateSessionTitle(content || 'Conversa com arquivos') : 
                sessions.find(s => s.id === sessionId)?.title || 'Nova Conversa',
         messages: updatedMessages,
         createdAt: sessions.find(s => s.id === sessionId)?.createdAt || new Date(),

@@ -51,11 +51,55 @@ serve(async (req) => {
       });
     }
 
-    const { messages, stream = false } = await req.json();
+    const { messages, hasAttachments = false } = await req.json();
 
     if (!messages || !Array.isArray(messages)) {
       throw new Error('Messages array is required');
     }
+
+    // Processar mensagens com anexos
+    const processedMessages = messages.map((msg: any) => {
+      const openAIMessage: any = {
+        role: msg.role,
+        content: []
+      };
+
+      // Adicionar conteúdo de texto
+      if (msg.content && msg.content.trim()) {
+        openAIMessage.content.push({
+          type: 'text',
+          text: msg.content
+        });
+      }
+
+      // Adicionar anexos se existirem
+      if (msg.attachments && msg.attachments.length > 0) {
+        msg.attachments.forEach((attachment: any) => {
+          if (attachment.type === 'image' && attachment.base64) {
+            openAIMessage.content.push({
+              type: 'image_url',
+              image_url: {
+                url: attachment.base64,
+                detail: 'high'
+              }
+            });
+          } else if (attachment.type === 'document') {
+            // Para documentos, adicionar como texto descritivo
+            openAIMessage.content.push({
+              type: 'text',
+              text: `[Documento anexado: ${attachment.name}]`
+            });
+          }
+        });
+      }
+
+      // Se não há conteúdo, adicionar placeholder
+      if (openAIMessage.content.length === 0) {
+        openAIMessage.content = 'Arquivo enviado';
+      }
+
+      return openAIMessage;
+    });
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -64,33 +108,23 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-4o', // Usar GPT-4o para suporte a visão
         messages: [
           {
             role: 'system',
-            content: 'Você é um assistente inteligente avançado, similar ao ChatGPT Plus. Forneça respostas detalhadas, precisas e úteis. Você pode ajudar com análises, criação de conteúdo, programação, matemática, pesquisa e muito mais. Responda sempre em português brasileiro, a menos que especificamente solicitado em outro idioma.'
+            content: hasAttachments 
+              ? 'Você é um assistente inteligente avançado com capacidade de análise de imagens e documentos. Forneça respostas detalhadas, precisas e úteis baseadas no texto e nos arquivos fornecidos. Quando analisar imagens, descreva o que você vê de forma detalhada. Para documentos, extraia e analise as informações relevantes. Responda sempre em português brasileiro.'
+              : 'Você é um assistente inteligente avançado, similar ao ChatGPT Plus. Forneça respostas detalhadas, precisas e úteis. Você pode ajudar com análises, criação de conteúdo, programação, matemática, pesquisa e muito mais. Responda sempre em português brasileiro, a menos que especificamente solicitado em outro idioma.'
           },
-          ...messages
+          ...processedMessages
         ],
         temperature: 0.7,
-        max_tokens: 4000,
-        stream: stream
+        max_tokens: 4000
       }),
     });
 
     if (!response.ok) {
       throw new Error(`OpenAI API error: ${response.statusText}`);
-    }
-
-    if (stream) {
-      return new Response(response.body, {
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          'Connection': 'keep-alive',
-        },
-      });
     }
 
     const data = await response.json();

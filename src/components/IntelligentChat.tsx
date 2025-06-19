@@ -4,14 +4,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Send, Plus, MessageCircle, Trash2, Crown, User, Bot } from 'lucide-react';
+import { Send, Plus, MessageCircle, Trash2, Crown, User, Bot, Image, FileText } from 'lucide-react';
 import { useIntelligentChat } from '@/hooks/useIntelligentChat';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { FileUpload, FileWithPreview } from '@/components/chat/FileUpload';
 
 const IntelligentChat: React.FC = () => {
   const [inputMessage, setInputMessage] = useState('');
+  const [selectedFiles, setSelectedFiles] = useState<FileWithPreview[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const {
     messages,
@@ -35,10 +37,20 @@ const IntelligentChat: React.FC = () => {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputMessage.trim() || isLoading) return;
+    if ((!inputMessage.trim() && selectedFiles.length === 0) || isLoading) return;
 
-    await sendMessage(inputMessage);
+    const files = selectedFiles.map(f => f.file);
+    await sendMessage(inputMessage, files);
     setInputMessage('');
+    setSelectedFiles([]);
+  };
+
+  const handleFileSelect = (files: FileWithPreview[]) => {
+    setSelectedFiles(prev => [...prev, ...files]);
+  };
+
+  const handleFileRemove = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const formatMessage = (content: string) => {
@@ -48,6 +60,36 @@ const IntelligentChat: React.FC = () => {
         {index < content.split('\n').length - 1 && <br />}
       </span>
     ));
+  };
+
+  const renderAttachments = (attachments?: any[]) => {
+    if (!attachments || attachments.length === 0) return null;
+
+    return (
+      <div className="flex flex-wrap gap-2 mt-2">
+        {attachments.map((attachment, index) => (
+          <div key={index} className="flex items-center gap-2 p-2 bg-gray-100 rounded-lg">
+            {attachment.type === 'image' ? (
+              <>
+                <Image className="w-4 h-4 text-blue-600" />
+                {attachment.base64 && (
+                  <img 
+                    src={attachment.base64} 
+                    alt={attachment.name}
+                    className="w-16 h-16 object-cover rounded border ml-2"
+                  />
+                )}
+              </>
+            ) : (
+              <FileText className="w-4 h-4 text-green-600" />
+            )}
+            <span className="text-xs text-gray-600 truncate max-w-32">
+              {attachment.name}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
   };
 
   return (
@@ -139,7 +181,7 @@ const IntelligentChat: React.FC = () => {
                   Como posso ajudá-lo hoje?
                 </h2>
                 <p className="text-gray-600 text-center max-w-md">
-                  Sou um assistente de IA avançado. Posso ajudá-lo com análises, criação de conteúdo, programação, matemática e muito mais.
+                  Sou um assistente de IA avançado. Posso analisar imagens, documentos, e ajudá-lo com análises, criação de conteúdo, programação, matemática e muito mais.
                 </p>
               </div>
             ) : (
@@ -168,6 +210,7 @@ const IntelligentChat: React.FC = () => {
                           <div className="text-gray-900 whitespace-pre-wrap">
                             {formatMessage(message.content)}
                           </div>
+                          {renderAttachments(message.attachments)}
                         </div>
                       </div>
                     </div>
@@ -205,18 +248,39 @@ const IntelligentChat: React.FC = () => {
         {/* Input de mensagem */}
         <div className="border-t border-gray-200 bg-white p-4">
           <div className="max-w-3xl mx-auto">
+            {/* Upload de arquivos */}
+            {selectedFiles.length > 0 && (
+              <div className="mb-4">
+                <FileUpload
+                  onFileSelect={handleFileSelect}
+                  selectedFiles={selectedFiles}
+                  onFileRemove={handleFileRemove}
+                  disabled={isLoading}
+                />
+              </div>
+            )}
+            
             <form onSubmit={handleSendMessage} className="relative">
               <div className="relative flex items-center">
+                <div className="absolute left-3 flex items-center">
+                  <FileUpload
+                    onFileSelect={handleFileSelect}
+                    selectedFiles={[]}
+                    onFileRemove={() => {}}
+                    disabled={isLoading}
+                  />
+                </div>
+                
                 <Input
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   placeholder="Envie uma mensagem para o ChatGPT"
                   disabled={isLoading}
-                  className="pr-12 py-3 text-base bg-white text-black border-gray-300 rounded-xl focus:border-gray-400 focus:ring-0"
+                  className="pl-12 pr-12 py-3 text-base bg-white text-black border-gray-300 rounded-xl focus:border-gray-400 focus:ring-0"
                 />
                 <Button 
                   type="submit" 
-                  disabled={isLoading || !inputMessage.trim()}
+                  disabled={isLoading || (!inputMessage.trim() && selectedFiles.length === 0)}
                   size="sm"
                   className="absolute right-2 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-300 rounded-lg p-2"
                 >

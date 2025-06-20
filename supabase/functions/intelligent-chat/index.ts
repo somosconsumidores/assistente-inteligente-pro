@@ -1,4 +1,5 @@
 
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
@@ -38,15 +39,48 @@ const isImageTransformationRequest = (content: string, hasAttachments: boolean):
   return transformKeywords.some(keyword => lowerContent.includes(keyword));
 };
 
-// Função para converter base64 para blob
-const base64ToBlob = (base64Data: string): Uint8Array => {
-  const base64 = base64Data.split(',')[1]; // Remove data:image/...;base64,
-  const binaryString = atob(base64);
-  const bytes = new Uint8Array(binaryString.length);
-  for (let i = 0; i < binaryString.length; i++) {
-    bytes[i] = binaryString.charCodeAt(i);
+// Função para analisar imagem usando GPT-4o Vision
+const analyzeImageWithVision = async (imageBase64: string): Promise<string> => {
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${openAIApiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o',
+      messages: [
+        {
+          role: 'system',
+          content: 'Você é um especialista em análise de imagens. Analise a imagem fornecida e forneça uma descrição extremamente detalhada, incluindo objetos, pessoas, poses, cores, composição, iluminação, ambiente, estilo visual atual, e qualquer detalhe relevante que ajudaria a recriar a essência da imagem em um estilo diferente.'
+        },
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: 'Analise esta imagem em detalhes para que eu possa recriá-la em um estilo diferente, preservando todos os elementos importantes:'
+            },
+            {
+              type: 'image_url',
+              image_url: {
+                url: imageBase64,
+                detail: 'high'
+              }
+            }
+          ]
+        }
+      ],
+      max_tokens: 1000
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Erro na análise da imagem: ${response.statusText}`);
   }
-  return bytes;
+
+  const data = await response.json();
+  return data.choices[0].message.content;
 };
 
 serve(async (req) => {
@@ -102,7 +136,7 @@ serve(async (req) => {
 
     // Processar transformação de imagem
     if (isTransformRequest) {
-      console.log('Processando transformação de imagem para prompt:', lastMessage.content);
+      console.log('Processando transformação real de imagem para prompt:', lastMessage.content);
       
       // Encontrar a imagem anexada
       const imageAttachment = lastMessage.attachments?.find((att: any) => att.type === 'image' && att.base64);
@@ -111,38 +145,88 @@ serve(async (req) => {
         throw new Error('Nenhuma imagem encontrada para transformação');
       }
 
-      // Usar DALL-E 3 para criar uma nova imagem baseada na descrição + transformação
-      const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${openAIApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'dall-e-3',
-          prompt: `Create an image based on this request: ${lastMessage.content}. Make it high quality and detailed.`,
-          n: 1,
-          size: '1024x1024',
-          quality: 'hd'
-        }),
-      });
+      try {
+        // Analisar a imagem original usando GPT-4o Vision
+        console.log('Analisando imagem original...');
+        const imageAnalysis = await analyzeImageWithVision(imageAttachment.base64);
+        console.log('Análise da imagem:', imageAnalysis);
 
-      if (!imageResponse.ok) {
-        const errorData = await imageResponse.text();
-        console.error('OpenAI Image API error:', errorData);
-        throw new Error(`Erro na transformação de imagem: ${imageResponse.statusText}`);
+        // Criar prompt combinado baseado na análise + estilo solicitado
+        const transformationPrompt = `Baseado nesta descrição detalhada da imagem original: "${imageAnalysis}"
+
+Agora crie uma nova imagem que mantenha todos os elementos principais, composição, poses e características descritas, mas ${lastMessage.content.toLowerCase()}.
+
+Mantenha a mesma composição, poses dos personagens/objetos, cores principais adaptadas ao novo estilo, e todos os elementos visuais importantes, apenas aplicando a transformação de estilo solicitada.`;
+
+        console.log('Prompt de transformação:', transformationPrompt);
+
+        // Gerar nova imagem usando DALL-E 3 com o prompt inteligente
+        const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${openAIApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'dall-e-3',
+            prompt: transformationPrompt,
+            n: 1,
+            size: '1024x1024',
+            quality: 'hd'
+          }),
+        });
+
+        if (!imageResponse.ok) {
+          const errorData = await imageResponse.text();
+          console.error('OpenAI Image API error:', errorData);
+          throw new Error(`Erro na transformação de imagem: ${imageResponse.statusText}`);
+        }
+
+        const imageData = await imageResponse.json();
+        
+        return new Response(JSON.stringify({
+          message: 'Aqui está sua imagem transformada! Analisei a imagem original e recriou preservando os elementos principais no novo estilo solicitado.',
+          imageUrl: imageData.data[0].url,
+          isImageGeneration: true,
+          isTransformation: true
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+
+      } catch (analysisError) {
+        console.error('Erro na análise da imagem:', analysisError);
+        
+        // Fallback para o método anterior se a análise falhar
+        const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${openAIApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'dall-e-3',
+            prompt: `Create an image based on this request: ${lastMessage.content}. Make it high quality and detailed.`,
+            n: 1,
+            size: '1024x1024',
+            quality: 'hd'
+          }),
+        });
+
+        if (!imageResponse.ok) {
+          throw new Error(`Erro na transformação de imagem: ${imageResponse.statusText}`);
+        }
+
+        const imageData = await imageResponse.json();
+        
+        return new Response(JSON.stringify({
+          message: 'Aqui está a imagem transformada (usando método alternativo).',
+          imageUrl: imageData.data[0].url,
+          isImageGeneration: true,
+          isTransformation: true
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
       }
-
-      const imageData = await imageResponse.json();
-      
-      return new Response(JSON.stringify({
-        message: 'Aqui está a imagem transformada conforme solicitado!',
-        imageUrl: imageData.data[0].url,
-        isImageGeneration: true,
-        isTransformation: true
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
     }
 
     if (isImageRequest) {
@@ -233,8 +317,8 @@ serve(async (req) => {
           {
             role: 'system',
             content: hasAttachments 
-              ? 'Você é um assistente inteligente avançado com capacidade de análise de imagens e documentos. Forneça respostas detalhadas, precisas e úteis baseadas no texto e nos arquivos fornecidos. Quando analisar imagens, descreva o que você vê de forma detalhada. Para documentos, extraia e analise as informações relevantes. Responda sempre em português brasileiro. IMPORTANTE: Para transformar imagens em estilos específicos (como Pixar 3D, cartoon, etc.), informe que você pode analisar a imagem e sugerir uma nova criação, mas para transformações diretas recomende usar comandos como "crie uma imagem no estilo [estilo] baseada nesta imagem".'
-              : 'Você é um assistente inteligente avançado, similar ao ChatGPT Plus. Forneça respostas detalhadas, precisas e úteis. Você pode ajudar com análises, criação de conteúdo, programação, matemática, pesquisa e muito mais. Responda sempre em português brasileiro, a menos que especificamente solicitado em outro idioma. IMPORTANTE: Se o usuário solicitar geração de imagens, informe que deve usar palavras-chave como "gere uma imagem", "criar uma imagem", "desenhe" ou similares para ativar a funcionalidade de geração de imagens. Para transformações de imagem, elas podem enviar uma imagem e pedir para "transformar no estilo [estilo]" ou "converter para [estilo]".'
+              ? 'Você é um assistente inteligente avançado com capacidade de análise de imagens e documentos. Forneça respostas detalhadas, precisas e úteis baseadas no texto e nos arquivos fornecidos. Quando analisar imagens, descreva o que você vê de forma detalhada. Para documentos, extraia e analise as informações relevantes. Responda sempre em português brasileiro. IMPORTANTE: Para transformar imagens, você agora analisa a imagem original e recria ela no estilo solicitado. Use comandos como "transforme esta imagem no estilo [estilo]" para ativar a funcionalidade de transformação inteligente.'
+              : 'Você é um assistente inteligente avançado, similar ao ChatGPT Plus. Forneça respostas detalhadas, precisas e úteis. Você pode ajudar com análises, criação de conteúdo, programação, matemática, pesquisa e muito mais. Responda sempre em português brasileiro, a menos que especificamente solicitado em outro idioma. IMPORTANTE: Se o usuário solicitar geração de imagens, informe que deve usar palavras-chave como "gere uma imagem", "criar uma imagem", "desenhe" ou similares para ativar a funcionalidade de geração de imagens. Para transformações de imagem, elas podem enviar uma imagem e pedir para "transformar no estilo [estilo]" - agora você analisa a imagem original e a recria no novo estilo.'
           },
           ...processedMessages
         ],
@@ -266,3 +350,4 @@ serve(async (req) => {
     });
   }
 });
+

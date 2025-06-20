@@ -1,9 +1,10 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Send, Plus, MessageCircle, Trash2, Crown, User, Bot, Image, FileText, Download, Palette } from 'lucide-react';
+import { Send, Plus, MessageCircle, Trash2, Crown, User, Bot, Image, FileText, Download, Palette, Sparkles } from 'lucide-react';
 import { useIntelligentChat } from '@/hooks/useIntelligentChat';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -99,8 +100,11 @@ const IntelligentChat: React.FC = () => {
         <div className="flex items-center gap-2 mb-3">
           {isTransformation ? (
             <>
-              <Palette className="w-4 h-4 text-purple-600" />
-              <span className="text-sm font-medium text-gray-700">Imagem Transformada</span>
+              <Sparkles className="w-4 h-4 text-purple-600" />
+              <span className="text-sm font-medium text-gray-700">Transformação Inteligente</span>
+              <Badge variant="outline" className="text-xs text-purple-600 border-purple-200 bg-purple-50">
+                Análise + Recriação
+              </Badge>
             </>
           ) : (
             <>
@@ -131,6 +135,11 @@ const IntelligentChat: React.FC = () => {
             </Button>
           </div>
         </div>
+        {isTransformation && (
+          <div className="mt-2 text-xs text-gray-600 bg-purple-50 p-2 rounded">
+            💡 Esta imagem foi criada analisando sua foto original e recriando-a no estilo solicitado
+          </div>
+        )}
       </div>
     );
   };
@@ -139,7 +148,6 @@ const IntelligentChat: React.FC = () => {
     <div className="flex h-screen bg-white">
       {/* Sidebar */}
       <div className="w-64 bg-gray-900 flex flex-col border-r border-gray-700">
-        {/* Header da Sidebar */}
         <div className="p-3 border-b border-gray-700">
           <Button 
             onClick={startNewChat}
@@ -150,7 +158,6 @@ const IntelligentChat: React.FC = () => {
           </Button>
         </div>
 
-        {/* Lista de Sessões */}
         <ScrollArea className="flex-1 px-2 py-2">
           <div className="space-y-1">
             {sessions.map((session) => (
@@ -192,7 +199,6 @@ const IntelligentChat: React.FC = () => {
           </div>
         </ScrollArea>
 
-        {/* Footer da Sidebar */}
         <div className="p-3 border-t border-gray-700">
           <div className="flex items-center gap-2 text-xs text-gray-400">
             <Crown className="w-3.5 h-3.5 text-yellow-500" />
@@ -203,7 +209,6 @@ const IntelligentChat: React.FC = () => {
 
       {/* Área Principal */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white">
           <div className="flex items-center gap-3">
             <h1 className="text-xl font-semibold text-gray-900">ChatGPT 4</h1>
@@ -215,13 +220,12 @@ const IntelligentChat: React.FC = () => {
               Geração de Imagens
             </Badge>
             <Badge variant="outline" className="text-xs text-purple-600 border-purple-200 bg-purple-50 px-2 py-1">
-              <Palette className="w-3 h-3 mr-1" />
-              Transformação
+              <Sparkles className="w-3 h-3 mr-1" />
+              Transformação Inteligente
             </Badge>
           </div>
         </div>
 
-        {/* Área de Mensagens */}
         <ScrollArea className="flex-1 bg-white">
           <div className="max-w-3xl mx-auto w-full">
             {messages.length === 0 ? (
@@ -247,11 +251,11 @@ const IntelligentChat: React.FC = () => {
                   </div>
                   <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <Palette className="w-4 h-4 text-purple-600" />
-                      <span className="text-sm font-medium text-purple-800">Transformação de Imagens</span>
+                      <Sparkles className="w-4 h-4 text-purple-600" />
+                      <span className="text-sm font-medium text-purple-800">Transformação Inteligente</span>
                     </div>
                     <p className="text-sm text-purple-700">
-                      Envie uma imagem e peça "transformar no estilo Pixar 3D", "converter para cartoon" ou "no estilo realista".
+                      Envie uma imagem e peça "transforme no estilo Pixar 3D". Eu analiso sua foto e a recrio no estilo desejado!
                     </p>
                   </div>
                 </div>
@@ -319,7 +323,6 @@ const IntelligentChat: React.FC = () => {
         {/* Área de Input */}
         <div className="border-t border-gray-200 bg-white">
           <div className="max-w-3xl mx-auto p-4">
-            {/* Preview de arquivos selecionados */}
             {selectedFiles.length > 0 && (
               <div className="mb-4 p-3 bg-gray-50 rounded-lg">
                 <div className="flex flex-wrap gap-2">
@@ -365,7 +368,6 @@ const IntelligentChat: React.FC = () => {
               </div>
             )}
             
-            {/* Input de mensagem */}
             <form onSubmit={handleSendMessage} className="relative">
               <div className="relative flex items-end gap-2">
                 <div className="flex-1 relative">
@@ -399,7 +401,7 @@ const IntelligentChat: React.FC = () => {
             </form>
             
             <div className="mt-2 text-xs text-gray-500 text-center">
-              O ChatGPT pode cometer erros. Considere verificar informações importantes. • Use "gere uma imagem" para criar ou "transforme no estilo..." para modificar imagens.
+              O ChatGPT pode cometer erros. Considere verificar informações importantes. • Use "gere uma imagem" para criar ou "transforme no estilo..." para transformação inteligente.
             </div>
           </div>
         </div>
@@ -409,3 +411,4 @@ const IntelligentChat: React.FC = () => {
 };
 
 export default IntelligentChat;
+

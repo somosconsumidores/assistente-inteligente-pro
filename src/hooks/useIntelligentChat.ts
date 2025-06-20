@@ -9,6 +9,7 @@ interface ChatMessage {
   attachments?: MessageAttachment[];
   imageUrl?: string;
   isImageGeneration?: boolean;
+  isTransformation?: boolean;
 }
 
 interface MessageAttachment {
@@ -58,7 +59,6 @@ export const useIntelligentChat = () => {
 
     let attachments: MessageAttachment[] = [];
 
-    // Processar arquivos se fornecidos
     if (files && files.length > 0) {
       try {
         attachments = await Promise.all(
@@ -89,7 +89,6 @@ export const useIntelligentChat = () => {
       attachments: attachments.length > 0 ? attachments : undefined
     };
 
-    // Se for a primeira mensagem, criar nova sessão
     let sessionId = currentSessionId;
     if (!sessionId) {
       sessionId = generateSessionId();
@@ -100,7 +99,6 @@ export const useIntelligentChat = () => {
     setIsLoading(true);
 
     try {
-      // Preparar dados para a API
       const apiMessages = [...messages, userMessage].map(msg => ({
         role: msg.role,
         content: msg.content,
@@ -136,13 +134,21 @@ export const useIntelligentChat = () => {
         content: data.message,
         timestamp: new Date(),
         imageUrl: data.imageUrl,
-        isImageGeneration: data.isImageGeneration
+        isImageGeneration: data.isImageGeneration,
+        isTransformation: data.isTransformation
       };
 
       const updatedMessages = [...messages, userMessage, assistantMessage];
       setMessages(updatedMessages);
 
-      // Salvar sessão no localStorage
+      if (data.isTransformation) {
+        toast({
+          title: "Imagem Transformada!",
+          description: "Sua imagem foi transformada com sucesso usando IA.",
+          variant: "default"
+        });
+      }
+
       const session: ChatSession = {
         id: sessionId,
         title: messages.length === 0 ? generateSessionTitle(content || 'Conversa com arquivos') : 

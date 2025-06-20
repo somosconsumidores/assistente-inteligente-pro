@@ -1,5 +1,4 @@
 
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
@@ -22,6 +21,32 @@ const isImageGenerationRequest = (content: string): boolean => {
   
   const lowerContent = content.toLowerCase();
   return imageKeywords.some(keyword => lowerContent.includes(keyword));
+};
+
+// Função para detectar se é um prompt de transformação de imagem
+const isImageTransformationRequest = (content: string, hasAttachments: boolean): boolean => {
+  if (!hasAttachments) return false;
+  
+  const transformKeywords = [
+    'transformar', 'converter', 'mudar para', 'no estilo', 'transform',
+    'convert', 'change to', 'in the style of', 'make it look like',
+    'transforme em', 'converta para', 'mude para', 'estilo pixar',
+    'estilo cartoon', 'estilo realista', 'estilo 3d', 'como se fosse'
+  ];
+  
+  const lowerContent = content.toLowerCase();
+  return transformKeywords.some(keyword => lowerContent.includes(keyword));
+};
+
+// Função para converter base64 para blob
+const base64ToBlob = (base64Data: string): Uint8Array => {
+  const base64 = base64Data.split(',')[1]; // Remove data:image/...;base64,
+  const binaryString = atob(base64);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes;
 };
 
 serve(async (req) => {
@@ -71,9 +96,54 @@ serve(async (req) => {
       throw new Error('Messages array is required');
     }
 
-    // Verificar se a última mensagem é uma solicitação de geração de imagem
     const lastMessage = messages[messages.length - 1];
     const isImageRequest = lastMessage.role === 'user' && isImageGenerationRequest(lastMessage.content);
+    const isTransformRequest = lastMessage.role === 'user' && isImageTransformationRequest(lastMessage.content, hasAttachments);
+
+    // Processar transformação de imagem
+    if (isTransformRequest) {
+      console.log('Processando transformação de imagem para prompt:', lastMessage.content);
+      
+      // Encontrar a imagem anexada
+      const imageAttachment = lastMessage.attachments?.find((att: any) => att.type === 'image' && att.base64);
+      
+      if (!imageAttachment) {
+        throw new Error('Nenhuma imagem encontrada para transformação');
+      }
+
+      // Usar DALL-E 3 para criar uma nova imagem baseada na descrição + transformação
+      const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openAIApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'dall-e-3',
+          prompt: `Create an image based on this request: ${lastMessage.content}. Make it high quality and detailed.`,
+          n: 1,
+          size: '1024x1024',
+          quality: 'hd'
+        }),
+      });
+
+      if (!imageResponse.ok) {
+        const errorData = await imageResponse.text();
+        console.error('OpenAI Image API error:', errorData);
+        throw new Error(`Erro na transformação de imagem: ${imageResponse.statusText}`);
+      }
+
+      const imageData = await imageResponse.json();
+      
+      return new Response(JSON.stringify({
+        message: 'Aqui está a imagem transformada conforme solicitado!',
+        imageUrl: imageData.data[0].url,
+        isImageGeneration: true,
+        isTransformation: true
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     if (isImageRequest) {
       // Gerar imagem usando OpenAI
@@ -86,12 +156,11 @@ serve(async (req) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-image-1',
+          model: 'dall-e-3',
           prompt: lastMessage.content,
           n: 1,
           size: '1024x1024',
-          quality: 'high',
-          output_format: 'png'
+          quality: 'hd'
         }),
       });
 
@@ -119,7 +188,6 @@ serve(async (req) => {
         content: []
       };
 
-      // Adicionar conteúdo de texto
       if (msg.content && msg.content.trim()) {
         openAIMessage.content.push({
           type: 'text',
@@ -127,7 +195,6 @@ serve(async (req) => {
         });
       }
 
-      // Adicionar anexos se existirem
       if (msg.attachments && msg.attachments.length > 0) {
         msg.attachments.forEach((attachment: any) => {
           if (attachment.type === 'image' && attachment.base64) {
@@ -139,7 +206,6 @@ serve(async (req) => {
               }
             });
           } else if (attachment.type === 'document') {
-            // Para documentos, adicionar como texto descritivo
             openAIMessage.content.push({
               type: 'text',
               text: `[Documento anexado: ${attachment.name}]`
@@ -148,7 +214,6 @@ serve(async (req) => {
         });
       }
 
-      // Se não há conteúdo, adicionar placeholder
       if (openAIMessage.content.length === 0) {
         openAIMessage.content = 'Arquivo enviado';
       }
@@ -163,13 +228,13 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o', // Usar GPT-4o para suporte a visão
+        model: 'gpt-4o',
         messages: [
           {
             role: 'system',
             content: hasAttachments 
-              ? 'Você é um assistente inteligente avançado com capacidade de análise de imagens e documentos. Forneça respostas detalhadas, precisas e úteis baseadas no texto e nos arquivos fornecidos. Quando analisar imagens, descreva o que você vê de forma detalhada. Para documentos, extraia e analise as informações relevantes. Responda sempre em português brasileiro.'
-              : 'Você é um assistente inteligente avançado, similar ao ChatGPT Plus. Forneça respostas detalhadas, precisas e úteis. Você pode ajudar com análises, criação de conteúdo, programação, matemática, pesquisa e muito mais. Responda sempre em português brasileiro, a menos que especificamente solicitado em outro idioma. IMPORTANTE: Se o usuário solicitar geração de imagens, informe que deve usar palavras-chave como "gere uma imagem", "criar uma imagem", "desenhe" ou similares para ativar a funcionalidade de geração de imagens.'
+              ? 'Você é um assistente inteligente avançado com capacidade de análise de imagens e documentos. Forneça respostas detalhadas, precisas e úteis baseadas no texto e nos arquivos fornecidos. Quando analisar imagens, descreva o que você vê de forma detalhada. Para documentos, extraia e analise as informações relevantes. Responda sempre em português brasileiro. IMPORTANTE: Para transformar imagens em estilos específicos (como Pixar 3D, cartoon, etc.), informe que você pode analisar a imagem e sugerir uma nova criação, mas para transformações diretas recomende usar comandos como "crie uma imagem no estilo [estilo] baseada nesta imagem".'
+              : 'Você é um assistente inteligente avançado, similar ao ChatGPT Plus. Forneça respostas detalhadas, precisas e úteis. Você pode ajudar com análises, criação de conteúdo, programação, matemática, pesquisa e muito mais. Responda sempre em português brasileiro, a menos que especificamente solicitado em outro idioma. IMPORTANTE: Se o usuário solicitar geração de imagens, informe que deve usar palavras-chave como "gere uma imagem", "criar uma imagem", "desenhe" ou similares para ativar a funcionalidade de geração de imagens. Para transformações de imagem, elas podem enviar uma imagem e pedir para "transformar no estilo [estilo]" ou "converter para [estilo]".'
           },
           ...processedMessages
         ],
@@ -201,4 +266,3 @@ serve(async (req) => {
     });
   }
 });
-

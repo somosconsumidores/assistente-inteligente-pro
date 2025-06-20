@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Send, Plus, MessageCircle, Trash2, Crown, User, Bot, Image, FileText } from 'lucide-react';
+import { Send, Plus, MessageCircle, Trash2, Crown, User, Bot, Image, FileText, Download } from 'lucide-react';
 import { useIntelligentChat } from '@/hooks/useIntelligentChat';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -91,6 +91,41 @@ const IntelligentChat: React.FC = () => {
     );
   };
 
+  const renderGeneratedImage = (imageUrl?: string, isImageGeneration?: boolean) => {
+    if (!imageUrl || !isImageGeneration) return null;
+
+    return (
+      <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+        <div className="flex items-center gap-2 mb-3">
+          <Image className="w-4 h-4 text-blue-600" />
+          <span className="text-sm font-medium text-gray-700">Imagem Gerada</span>
+        </div>
+        <div className="relative group">
+          <img 
+            src={imageUrl} 
+            alt="Imagem gerada por IA"
+            className="w-full max-w-md rounded-lg border shadow-sm"
+          />
+          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                const link = document.createElement('a');
+                link.href = imageUrl;
+                link.download = `imagem-gerada-${Date.now()}.png`;
+                link.click();
+              }}
+              className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
+            >
+              <Download className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="flex h-screen bg-white">
       {/* Sidebar */}
@@ -166,6 +201,10 @@ const IntelligentChat: React.FC = () => {
             <Badge variant="outline" className="text-xs text-green-600 border-green-200 bg-green-50 px-2 py-1">
               Online
             </Badge>
+            <Badge variant="outline" className="text-xs text-blue-600 border-blue-200 bg-blue-50 px-2 py-1">
+              <Image className="w-3 h-3 mr-1" />
+              Geração de Imagens
+            </Badge>
           </div>
         </div>
 
@@ -180,9 +219,18 @@ const IntelligentChat: React.FC = () => {
                 <h2 className="text-2xl font-semibold text-gray-900 mb-3 text-center">
                   Como posso ajudá-lo hoje?
                 </h2>
-                <p className="text-gray-600 text-center max-w-md leading-relaxed">
+                <p className="text-gray-600 text-center max-w-md leading-relaxed mb-4">
                   Sou um assistente de IA avançado. Posso analisar imagens, documentos, e ajudá-lo com análises, criação de conteúdo, programação, matemática e muito mais.
                 </p>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-md">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Image className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm font-medium text-blue-800">Nova funcionalidade!</span>
+                  </div>
+                  <p className="text-sm text-blue-700">
+                    Agora posso gerar imagens! Use frases como "gere uma imagem de...", "criar uma imagem de..." ou "desenhe..." para ativar a geração de imagens.
+                  </p>
+                </div>
               </div>
             ) : (
               <div className="pb-6">
@@ -210,6 +258,7 @@ const IntelligentChat: React.FC = () => {
                           </div>
                         </div>
                         {renderAttachments(message.attachments)}
+                        {renderGeneratedImage(message.imageUrl, message.isImageGeneration)}
                       </div>
                     </div>
                   </div>
@@ -308,7 +357,7 @@ const IntelligentChat: React.FC = () => {
                   <Input
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
-                    placeholder="Envie uma mensagem para o ChatGPT"
+                    placeholder="Envie uma mensagem ou peça para gerar uma imagem..."
                     disabled={isLoading}
                     className="w-full pl-12 pr-4 py-3 min-h-[48px] text-base bg-white border border-gray-300 rounded-xl focus:border-gray-400 focus:ring-2 focus:ring-gray-200 resize-none text-black placeholder:text-gray-500"
                     style={{ paddingTop: '12px', paddingBottom: '12px' }}
@@ -326,7 +375,7 @@ const IntelligentChat: React.FC = () => {
             </form>
             
             <div className="mt-2 text-xs text-gray-500 text-center">
-              O ChatGPT pode cometer erros. Considere verificar informações importantes.
+              O ChatGPT pode cometer erros. Considere verificar informações importantes. • Use palavras como "gere uma imagem" para criar imagens.
             </div>
           </div>
         </div>

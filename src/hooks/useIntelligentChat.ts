@@ -7,6 +7,8 @@ interface ChatMessage {
   content: string;
   timestamp: Date;
   attachments?: MessageAttachment[];
+  imageUrl?: string;
+  isImageGeneration?: boolean;
 }
 
 interface MessageAttachment {
@@ -132,7 +134,9 @@ export const useIntelligentChat = () => {
       const assistantMessage: ChatMessage = {
         role: 'assistant',
         content: data.message,
-        timestamp: new Date()
+        timestamp: new Date(),
+        imageUrl: data.imageUrl,
+        isImageGeneration: data.isImageGeneration
       };
 
       const updatedMessages = [...messages, userMessage, assistantMessage];

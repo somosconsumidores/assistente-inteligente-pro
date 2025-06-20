@@ -1,4 +1,5 @@
 
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
@@ -9,6 +10,19 @@ const corsHeaders = {
 };
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+
+// Função para detectar se é um prompt de geração de imagem
+const isImageGenerationRequest = (content: string): boolean => {
+  const imageKeywords = [
+    'gere uma imagem', 'criar uma imagem', 'desenhe', 'ilustre',
+    'faça uma imagem', 'generate an image', 'create an image', 'draw',
+    'ilustrar', 'imagem de', 'foto de', 'picture of', 'image of',
+    'visualizar', 'mostrar visualmente', 'criar visual'
+  ];
+  
+  const lowerContent = content.toLowerCase();
+  return imageKeywords.some(keyword => lowerContent.includes(keyword));
+};
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -57,7 +71,48 @@ serve(async (req) => {
       throw new Error('Messages array is required');
     }
 
-    // Processar mensagens com anexos
+    // Verificar se a última mensagem é uma solicitação de geração de imagem
+    const lastMessage = messages[messages.length - 1];
+    const isImageRequest = lastMessage.role === 'user' && isImageGenerationRequest(lastMessage.content);
+
+    if (isImageRequest) {
+      // Gerar imagem usando OpenAI
+      console.log('Gerando imagem para prompt:', lastMessage.content);
+      
+      const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openAIApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-image-1',
+          prompt: lastMessage.content,
+          n: 1,
+          size: '1024x1024',
+          quality: 'high',
+          output_format: 'png'
+        }),
+      });
+
+      if (!imageResponse.ok) {
+        const errorData = await imageResponse.text();
+        console.error('OpenAI Image API error:', errorData);
+        throw new Error(`Erro na geração de imagem: ${imageResponse.statusText}`);
+      }
+
+      const imageData = await imageResponse.json();
+      
+      return new Response(JSON.stringify({
+        message: 'Aqui está a imagem que você solicitou!',
+        imageUrl: imageData.data[0].url,
+        isImageGeneration: true
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Processar mensagens normais (chat de texto/análise)
     const processedMessages = messages.map((msg: any) => {
       const openAIMessage: any = {
         role: msg.role,
@@ -114,7 +169,7 @@ serve(async (req) => {
             role: 'system',
             content: hasAttachments 
               ? 'Você é um assistente inteligente avançado com capacidade de análise de imagens e documentos. Forneça respostas detalhadas, precisas e úteis baseadas no texto e nos arquivos fornecidos. Quando analisar imagens, descreva o que você vê de forma detalhada. Para documentos, extraia e analise as informações relevantes. Responda sempre em português brasileiro.'
-              : 'Você é um assistente inteligente avançado, similar ao ChatGPT Plus. Forneça respostas detalhadas, precisas e úteis. Você pode ajudar com análises, criação de conteúdo, programação, matemática, pesquisa e muito mais. Responda sempre em português brasileiro, a menos que especificamente solicitado em outro idioma.'
+              : 'Você é um assistente inteligente avançado, similar ao ChatGPT Plus. Forneça respostas detalhadas, precisas e úteis. Você pode ajudar com análises, criação de conteúdo, programação, matemática, pesquisa e muito mais. Responda sempre em português brasileiro, a menos que especificamente solicitado em outro idioma. IMPORTANTE: Se o usuário solicitar geração de imagens, informe que deve usar palavras-chave como "gere uma imagem", "criar uma imagem", "desenhe" ou similares para ativar a funcionalidade de geração de imagens.'
           },
           ...processedMessages
         ],
@@ -146,3 +201,4 @@ serve(async (req) => {
     });
   }
 });
+

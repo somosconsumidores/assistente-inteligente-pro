@@ -100,40 +100,43 @@ export function MobileNavigation() {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-gray-900/95 backdrop-blur-md border-t border-gray-700 safe-area-bottom">
-      <div className="grid grid-cols-7 gap-1 px-1 py-2">
-        {mobileMenuItems.map((item) => {
-          const isItemActive = isActive(item.url);
-          const hasAccess = hasAccessToAssistant(item);
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-gray-900/95 backdrop-blur-md border-t border-gray-700">
+      {/* Safe area spacer */}
+      <div className="pb-safe">
+        <div className="grid grid-cols-7 gap-0.5 px-1 py-2">
+          {mobileMenuItems.map((item) => {
+            const isItemActive = isActive(item.url);
+            const hasAccess = hasAccessToAssistant(item);
 
-          return (
-            <button
-              key={item.title}
-              onClick={() => handleNavigation(item)}
-              disabled={!hasAccess}
-              className={`
-                flex flex-col items-center justify-center py-2 px-1 rounded-lg text-xs font-medium
-                transition-all duration-200 touch-target min-h-[60px]
-                ${isItemActive 
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25' 
-                  : hasAccess 
-                    ? 'text-gray-300 hover:bg-gray-800 hover:text-white active:bg-gray-700' 
-                    : 'text-gray-500 opacity-50'
-                }
-              `}
-            >
-              <item.icon className="w-4 h-4 mb-1" />
-              <span className="text-[9px] leading-tight text-center">
-                {item.title}
-              </span>
-              {!hasAccess && item.isPremium && (
-                <Badge variant="secondary" className="mt-1 text-[7px] px-1 py-0 h-3">
-                  Premium
-                </Badge>
-              )}
-            </button>
-          );
-        })}
+            return (
+              <button
+                key={item.title}
+                onClick={() => handleNavigation(item)}
+                disabled={!hasAccess}
+                className={`
+                  flex flex-col items-center justify-center p-2 rounded-lg text-xs font-medium
+                  transition-all duration-200 min-h-[64px] relative
+                  ${isItemActive 
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25' 
+                    : hasAccess 
+                      ? 'text-gray-300 hover:bg-gray-800 hover:text-white active:bg-gray-700' 
+                      : 'text-gray-500 opacity-50'
+                  }
+                `}
+              >
+                <item.icon className="w-4 h-4 mb-1 flex-shrink-0" />
+                <span className="text-[8px] leading-tight text-center truncate w-full px-0.5">
+                  {item.title}
+                </span>
+                {!hasAccess && item.isPremium && (
+                  <Badge variant="secondary" className="absolute -top-1 -right-1 text-[6px] px-1 py-0 h-3 min-w-0">
+                    Pro
+                  </Badge>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

@@ -9,6 +9,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { FileUpload, FileWithPreview } from '@/components/chat/FileUpload';
+
 const IntelligentChat: React.FC = () => {
   const [inputMessage, setInputMessage] = useState('');
   const [selectedFiles, setSelectedFiles] = useState<FileWithPreview[]>([]);
@@ -24,14 +25,17 @@ const IntelligentChat: React.FC = () => {
     startNewChat,
     deleteSession
   } = useIntelligentChat();
+
   useEffect(() => {
     loadSessions();
   }, [loadSessions]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
       behavior: 'smooth'
     });
   }, [messages]);
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputMessage.trim() && selectedFiles.length === 0 || isLoading) return;
@@ -40,66 +44,128 @@ const IntelligentChat: React.FC = () => {
     setInputMessage('');
     setSelectedFiles([]);
   };
+
   const handleFileSelect = (files: FileWithPreview[]) => {
     setSelectedFiles(prev => [...prev, ...files]);
   };
+
   const handleFileRemove = (index: number) => {
     setSelectedFiles(prev => prev.filter((_, i) => i !== index));
   };
+
   const formatMessage = (content: string) => {
-    return content.split('\n').map((line, index) => <span key={index}>
+    return content.split('\n').map((line, index) => (
+      <span key={index}>
         {line}
         {index < content.split('\n').length - 1 && <br />}
-      </span>);
+      </span>
+    ));
   };
+
+  const downloadImage = async (imageUrl: string, isTransformation?: boolean) => {
+    try {
+      // Fetch the image
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      
+      // Create a temporary URL for the blob
+      const url = window.URL.createObjectURL(blob);
+      
+      // Create a temporary anchor element and trigger download
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${isTransformation ? 'imagem-transformada' : 'imagem-gerada'}-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Erro ao fazer download da imagem:', error);
+      // Fallback: open image in new tab
+      window.open(imageUrl, '_blank');
+    }
+  };
+
   const renderAttachments = (attachments?: any[]) => {
     if (!attachments || attachments.length === 0) return null;
-    return <div className="flex flex-wrap gap-2 mt-3">
-        {attachments.map((attachment, index) => <div key={index} className="flex items-center gap-2 p-2 bg-gray-100 rounded-lg max-w-xs">
-            {attachment.type === 'image' ? <>
+    return (
+      <div className="flex flex-wrap gap-2 mt-3">
+        {attachments.map((attachment, index) => (
+          <div key={index} className="flex items-center gap-2 p-2 bg-gray-100 rounded-lg max-w-xs">
+            {attachment.type === 'image' ? (
+              <>
                 <Image className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                {attachment.base64 && <img src={attachment.base64} alt={attachment.name} className="w-20 h-20 object-cover rounded border" />}
-              </> : <FileText className="w-4 h-4 text-green-600 flex-shrink-0" />}
+                {attachment.base64 && (
+                  <img 
+                    src={attachment.base64} 
+                    alt={attachment.name} 
+                    className="w-20 h-20 object-cover rounded border" 
+                  />
+                )}
+              </>
+            ) : (
+              <FileText className="w-4 h-4 text-green-600 flex-shrink-0" />
+            )}
             <span className="text-xs text-gray-600 truncate flex-1">
               {attachment.name}
             </span>
-          </div>)}
-      </div>;
+          </div>
+        ))}
+      </div>
+    );
   };
+
   const renderGeneratedImage = (imageUrl?: string, isImageGeneration?: boolean, isTransformation?: boolean) => {
     if (!imageUrl || !isImageGeneration) return null;
-    return <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+    
+    return (
+      <div className="mt-4 p-3 bg-gray-50 rounded-lg">
         <div className="flex items-center gap-2 mb-3">
-          {isTransformation ? <>
+          {isTransformation ? (
+            <>
               <Sparkles className="w-4 h-4 text-purple-600" />
               <span className="text-sm font-medium text-gray-700">Transformação Inteligente</span>
               <Badge variant="outline" className="text-xs text-purple-600 border-purple-200 bg-purple-50">
                 Análise + Recriação
               </Badge>
-            </> : <>
+            </>
+          ) : (
+            <>
               <Image className="w-4 h-4 text-blue-600" />
               <span className="text-sm font-medium text-gray-700">Imagem Gerada</span>
-            </>}
+            </>
+          )}
         </div>
         <div className="relative group">
-          <img src={imageUrl} alt={isTransformation ? "Imagem transformada por IA" : "Imagem gerada por IA"} className="w-full max-w-md rounded-lg border shadow-sm" />
+          <img 
+            src={imageUrl} 
+            alt={isTransformation ? "Imagem transformada por IA" : "Imagem gerada por IA"} 
+            className="w-full max-w-md rounded-lg border shadow-sm" 
+          />
           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button variant="secondary" size="sm" onClick={() => {
-            const link = document.createElement('a');
-            link.href = imageUrl;
-            link.download = `${isTransformation ? 'imagem-transformada' : 'imagem-gerada'}-${Date.now()}.png`;
-            link.click();
-          }} className="h-8 w-8 p-0 bg-white/90 hover:bg-white text-slate-950">
+            <Button 
+              variant="secondary" 
+              size="sm" 
+              onClick={() => downloadImage(imageUrl, isTransformation)}
+              className="h-8 w-8 p-0 bg-white/90 hover:bg-white text-slate-950"
+            >
               <Download className="w-4 h-4" />
             </Button>
           </div>
         </div>
-        {isTransformation && <div className="mt-2 text-xs text-gray-600 bg-purple-50 p-2 rounded">
+        {isTransformation && (
+          <div className="mt-2 text-xs text-gray-600 bg-purple-50 p-2 rounded">
             💡 Esta imagem foi criada analisando sua foto original e recriando-a no estilo solicitado
-          </div>}
-      </div>;
+          </div>
+        )}
+      </div>
+    );
   };
-  return <div className="flex h-screen bg-white">
+
+  return (
+    <div className="flex h-screen bg-white">
       {/* Sidebar */}
       <div className="w-64 bg-gray-900 flex flex-col border-r border-gray-700">
         <div className="p-3 border-b border-gray-700">
@@ -291,6 +357,8 @@ const IntelligentChat: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default IntelligentChat;

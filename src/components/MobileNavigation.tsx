@@ -38,6 +38,12 @@ const mobileMenuItems = [
     isPremium: false
   },
   {
+    title: 'Mercado',
+    url: '/supermercado',
+    icon: ShoppingCart,
+    isPremium: false
+  },
+  {
     title: 'Viagens',
     url: '/viagens',
     icon: MapPin,
@@ -95,7 +101,7 @@ export function MobileNavigation() {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-gray-900/95 backdrop-blur-md border-t border-gray-700 safe-area-bottom">
-      <div className="grid grid-cols-6 gap-1 px-2 py-2">
+      <div className="grid grid-cols-7 gap-1 px-1 py-2">
         {mobileMenuItems.map((item) => {
           const isItemActive = isActive(item.url);
           const hasAccess = hasAccessToAssistant(item);
@@ -116,12 +122,12 @@ export function MobileNavigation() {
                 }
               `}
             >
-              <item.icon className="w-5 h-5 mb-1" />
-              <span className="text-[10px] leading-tight text-center">
+              <item.icon className="w-4 h-4 mb-1" />
+              <span className="text-[9px] leading-tight text-center">
                 {item.title}
               </span>
               {!hasAccess && item.isPremium && (
-                <Badge variant="secondary" className="mt-1 text-[8px] px-1 py-0 h-4">
+                <Badge variant="secondary" className="mt-1 text-[7px] px-1 py-0 h-3">
                   Premium
                 </Badge>
               )}

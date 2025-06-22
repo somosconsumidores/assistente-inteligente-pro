@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -27,10 +26,7 @@ const Hero = () => {
           {/* Main Heading */}
           <div className="space-y-4">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-tight">
-              Cansado de Perder Tempo com Pesquisa, Conselhos Ruins e{' '}
-              <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                Decisões Erradas?
-              </span>
+              Biblioteca de Assistentes Inteligentes
             </h1>
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
               Resolva problemas do dia a dia com 5 especialistas digitais que funcionam 24h por dia — de graça.

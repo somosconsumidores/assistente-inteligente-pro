@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { LayoutDashboard, Scale, TrendingUp, Package, ShoppingCart, MapPin } from 'lucide-react';
+import { LayoutDashboard, Scale, TrendingUp, Package, ShoppingCart, MapPin, MessageSquare } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useMobileDeviceInfo } from '@/hooks/use-mobile';
 
@@ -14,34 +14,34 @@ const mobileMenuItems = [
     isPremium: false
   },
   {
+    title: 'Chat IA',
+    url: '/chat-inteligente',
+    icon: MessageSquare,
+    isPremium: true
+  },
+  {
     title: 'Direito',
     url: '/direito-consumidor',
     icon: Scale,
-    isPremium: true
+    isPremium: false
   },
   {
     title: 'Finanças',
     url: '/financas',
     icon: TrendingUp,
-    isPremium: true
+    isPremium: false
   },
   {
     title: 'Produtos',
     url: '/produtos',
     icon: Package,
-    isPremium: true
-  },
-  {
-    title: 'Mercado',
-    url: '/supermercado',
-    icon: ShoppingCart,
-    isPremium: true
+    isPremium: false
   },
   {
     title: 'Viagens',
     url: '/viagens',
     icon: MapPin,
-    isPremium: true
+    isPremium: false
   }
 ];
 
@@ -69,18 +69,36 @@ export function MobileNavigation() {
     }
   };
 
+  const hasAccessToAssistant = (item: typeof mobileMenuItems[0]) => {
+    // Chat Inteligente é premium only
+    if (item.url === '/chat-inteligente') {
+      return isPremiumUser;
+    }
+    
+    // Outros assistentes: premium users têm acesso total, free users precisam ter selecionado
+    if (isPremiumUser) return true;
+    
+    if (!profile?.selected_assistant_id) return false;
+    
+    // Mapear URLs para IDs dos assistentes
+    const urlToAssistantId: { [key: string]: string } = {
+      '/direito-consumidor': 'direito-consumidor',
+      '/financas': 'financas',
+      '/produtos': 'produtos',
+      '/supermercado': 'supermercado',
+      '/viagens': 'viagens'
+    };
+    
+    const assistantId = urlToAssistantId[item.url];
+    return assistantId === profile.selected_assistant_id;
+  };
+
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-gray-900/95 backdrop-blur-md border-t border-gray-700 safe-area-bottom">
       <div className="grid grid-cols-6 gap-1 px-2 py-2">
         {mobileMenuItems.map((item) => {
           const isItemActive = isActive(item.url);
-          const hasAccess = isPremiumUser || !item.isPremium || 
-            (profile?.selected_assistant_id && 
-             ((item.url === '/direito-consumidor' && profile.selected_assistant_id === 'direito') ||
-              (item.url === '/financas' && profile.selected_assistant_id === 'financas') ||
-              (item.url === '/produtos' && profile.selected_assistant_id === 'produtos') ||
-              (item.url === '/supermercado' && profile.selected_assistant_id === 'supermercado') ||
-              (item.url === '/viagens' && profile.selected_assistant_id === 'viagens')));
+          const hasAccess = hasAccessToAssistant(item);
 
           return (
             <button
@@ -102,7 +120,7 @@ export function MobileNavigation() {
               <span className="text-[10px] leading-tight text-center">
                 {item.title}
               </span>
-              {!isPremiumUser && item.isPremium && !hasAccess && (
+              {!hasAccess && item.isPremium && (
                 <Badge variant="secondary" className="mt-1 text-[8px] px-1 py-0 h-4">
                   Premium
                 </Badge>

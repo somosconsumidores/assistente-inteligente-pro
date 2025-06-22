@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +9,6 @@ import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { FileUpload, FileWithPreview } from '@/components/chat/FileUpload';
-
 const IntelligentChat: React.FC = () => {
   const [inputMessage, setInputMessage] = useState('');
   const [selectedFiles, setSelectedFiles] = useState<FileWithPreview[]>([]);
@@ -26,133 +24,86 @@ const IntelligentChat: React.FC = () => {
     startNewChat,
     deleteSession
   } = useIntelligentChat();
-
   useEffect(() => {
     loadSessions();
   }, [loadSessions]);
-
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({
+      behavior: 'smooth'
+    });
   }, [messages]);
-
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if ((!inputMessage.trim() && selectedFiles.length === 0) || isLoading) return;
-
+    if (!inputMessage.trim() && selectedFiles.length === 0 || isLoading) return;
     const files = selectedFiles.map(f => f.file);
     await sendMessage(inputMessage, files);
     setInputMessage('');
     setSelectedFiles([]);
   };
-
   const handleFileSelect = (files: FileWithPreview[]) => {
     setSelectedFiles(prev => [...prev, ...files]);
   };
-
   const handleFileRemove = (index: number) => {
     setSelectedFiles(prev => prev.filter((_, i) => i !== index));
   };
-
   const formatMessage = (content: string) => {
-    return content.split('\n').map((line, index) => (
-      <span key={index}>
+    return content.split('\n').map((line, index) => <span key={index}>
         {line}
         {index < content.split('\n').length - 1 && <br />}
-      </span>
-    ));
+      </span>);
   };
-
   const renderAttachments = (attachments?: any[]) => {
     if (!attachments || attachments.length === 0) return null;
-
-    return (
-      <div className="flex flex-wrap gap-2 mt-3">
-        {attachments.map((attachment, index) => (
-          <div key={index} className="flex items-center gap-2 p-2 bg-gray-100 rounded-lg max-w-xs">
-            {attachment.type === 'image' ? (
-              <>
+    return <div className="flex flex-wrap gap-2 mt-3">
+        {attachments.map((attachment, index) => <div key={index} className="flex items-center gap-2 p-2 bg-gray-100 rounded-lg max-w-xs">
+            {attachment.type === 'image' ? <>
                 <Image className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                {attachment.base64 && (
-                  <img 
-                    src={attachment.base64} 
-                    alt={attachment.name}
-                    className="w-20 h-20 object-cover rounded border"
-                  />
-                )}
-              </>
-            ) : (
-              <FileText className="w-4 h-4 text-green-600 flex-shrink-0" />
-            )}
+                {attachment.base64 && <img src={attachment.base64} alt={attachment.name} className="w-20 h-20 object-cover rounded border" />}
+              </> : <FileText className="w-4 h-4 text-green-600 flex-shrink-0" />}
             <span className="text-xs text-gray-600 truncate flex-1">
               {attachment.name}
             </span>
-          </div>
-        ))}
-      </div>
-    );
+          </div>)}
+      </div>;
   };
-
   const renderGeneratedImage = (imageUrl?: string, isImageGeneration?: boolean, isTransformation?: boolean) => {
     if (!imageUrl || !isImageGeneration) return null;
-
-    return (
-      <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+    return <div className="mt-4 p-3 bg-gray-50 rounded-lg">
         <div className="flex items-center gap-2 mb-3">
-          {isTransformation ? (
-            <>
+          {isTransformation ? <>
               <Sparkles className="w-4 h-4 text-purple-600" />
               <span className="text-sm font-medium text-gray-700">Transformação Inteligente</span>
               <Badge variant="outline" className="text-xs text-purple-600 border-purple-200 bg-purple-50">
                 Análise + Recriação
               </Badge>
-            </>
-          ) : (
-            <>
+            </> : <>
               <Image className="w-4 h-4 text-blue-600" />
               <span className="text-sm font-medium text-gray-700">Imagem Gerada</span>
-            </>
-          )}
+            </>}
         </div>
         <div className="relative group">
-          <img 
-            src={imageUrl} 
-            alt={isTransformation ? "Imagem transformada por IA" : "Imagem gerada por IA"}
-            className="w-full max-w-md rounded-lg border shadow-sm"
-          />
+          <img src={imageUrl} alt={isTransformation ? "Imagem transformada por IA" : "Imagem gerada por IA"} className="w-full max-w-md rounded-lg border shadow-sm" />
           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => {
-                const link = document.createElement('a');
-                link.href = imageUrl;
-                link.download = `${isTransformation ? 'imagem-transformada' : 'imagem-gerada'}-${Date.now()}.png`;
-                link.click();
-              }}
-              className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
-            >
+            <Button variant="secondary" size="sm" onClick={() => {
+            const link = document.createElement('a');
+            link.href = imageUrl;
+            link.download = `${isTransformation ? 'imagem-transformada' : 'imagem-gerada'}-${Date.now()}.png`;
+            link.click();
+          }} className="h-8 w-8 p-0 bg-white/90 hover:bg-white text-slate-950">
               <Download className="w-4 h-4" />
             </Button>
           </div>
         </div>
-        {isTransformation && (
-          <div className="mt-2 text-xs text-gray-600 bg-purple-50 p-2 rounded">
+        {isTransformation && <div className="mt-2 text-xs text-gray-600 bg-purple-50 p-2 rounded">
             💡 Esta imagem foi criada analisando sua foto original e recriando-a no estilo solicitado
-          </div>
-        )}
-      </div>
-    );
+          </div>}
+      </div>;
   };
-
-  return (
-    <div className="flex h-screen bg-white">
+  return <div className="flex h-screen bg-white">
       {/* Sidebar */}
       <div className="w-64 bg-gray-900 flex flex-col border-r border-gray-700">
         <div className="p-3 border-b border-gray-700">
-          <Button 
-            onClick={startNewChat}
-            className="w-full flex items-center justify-center gap-2 bg-transparent border border-gray-600 hover:bg-gray-800 text-white h-11 rounded-md text-sm font-medium"
-          >
+          <Button onClick={startNewChat} className="w-full flex items-center justify-center gap-2 bg-transparent border border-gray-600 hover:bg-gray-800 text-white h-11 rounded-md text-sm font-medium">
             <Plus className="w-4 h-4" />
             Nova conversa
           </Button>
@@ -160,42 +111,25 @@ const IntelligentChat: React.FC = () => {
 
         <ScrollArea className="flex-1 px-2 py-2">
           <div className="space-y-1">
-            {sessions.map((session) => (
-              <div
-                key={session.id}
-                className={`group relative flex items-center px-3 py-2.5 rounded-lg cursor-pointer transition-colors ${
-                  currentSessionId === session.id
-                    ? 'bg-gray-800'
-                    : 'hover:bg-gray-800'
-                }`}
-                onClick={() => loadSession(session.id)}
-              >
+            {sessions.map(session => <div key={session.id} className={`group relative flex items-center px-3 py-2.5 rounded-lg cursor-pointer transition-colors ${currentSessionId === session.id ? 'bg-gray-800' : 'hover:bg-gray-800'}`} onClick={() => loadSession(session.id)}>
                 <MessageCircle className="w-4 h-4 text-gray-400 mr-3 flex-shrink-0" />
                 <span className="text-sm text-gray-300 truncate flex-1 pr-8">
                   {session.title}
                 </span>
                 
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-1 opacity-0 group-hover:opacity-100 p-1.5 h-7 w-7 text-gray-400 hover:text-white hover:bg-gray-700"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    deleteSession(session.id);
-                  }}
-                >
+                <Button variant="ghost" size="sm" className="absolute right-1 opacity-0 group-hover:opacity-100 p-1.5 h-7 w-7 text-gray-400 hover:text-white hover:bg-gray-700" onClick={e => {
+              e.stopPropagation();
+              deleteSession(session.id);
+            }}>
                   <Trash2 className="w-3.5 h-3.5" />
                 </Button>
-              </div>
-            ))}
+              </div>)}
             
-            {sessions.length === 0 && (
-              <div className="px-3 py-8 text-center">
+            {sessions.length === 0 && <div className="px-3 py-8 text-center">
                 <p className="text-sm text-gray-500">
                   Nenhuma conversa ainda
                 </p>
-              </div>
-            )}
+              </div>}
           </div>
         </ScrollArea>
 
@@ -228,8 +162,7 @@ const IntelligentChat: React.FC = () => {
 
         <ScrollArea className="flex-1 bg-white">
           <div className="max-w-3xl mx-auto w-full">
-            {messages.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full py-20">
+            {messages.length === 0 ? <div className="flex flex-col items-center justify-center h-full py-20">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
                   <MessageCircle className="w-8 h-8 text-green-600" />
                 </div>
@@ -259,23 +192,12 @@ const IntelligentChat: React.FC = () => {
                     </p>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className="pb-6">
-                {messages.map((message, index) => (
-                  <div key={index} className="group px-4 py-6 hover:bg-gray-50/50 transition-colors">
+              </div> : <div className="pb-6">
+                {messages.map((message, index) => <div key={index} className="group px-4 py-6 hover:bg-gray-50/50 transition-colors">
                     <div className="max-w-3xl mx-auto flex gap-6">
                       <div className="flex-shrink-0 w-8 h-8">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                          message.role === 'user'
-                            ? 'bg-blue-600'
-                            : 'bg-green-600'
-                        }`}>
-                          {message.role === 'user' ? (
-                            <User className="w-4 h-4 text-white" />
-                          ) : (
-                            <Bot className="w-4 h-4 text-white" />
-                          )}
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${message.role === 'user' ? 'bg-blue-600' : 'bg-green-600'}`}>
+                          {message.role === 'user' ? <User className="w-4 h-4 text-white" /> : <Bot className="w-4 h-4 text-white" />}
                         </div>
                       </div>
                       
@@ -289,11 +211,9 @@ const IntelligentChat: React.FC = () => {
                         {renderGeneratedImage(message.imageUrl, message.isImageGeneration, message.isTransformation)}
                       </div>
                     </div>
-                  </div>
-                ))}
+                  </div>)}
                 
-                {isLoading && (
-                  <div className="group px-4 py-6">
+                {isLoading && <div className="group px-4 py-6">
                     <div className="max-w-3xl mx-auto flex gap-6">
                       <div className="flex-shrink-0 w-8 h-8">
                         <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
@@ -305,16 +225,18 @@ const IntelligentChat: React.FC = () => {
                         <div className="flex items-center gap-2">
                           <div className="flex space-x-1">
                             <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{
+                        animationDelay: '0.1s'
+                      }}></div>
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{
+                        animationDelay: '0.2s'
+                      }}></div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            )}
+                  </div>}
+              </div>}
             
             <div ref={messagesEndRef} />
           </div>
@@ -323,78 +245,41 @@ const IntelligentChat: React.FC = () => {
         {/* Área de Input */}
         <div className="border-t border-gray-200 bg-white">
           <div className="max-w-3xl mx-auto p-4">
-            {selectedFiles.length > 0 && (
-              <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+            {selectedFiles.length > 0 && <div className="mb-4 p-3 bg-gray-50 rounded-lg">
                 <div className="flex flex-wrap gap-2">
-                  {selectedFiles.map((fileWithPreview, index) => (
-                    <div key={index} className="relative group">
-                      {fileWithPreview.type === 'image' && fileWithPreview.preview ? (
-                        <div className="relative">
-                          <img 
-                            src={fileWithPreview.preview} 
-                            alt={fileWithPreview.file.name}
-                            className="w-20 h-20 object-cover rounded-lg border border-gray-200"
-                          />
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => handleFileRemove(index)}
-                            className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
+                  {selectedFiles.map((fileWithPreview, index) => <div key={index} className="relative group">
+                      {fileWithPreview.type === 'image' && fileWithPreview.preview ? <div className="relative">
+                          <img src={fileWithPreview.preview} alt={fileWithPreview.file.name} className="w-20 h-20 object-cover rounded-lg border border-gray-200" />
+                          <Button type="button" variant="destructive" size="sm" onClick={() => handleFileRemove(index)} className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
                             ×
                           </Button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2 p-2 bg-white rounded-lg border border-gray-200">
+                        </div> : <div className="flex items-center gap-2 p-2 bg-white rounded-lg border border-gray-200">
                           <FileText className="w-4 h-4 text-gray-500" />
                           <span className="text-sm text-gray-700 truncate max-w-32">
                             {fileWithPreview.file.name}
                           </span>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleFileRemove(index)}
-                            className="h-5 w-5 p-0 text-gray-400 hover:text-gray-600"
-                          >
+                          <Button type="button" variant="ghost" size="sm" onClick={() => handleFileRemove(index)} className="h-5 w-5 p-0 text-gray-400 hover:text-gray-600">
                             ×
                           </Button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                        </div>}
+                    </div>)}
                 </div>
-              </div>
-            )}
+              </div>}
             
             <form onSubmit={handleSendMessage} className="relative">
               <div className="relative flex items-end gap-2">
                 <div className="flex-1 relative">
                   <div className="absolute left-3 bottom-3 z-10">
-                    <FileUpload
-                      onFileSelect={handleFileSelect}
-                      selectedFiles={[]}
-                      onFileRemove={() => {}}
-                      disabled={isLoading}
-                    />
+                    <FileUpload onFileSelect={handleFileSelect} selectedFiles={[]} onFileRemove={() => {}} disabled={isLoading} />
                   </div>
                   
-                  <Input
-                    value={inputMessage}
-                    onChange={(e) => setInputMessage(e.target.value)}
-                    placeholder="Envie uma mensagem, gere uma imagem ou transforme uma imagem..."
-                    disabled={isLoading}
-                    className="w-full pl-12 pr-4 py-3 min-h-[48px] text-base bg-white border border-gray-300 rounded-xl focus:border-gray-400 focus:ring-2 focus:ring-gray-200 resize-none text-black placeholder:text-gray-500"
-                    style={{ paddingTop: '12px', paddingBottom: '12px' }}
-                  />
+                  <Input value={inputMessage} onChange={e => setInputMessage(e.target.value)} placeholder="Envie uma mensagem, gere uma imagem ou transforme uma imagem..." disabled={isLoading} className="w-full pl-12 pr-4 py-3 min-h-[48px] text-base bg-white border border-gray-300 rounded-xl focus:border-gray-400 focus:ring-2 focus:ring-gray-200 resize-none text-black placeholder:text-gray-500" style={{
+                  paddingTop: '12px',
+                  paddingBottom: '12px'
+                }} />
                 </div>
                 
-                <Button 
-                  type="submit" 
-                  disabled={isLoading || (!inputMessage.trim() && selectedFiles.length === 0)}
-                  className="h-12 w-12 bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 rounded-xl p-0 flex-shrink-0"
-                >
+                <Button type="submit" disabled={isLoading || !inputMessage.trim() && selectedFiles.length === 0} className="h-12 w-12 bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 rounded-xl p-0 flex-shrink-0">
                   <Send className="w-4 h-4 text-gray-600" />
                 </Button>
               </div>
@@ -406,9 +291,6 @@ const IntelligentChat: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default IntelligentChat;
-

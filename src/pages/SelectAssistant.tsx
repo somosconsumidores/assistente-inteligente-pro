@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Crown } from 'lucide-react';
@@ -6,12 +5,19 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useSubscription } from '@/hooks/useSubscription';
 import AssistantPanel from '@/components/AssistantPanel';
-
 const SelectAssistant = () => {
-  const { profile, updateSelectedAssistant } = useAuth();
-  const { toast } = useToast();
+  const {
+    profile,
+    updateSelectedAssistant
+  } = useAuth();
+  const {
+    toast
+  } = useToast();
   const navigate = useNavigate();
-  const { createCheckout, checkSubscription } = useSubscription();
+  const {
+    createCheckout,
+    checkSubscription
+  } = useSubscription();
   const [searchParams] = useSearchParams();
 
   // Handle success/cancel from Stripe
@@ -19,16 +25,18 @@ const SelectAssistant = () => {
     const success = searchParams.get('success');
     const canceled = searchParams.get('canceled');
     const sessionId = searchParams.get('session_id');
-
-    console.log('SelectAssistant URL params:', { success, canceled, sessionId });
-
+    console.log('SelectAssistant URL params:', {
+      success,
+      canceled,
+      sessionId
+    });
     if (success === 'true') {
       console.log('Payment successful, session ID:', sessionId);
       toast({
         title: "Pagamento realizado com sucesso!",
-        description: "Bem-vindo ao plano Premium! Verificando status da assinatura...",
+        description: "Bem-vindo ao plano Premium! Verificando status da assinatura..."
       });
-      
+
       // Check subscription status after successful payment with a delay
       const checkAndUpdate = async () => {
         try {
@@ -36,7 +44,7 @@ const SelectAssistant = () => {
           await checkSubscription();
           toast({
             title: "Plano atualizado!",
-            description: "Agora você tem acesso a todos os assistentes premium!",
+            description: "Agora você tem acesso a todos os assistentes premium!"
           });
         } catch (error) {
           console.error('Error checking subscription:', error);
@@ -47,26 +55,28 @@ const SelectAssistant = () => {
           });
         }
       };
-      
+
       // Wait a bit for Stripe to process and then check
       setTimeout(checkAndUpdate, 3000);
-      
-      // Clean URL after handling
-      navigate('/select-assistant', { replace: true });
-    }
 
+      // Clean URL after handling
+      navigate('/select-assistant', {
+        replace: true
+      });
+    }
     if (canceled === 'true') {
       toast({
         title: "Pagamento cancelado",
         description: "Você pode tentar novamente quando quiser.",
         variant: "destructive"
       });
-      
+
       // Clean URL
-      navigate('/select-assistant', { replace: true });
+      navigate('/select-assistant', {
+        replace: true
+      });
     }
   }, [searchParams, toast, navigate, checkSubscription]);
-
   const handleUpgrade = async () => {
     try {
       await createCheckout();
@@ -74,7 +84,6 @@ const SelectAssistant = () => {
       console.error('Error during upgrade:', error);
     }
   };
-
   const handleSelectAssistant = async (assistantId: string) => {
     try {
       await updateSelectedAssistant(assistantId);
@@ -91,9 +100,7 @@ const SelectAssistant = () => {
       });
     }
   };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+  return <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       {/* Header */}
       <header className="bg-gray-900/95 backdrop-blur-md border-b border-gray-800">
         <div className="container mx-auto mobile-padding py-4 flex items-center justify-between">
@@ -123,52 +130,37 @@ const SelectAssistant = () => {
           </h1>
           <p className="text-lg text-gray-300 mb-6 max-w-3xl mx-auto">
             {(() => {
-              let descriptionText = '';
-              if (profile?.plan === 'premium') {
-                descriptionText = 'Como usuário premium, você tem acesso completo a todos os 5 assistentes especializados!';
-              } else if (profile?.selected_assistant_id) {
-                descriptionText = 'Você já selecionou seu assistente gratuito. Utilize-o abaixo ou faça upgrade para ter acesso a todos!';
-              } else {
-                descriptionText = 'No plano gratuito, você tem direito a escolher UM assistente especializado. Faça sua escolha abaixo.';
-              }
-              return descriptionText;
-            })()}
+            let descriptionText = '';
+            if (profile?.plan === 'premium') {
+              descriptionText = 'Como usuário premium, você tem acesso completo a todos os 5 assistentes especializados!';
+            } else if (profile?.selected_assistant_id) {
+              descriptionText = 'Você já selecionou seu assistente gratuito. Utilize-o abaixo ou faça upgrade para ter acesso a todos!';
+            } else {
+              descriptionText = 'No plano gratuito, você tem direito a escolher UM assistente especializado. Faça sua escolha abaixo.';
+            }
+            return descriptionText;
+          })()}
           </p>
           
-          {profile?.plan !== 'premium' && (
-            <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-500/20 to-red-500/20 text-orange-300 rounded-xl border border-orange-500/30 backdrop-blur-sm">
+          {profile?.plan !== 'premium' && <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-500/20 to-red-500/20 text-orange-300 rounded-xl border border-orange-500/30 backdrop-blur-sm">
               <Crown className="w-5 h-5 mr-2" />
-              <span className="font-medium">Quer acesso a todos os 5 assistentes? </span>
-              <button 
-                onClick={handleUpgrade}
-                className="ml-2 text-orange-400 hover:text-orange-300 font-semibold underline transition-colors"
-              >
+              <span className="font-medium">Quer acesso a todos os 6 assistentes?</span>
+              <button onClick={handleUpgrade} className="ml-2 text-orange-400 hover:text-orange-300 font-semibold underline transition-colors">
                 Fazer upgrade para Premium
               </button>
-            </div>
-          )}
+            </div>}
         </div>
 
         {/* Assistant Panel */}
-        <AssistantPanel 
-          userPlan={profile?.plan as 'free' | 'premium' || 'free'} 
-          onUpgrade={handleUpgrade}
-          selectedAssistantId={profile?.selected_assistant_id} 
-          onSelectAssistant={handleSelectAssistant} 
-        />
+        <AssistantPanel userPlan={profile?.plan as 'free' | 'premium' || 'free'} onUpgrade={handleUpgrade} selectedAssistantId={profile?.selected_assistant_id} onSelectAssistant={handleSelectAssistant} />
 
         {/* Bottom Info */}
         <div className="text-center mt-16">
           <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-blue-300 rounded-full text-sm font-medium border border-blue-500/30 backdrop-blur-sm">
-            {profile?.plan === 'premium' 
-              ? '🚀 Você tem acesso completo a todos os assistentes!' 
-              : '⭐ Upgrade para Premium e desbloqueie todos os assistentes'
-            }
+            {profile?.plan === 'premium' ? '🚀 Você tem acesso completo a todos os assistentes!' : '⭐ Upgrade para Premium e desbloqueie todos os assistentes'}
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default SelectAssistant;

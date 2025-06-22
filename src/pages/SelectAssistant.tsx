@@ -132,11 +132,11 @@ const SelectAssistant = () => {
             {(() => {
             let descriptionText = '';
             if (profile?.plan === 'premium') {
-              descriptionText = 'Como usuário premium, você tem acesso completo a todos os 5 assistentes especializados!';
+              descriptionText = 'Como usuário premium, você tem acesso completo a todos os 6 assistentes especializados!';
             } else if (profile?.selected_assistant_id) {
               descriptionText = 'Você já selecionou seu assistente gratuito. Utilize-o abaixo ou faça upgrade para ter acesso a todos!';
             } else {
-              descriptionText = 'No plano gratuito, você tem direito a escolher UM assistente especializado. Faça sua escolha abaixo.';
+              descriptionText = 'No plano gratuito, você tem direito a escolher UM assistente entre 5 opções especializadas. Faça sua escolha abaixo.';
             }
             return descriptionText;
           })()}

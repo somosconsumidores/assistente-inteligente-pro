@@ -23,10 +23,8 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({
   const navigate = useNavigate();
   const { checkAssistantAccess } = useAssistantAccess();
 
-  // Filtrar assistentes disponíveis para usuários gratuitos
-  const availableAssistants = userPlan === 'premium' 
-    ? assistants 
-    : assistants.filter(assistant => !assistant.isPremium);
+  // Show all assistants, but users will only be able to interact with appropriate ones
+  const availableAssistants = assistants;
 
   const handleAssistantClick = (assistant: Assistant) => {
     console.log('[AssistantPanel] Clicked on assistant:', assistant.id);
@@ -42,7 +40,7 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({
 
     // Se é usuário gratuito
     if (userPlan === 'free') {
-      // Verificar se o assistente é premium (não deveria acontecer com o filtro, mas por segurança)
+      // Verificar se o assistente é premium
       if (assistant.isPremium) {
         console.log('[AssistantPanel] Free user tried to access premium assistant');
         onUpgrade();

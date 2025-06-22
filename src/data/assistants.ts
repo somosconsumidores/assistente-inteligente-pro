@@ -58,7 +58,7 @@ export const assistants: Assistant[] = [
     icon: Calculator,
     path: '/financas',
     gradient: 'from-green-500 to-green-700',
-    isPremium: true,
+    isPremium: false,
     bgColor: 'from-green-900/20 to-green-800/20',
     color: 'from-green-500 to-green-700',
     benefits: [
@@ -76,7 +76,7 @@ export const assistants: Assistant[] = [
     icon: Package,
     path: '/produtos',
     gradient: 'from-purple-500 to-purple-700',
-    isPremium: true,
+    isPremium: false,
     bgColor: 'from-purple-900/20 to-purple-800/20',
     color: 'from-purple-500 to-purple-700',
     benefits: [
@@ -94,7 +94,7 @@ export const assistants: Assistant[] = [
     icon: MapPin,
     path: '/viagens',
     gradient: 'from-orange-500 to-orange-700',
-    isPremium: true,
+    isPremium: false,
     bgColor: 'from-orange-900/20 to-orange-800/20',
     color: 'from-orange-500 to-orange-700',
     benefits: [
@@ -112,7 +112,7 @@ export const assistants: Assistant[] = [
     icon: ShoppingCart,
     path: '/supermercado',
     gradient: 'from-red-500 to-red-700',
-    isPremium: true,
+    isPremium: false,
     bgColor: 'from-red-900/20 to-red-800/20',
     color: 'from-red-500 to-red-700',
     benefits: [

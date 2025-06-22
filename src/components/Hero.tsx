@@ -1,15 +1,13 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Sparkles, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-
 const Hero = () => {
-  const { user } = useAuth();
-  
-  return (
-    <section className="relative mobile-padding py-12 sm:py-16 lg:py-20 xl:py-24 overflow-hidden">
+  const {
+    user
+  } = useAuth();
+  return <section className="relative mobile-padding py-12 sm:py-16 lg:py-20 xl:py-24 overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-purple-900/20 to-pink-900/20" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full bg-gradient-to-r from-transparent via-blue-500/5 to-transparent" />
@@ -44,7 +42,7 @@ const Hero = () => {
               </div>
               <div className="flex items-start gap-3 text-sm sm:text-base text-gray-300">
                 <span className="text-green-400 font-semibold">💸</span>
-                <span>Economia de tempo, dinheiro e paciência</span>
+                <span>Economize US$ 20 por mês utilizando o Chat Inteligente</span>
               </div>
               <div className="flex items-start gap-3 text-sm sm:text-base text-gray-300">
                 <span className="text-green-400 font-semibold">⚖️</span>
@@ -108,8 +106,6 @@ const Hero = () => {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default Hero;

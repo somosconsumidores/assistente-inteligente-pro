@@ -1,5 +1,5 @@
 
-import { Scale, DollarSign, ShoppingCart, Plane, ShoppingBasket } from 'lucide-react';
+import { Scale, DollarSign, ShoppingCart, Plane, ShoppingBasket, MessageSquare } from 'lucide-react';
 
 export interface Assistant {
   id: string;
@@ -14,6 +14,17 @@ export interface Assistant {
 }
 
 export const assistants: Assistant[] = [
+  {
+    id: 'chat-inteligente',
+    title: 'Chat Inteligente IA',
+    description: 'IA conversacional avançada com geração de imagens, análise de documentos e transformação de fotos. Economize US$ 20/mês do ChatGPT Plus!',
+    icon: MessageSquare,
+    color: 'from-indigo-400 to-purple-400',
+    bgColor: 'from-indigo-900/20 to-purple-900/20',
+    path: '/chat-inteligente',
+    benefits: ['Geração de imagens ilimitada', 'Análise de documentos e PDFs', 'Transformação de fotos com IA'],
+    isPremium: true
+  },
   {
     id: 'direito',
     title: 'Mestre do Direito do Consumidor',

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -31,7 +32,7 @@ const Hero = () => {
               </span>
             </h1>
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
-              Resolva problemas do dia a dia com 5 especialistas digitais que funcionam 24h por dia — de graça.
+              Resolva problemas do dia a dia com 6 especialistas digitais que funcionam 24h por dia.
               <span className="block mt-2 text-sm sm:text-base md:text-lg text-gray-400">Direito, finanças, produtos, compras, viagens… Tudo em um só lugar. E tudo pronto para responder com precisão, em segundos.</span>
             </p>
             
@@ -93,7 +94,7 @@ const Hero = () => {
           {/* Stats */}
           <div className="pt-8 sm:pt-12 grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-3xl mx-auto">
             <div className="text-center">
-              <div className="text-2xl sm:text-3xl font-bold text-white mb-1">5</div>
+              <div className="text-2xl sm:text-3xl font-bold text-white mb-1">6</div>
               <div className="text-sm sm:text-base text-gray-400">Assistentes Especializados</div>
             </div>
             <div className="text-center">

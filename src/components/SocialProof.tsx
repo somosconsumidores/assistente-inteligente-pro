@@ -8,7 +8,7 @@ const SocialProof = () => {
   const testimonials = [{
     name: "Maria Silva",
     role: "Empreendedora",
-    comment: "Fiz minha viagem pra Gramado com ajuda do assistente. Tudo planejado, datas certas, economia no hotel. E o melhor: sem passar horas vendo blog de mochileiro.",
+    comment: "Eu uso o Chat Inteligente todo dia. Só nisso eu economizo US$20 por mês",
     rating: 5,
     avatar: "MS"
   }, {

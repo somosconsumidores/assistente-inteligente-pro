@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import SubscriptionButton from '@/components/SubscriptionButton';
-import { Scale, Calculator, Package, MapPin, ShoppingCart, MessageSquare, Crown, Lock, Sparkles } from 'lucide-react';
+import { Crown, Lock, Sparkles } from 'lucide-react';
+import { assistants } from '@/data/assistants';
 
 interface AssistantCardsProps {
   userPlan?: 'free' | 'premium';
@@ -18,69 +19,6 @@ const AssistantCards = ({
   onUpgrade,
   isFirstAccess = false
 }: AssistantCardsProps) => {
-  const assistants = [
-    {
-      id: 'chat-inteligente',
-      title: 'Chat Inteligente IA',
-      description: 'IA conversacional avançada com geração de imagens, análise de documentos e transformação de fotos. Economize US$ 20/mês do ChatGPT Plus!',
-      icon: MessageSquare,
-      path: '/chat-inteligente',
-      gradient: 'from-indigo-500 to-purple-700',
-      available: userPlan === 'premium',
-      isFree: false
-    },
-    {
-      id: 'direito-consumidor',
-      title: 'Advogado do Consumidor',
-      description: 'Especialista em defesa dos direitos do consumidor, análise de contratos e orientações legais.',
-      icon: Scale,
-      path: '/direito-consumidor',
-      gradient: 'from-blue-500 to-blue-700',
-      available: true,
-      isFree: true
-    },
-    {
-      id: 'financas',
-      title: 'Consultor Financeiro',
-      description: 'Planejamento financeiro pessoal, organização de dívidas e controle de gastos na palma da mão.',
-      icon: Calculator,
-      path: '/financas',
-      gradient: 'from-green-500 to-green-700',
-      available: userPlan === 'premium',
-      isFree: false
-    },
-    {
-      id: 'produtos',
-      title: 'Mestre dos Produtos',
-      description: 'Ajuda para escolher o melhor produto pelo melhor preço com base em avaliações e comparativos reais.',
-      icon: Package,
-      path: '/produtos',
-      gradient: 'from-purple-500 to-purple-700',
-      available: userPlan === 'premium',
-      isFree: false
-    },
-    {
-      id: 'viagens',
-      title: 'Consultor de Viagens',
-      description: 'Planejamento de viagens, economia em passagens, melhores épocas e destinos com base no seu perfil.',
-      icon: MapPin,
-      path: '/viagens',
-      gradient: 'from-orange-500 to-orange-700',
-      available: userPlan === 'premium',
-      isFree: false
-    },
-    {
-      id: 'supermercado',
-      title: 'Assistente de Compras Domésticas',
-      description: 'Listas inteligentes, sugestões econômicas e comparativos de mercado.',
-      icon: ShoppingCart,
-      path: '/supermercado',
-      gradient: 'from-red-500 to-red-700',
-      available: userPlan === 'premium',
-      isFree: false
-    }
-  ];
-
   return (
     <div id="assistentes" className="space-y-6 sm:space-y-8">
       <div className="text-center space-y-3 sm:space-y-4">
@@ -91,7 +29,7 @@ const AssistantCards = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {assistants.map(assistant => {
           const Icon = assistant.icon;
-          const isAvailable = userPlan ? assistant.available : true;
+          const isAvailable = userPlan ? (userPlan === 'premium' || !assistant.isPremium) : true;
           
           return (
             <Card key={assistant.id} className={`relative overflow-hidden transition-all duration-300 group border-gray-800 bg-gray-900/50 backdrop-blur-sm ${isAvailable ? 'hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-1 cursor-pointer hover-lift' : 'opacity-60'}`}>
@@ -109,7 +47,7 @@ const AssistantCards = ({
               )}
 
               {/* Free Badge */}
-              {userPlan === 'free' && assistant.isFree && (
+              {userPlan === 'free' && !assistant.isPremium && (
                 <div className="absolute top-3 right-3 z-10">
                   <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-xs">
                     <Sparkles className="w-3 h-3 mr-1" />

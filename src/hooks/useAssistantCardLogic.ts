@@ -24,7 +24,32 @@ export const useAssistantCardLogic = ({
   let cardActionText = "Usar Assistente";
   let isClickable = true;
 
-  if (userPlan === 'free') {
+  // Se é premium, todos os assistentes estão disponíveis
+  if (userPlan === 'premium') {
+    cardActionText = "Usar Assistente";
+    return {
+      isLocked,
+      isSelected,
+      cardActionText,
+      isClickable
+    };
+  }
+
+  // Se é gratuito e assistente é premium, está bloqueado
+  if (userPlan === 'free' && assistant.isPremium) {
+    isLocked = true;
+    isClickable = false;
+    cardActionText = "Premium";
+    return {
+      isLocked,
+      isSelected,
+      cardActionText,
+      isClickable
+    };
+  }
+
+  // Se é usuário gratuito e assistente é gratuito
+  if (userPlan === 'free' && !assistant.isPremium) {
     if (selectedAssistantId) {
       // Usuário já escolheu um assistente
       if (assistant.id === selectedAssistantId) {
@@ -33,13 +58,13 @@ export const useAssistantCardLogic = ({
       } else {
         isLocked = true;
         isClickable = false;
+        cardActionText = "Bloqueado";
       }
     } else {
-      // Primeiro acesso - pode escolher qualquer assistente
+      // Primeiro acesso - pode escolher qualquer assistente gratuito
       cardActionText = "Selecionar Assistente";
     }
   }
-  // Usuários premium podem acessar tudo
 
   return {
     isLocked,

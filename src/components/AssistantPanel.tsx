@@ -23,6 +23,11 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({
   const navigate = useNavigate();
   const { checkAssistantAccess } = useAssistantAccess();
 
+  // Filtrar assistentes disponíveis para usuários gratuitos
+  const availableAssistants = userPlan === 'premium' 
+    ? assistants 
+    : assistants.filter(assistant => !assistant.isPremium);
+
   const handleAssistantClick = (assistant: Assistant) => {
     console.log('[AssistantPanel] Clicked on assistant:', assistant.id);
     console.log('[AssistantPanel] User plan:', userPlan);
@@ -37,7 +42,14 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({
 
     // Se é usuário gratuito
     if (userPlan === 'free') {
-      // Se ainda não selecionou um assistente, pode escolher qualquer um
+      // Verificar se o assistente é premium (não deveria acontecer com o filtro, mas por segurança)
+      if (assistant.isPremium) {
+        console.log('[AssistantPanel] Free user tried to access premium assistant');
+        onUpgrade();
+        return;
+      }
+
+      // Se ainda não selecionou um assistente, pode escolher qualquer um gratuito
       if (!selectedAssistantId && onSelectAssistant) {
         console.log('[AssistantPanel] Free user selecting first assistant:', assistant.id);
         onSelectAssistant(assistant.id);
@@ -64,7 +76,7 @@ const AssistantPanel: React.FC<AssistantPanelProps> = ({
       <DashboardNavigation />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {assistants.map((assistant) => {
+        {availableAssistants.map((assistant) => {
           const cardLogic = useAssistantCardLogic({
             assistant,
             userPlan,

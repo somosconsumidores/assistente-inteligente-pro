@@ -125,6 +125,48 @@ export type Database = {
           },
         ]
       }
+      product_price_cache: {
+        Row: {
+          average_price: number | null
+          brand: string | null
+          cache_key: string
+          confidence_level: string | null
+          created_at: string | null
+          id: string
+          last_updated: string | null
+          max_price: number | null
+          min_price: number | null
+          prices: Json | null
+          product_name: string
+        }
+        Insert: {
+          average_price?: number | null
+          brand?: string | null
+          cache_key: string
+          confidence_level?: string | null
+          created_at?: string | null
+          id?: string
+          last_updated?: string | null
+          max_price?: number | null
+          min_price?: number | null
+          prices?: Json | null
+          product_name: string
+        }
+        Update: {
+          average_price?: number | null
+          brand?: string | null
+          cache_key?: string
+          confidence_level?: string | null
+          created_at?: string | null
+          id?: string
+          last_updated?: string | null
+          max_price?: number | null
+          min_price?: number | null
+          prices?: Json | null
+          product_name?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

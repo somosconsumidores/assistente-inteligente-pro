@@ -10,6 +10,13 @@ export class RateLimiter {
   private readonly MAX_CALLS_PER_MINUTE = 10;
   private readonly RESET_WINDOW = 60 * 1000; // 1 minute
 
+  // SerpAPI rate limiting (100 calls/month on free plan)
+  private lastSerpApiCall: number = 0;
+  private serpApiCallCount: number = 0;
+  private readonly SERPAPI_MIN_DELAY = 2000; // 2 seconds between calls
+  private readonly SERPAPI_MAX_CALLS_PER_DAY = 10; // Conservative limit
+  private readonly SERPAPI_RESET_WINDOW = 24 * 60 * 60 * 1000; // 24 hours
+
   async waitForAmazonCall(): Promise<boolean> {
     const now = Date.now();
     
@@ -46,6 +53,33 @@ export class RateLimiter {
 
     this.lastAmazonCall = Date.now();
     this.amazonCallCount++;
+    return true;
+  }
+
+  async waitForSerpApiCall(): Promise<boolean> {
+    const now = Date.now();
+    
+    // Reset call count if window expired (24 hours)
+    if (now - this.lastSerpApiCall > this.SERPAPI_RESET_WINDOW) {
+      this.serpApiCallCount = 0;
+    }
+
+    // Check daily rate limit
+    if (this.serpApiCallCount >= this.SERPAPI_MAX_CALLS_PER_DAY) {
+      console.log('SerpAPI daily rate limit reached - skipping call');
+      return false;
+    }
+
+    // Wait for minimum delay
+    const timeSinceLastCall = now - this.lastSerpApiCall;
+    if (timeSinceLastCall < this.SERPAPI_MIN_DELAY) {
+      const waitTime = this.SERPAPI_MIN_DELAY - timeSinceLastCall;
+      console.log(`Rate limiting: waiting ${waitTime}ms before SerpAPI call`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+
+    this.lastSerpApiCall = Date.now();
+    this.serpApiCallCount++;
     return true;
   }
 

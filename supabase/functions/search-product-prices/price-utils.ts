@@ -1,7 +1,7 @@
 
 import type { PriceResult, ProductSearchResult } from './types.ts';
 
-// Enhanced price calculation with better confidence logic
+// Enhanced price calculation with 3-source confidence logic
 export const calculatePriceMetrics = (prices: PriceResult[]): {
   average_price: number;
   min_price: number;
@@ -31,22 +31,31 @@ export const calculatePriceMetrics = (prices: PriceResult[]): {
   const min_price = Math.min(...filteredPrices);
   const max_price = Math.max(...filteredPrices);
   
-  // Enhanced confidence logic
+  // Enhanced confidence logic with 3 sources
   const hasAmazonData = prices.some(p => p.source === 'amazon-pa');
   const hasMercadoLivreData = prices.some(p => p.source === 'mercadolivre');
-  const hasMultipleSources = new Set(prices.map(p => p.source)).size >= 2;
+  const hasGoogleShoppingData = prices.some(p => p.source === 'google-shopping');
+  
+  const sourcesCount = [hasAmazonData, hasMercadoLivreData, hasGoogleShoppingData].filter(Boolean).length;
   const highConfidencePrices = prices.filter(p => p.confidence === 'high').length;
   
   let confidence_level: 'real' | 'estimated' = 'estimated';
   
-  // Real confidence criteria (more strict to ensure quality)
-  if (hasAmazonData && hasMercadoLivreData && prices.length >= 3) {
+  // Real confidence criteria (enhanced for 3 sources)
+  if (sourcesCount >= 3 && prices.length >= 5) {
+    // All 3 sources with good coverage
     confidence_level = 'real';
-  } else if (hasAmazonData && prices.length >= 2) {
+  } else if (sourcesCount >= 2 && hasAmazonData && prices.length >= 3) {
+    // Amazon + one other source with decent coverage
     confidence_level = 'real';
-  } else if (hasMercadoLivreData && prices.length >= 5 && highConfidencePrices >= 3) {
+  } else if (sourcesCount >= 2 && highConfidencePrices >= 3 && prices.length >= 4) {
+    // Multiple sources with high confidence data
     confidence_level = 'real';
-  } else if (hasMultipleSources && prices.length >= 4) {
+  } else if (hasAmazonData && hasGoogleShoppingData && prices.length >= 3) {
+    // Amazon + Google Shopping combination
+    confidence_level = 'real';
+  } else if (hasMercadoLivreData && hasGoogleShoppingData && prices.length >= 6 && highConfidencePrices >= 4) {
+    // Strong Mercado Livre + Google Shopping data
     confidence_level = 'real';
   }
   
@@ -58,7 +67,7 @@ export const calculatePriceMetrics = (prices: PriceResult[]): {
   };
 };
 
-// Helper to determine if product should use Amazon API based on estimated value
+// Helper to determine API usage strategy
 export const shouldUseAmazonAPI = (productName: string, averagePrice?: number): boolean => {
   // Skip Amazon for low-value products to save API calls
   if (averagePrice && averagePrice < 100) {
@@ -82,4 +91,29 @@ export const shouldUseAmazonAPI = (productName: string, averagePrice?: number): 
   }
   
   return true;
+};
+
+// Helper to determine if we should use Google Shopping
+export const shouldUseGoogleShopping = (productName: string, otherSourcesCount: number): boolean => {
+  // Use Google Shopping as fallback when other sources have limited results
+  if (otherSourcesCount < 3) {
+    console.log('Using Google Shopping as fallback for limited results');
+    return true;
+  }
+  
+  // Always use for electronics and high-value items
+  const priorityKeywords = [
+    'iphone', 'samsung', 'notebook', 'laptop', 'tv', 'camera', 'console'
+  ];
+  
+  const isPriority = priorityKeywords.some(keyword => 
+    productName.toLowerCase().includes(keyword)
+  );
+  
+  if (isPriority) {
+    console.log('Using Google Shopping for priority product category');
+    return true;
+  }
+  
+  return false;
 };

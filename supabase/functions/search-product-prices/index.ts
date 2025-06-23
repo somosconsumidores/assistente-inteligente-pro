@@ -6,16 +6,18 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import type { ProductSearchResult } from './types.ts';
 import { searchAmazonPA } from './amazon-search.ts';
 import { searchMercadoLivre } from './mercadolivre-search.ts';
-import { calculatePriceMetrics, shouldUseAmazonAPI } from './price-utils.ts';
+import { searchGoogleShopping } from './google-shopping-search.ts';
+import { calculatePriceMetrics, shouldUseAmazonAPI, shouldUseGoogleShopping } from './price-utils.ts';
 import { checkPriceCache, savePriceCache, shouldPrioritizeCache } from './cache.ts';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL');
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-// Amazon PA API credentials
+// API credentials
 const amazonAccessKeyId = Deno.env.get('AMAZON_ACCESS_KEY_ID');
 const amazonSecretAccessKey = Deno.env.get('AMAZON_SECRET_ACCESS_KEY');
 const amazonAssociateTag = Deno.env.get('AMAZON_ASSOCIATE_TAG');
+const serpApiKey = Deno.env.get('SERPAPI_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -23,7 +25,7 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  console.log('Search product prices function called with enhanced rate limiting');
+  console.log('Search product prices function called with multi-source integration');
   
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -59,9 +61,9 @@ serve(async (req) => {
     }
 
     // Search multiple sources with intelligent API selection
-    console.log('Starting multi-source price search with rate limiting...');
+    console.log('Starting multi-source price search (Amazon + Mercado Livre + Google Shopping)...');
     
-    // Always search Mercado Livre first (more reliable, no rate limits)
+    // Always search Mercado Livre first (most reliable, no rate limits)
     const mercadoLivreResults = await searchMercadoLivre(product_name);
     console.log(`Mercado Livre found ${mercadoLivreResults.length} results`);
 
@@ -77,13 +79,26 @@ serve(async (req) => {
       amazonResults = await searchAmazonPA(product_name, amazonAccessKeyId, amazonSecretAccessKey, amazonAssociateTag);
       console.log(`Amazon PA API found ${amazonResults.length} results`);
     } else {
-      console.log('Skipping Amazon API call - using Mercado Livre only');
+      console.log('Skipping Amazon API call - conditions not met');
+    }
+
+    // Determine if we should call Google Shopping API
+    const totalResultsSoFar = amazonResults.length + mercadoLivreResults.length;
+    const useGoogleShopping = shouldUseGoogleShopping(product_name, totalResultsSoFar);
+    let googleShoppingResults: any[] = [];
+    
+    if (useGoogleShopping && serpApiKey) {
+      console.log('Attempting Google Shopping API call...');
+      googleShoppingResults = await searchGoogleShopping(product_name, serpApiKey);
+      console.log(`Google Shopping found ${googleShoppingResults.length} results`);
+    } else {
+      console.log('Skipping Google Shopping API call - conditions not met or API key missing');
     }
 
     // Combine all results
-    const allPrices = [...amazonResults, ...mercadoLivreResults];
+    const allPrices = [...amazonResults, ...mercadoLivreResults, ...googleShoppingResults];
 
-    // Calculate final metrics
+    // Calculate final metrics with enhanced 3-source logic
     const metrics = calculatePriceMetrics(allPrices);
     
     const finalResult: ProductSearchResult = {
@@ -99,6 +114,7 @@ serve(async (req) => {
     const sourcesSummary = {
       amazon: amazonResults.length,
       mercadolivre: mercadoLivreResults.length,
+      google_shopping: googleShoppingResults.length,
       total: allPrices.length
     };
 

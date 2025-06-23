@@ -36,7 +36,7 @@ export const useRealTimePrices = () => {
     setError(null);
 
     try {
-      console.log(`Searching real-time prices for: ${productName}`);
+      console.log(`Searching real-time prices with multi-source integration for: ${productName}`);
       
       const { data, error: functionError } = await supabase.functions.invoke('search-product-prices', {
         body: {
@@ -49,7 +49,17 @@ export const useRealTimePrices = () => {
         throw new Error(functionError.message || 'Erro ao buscar preços');
       }
 
-      console.log('Real-time price data received:', data);
+      console.log('Multi-source price data received:', data);
+      
+      // Log source breakdown for debugging
+      if (data?.prices) {
+        const sourceBreakdown = data.prices.reduce((acc: any, price: PriceResult) => {
+          acc[price.source] = (acc[price.source] || 0) + 1;
+          return acc;
+        }, {});
+        console.log('Price sources breakdown:', sourceBreakdown);
+      }
+      
       return data;
     } catch (err) {
       console.error('Error searching product prices:', err);
@@ -67,7 +77,7 @@ export const useRealTimePrices = () => {
     setError(null);
 
     try {
-      console.log(`Searching prices for ${products.length} products`);
+      console.log(`Searching prices for ${products.length} products with multi-source integration`);
       
       const searchPromises = products.map(product => 
         searchProductPrices(product.name, product.brand)

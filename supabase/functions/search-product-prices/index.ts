@@ -6,8 +6,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import type { ProductSearchResult } from './types.ts';
 import { searchAmazonPA } from './amazon-search.ts';
 import { searchMercadoLivre } from './mercadolivre-search.ts';
-import { calculatePriceMetrics } from './price-utils.ts';
-import { checkPriceCache, savePriceCache } from './cache.ts';
+import { calculatePriceMetrics, shouldUseAmazonAPI } from './price-utils.ts';
+import { checkPriceCache, savePriceCache, shouldPrioritizeCache } from './cache.ts';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL');
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
@@ -23,7 +23,7 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  console.log('Search product prices function called');
+  console.log('Search product prices function called with enhanced rate limiting');
   
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -44,30 +44,46 @@ serve(async (req) => {
     // Initialize Supabase client
     const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
 
-    // Check cache first
+    // Enhanced cache strategy - prioritize cache for popular products
+    const prioritizeCache = shouldPrioritizeCache(product_name);
+    if (prioritizeCache) {
+      console.log('Prioritizing cache for popular product');
+    }
+
     const cachedResult = await checkPriceCache(supabase, product_name, brand);
-    if (cachedResult) {
-      console.log('Returning cached price data');
+    if (cachedResult && prioritizeCache) {
+      console.log('Returning cached data for popular product');
       return new Response(JSON.stringify(cachedResult), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Search multiple sources with rate limiting for Amazon
-    console.log('No cache found, searching multiple sources...');
+    // Search multiple sources with intelligent API selection
+    console.log('Starting multi-source price search with rate limiting...');
     
-    // Search Amazon PA API first (higher priority)
-    const amazonResults = await searchAmazonPA(product_name, amazonAccessKeyId!, amazonSecretAccessKey!, amazonAssociateTag!);
-    
-    // Add small delay before Mercado Livre to respect rate limits
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
+    // Always search Mercado Livre first (more reliable, no rate limits)
     const mercadoLivreResults = await searchMercadoLivre(product_name);
+    console.log(`Mercado Livre found ${mercadoLivreResults.length} results`);
+
+    // Get initial price estimate from Mercado Livre
+    let initialMetrics = calculatePriceMetrics(mercadoLivreResults);
+    
+    // Determine if we should call Amazon API
+    const useAmazon = shouldUseAmazonAPI(product_name, initialMetrics.average_price);
+    let amazonResults: any[] = [];
+    
+    if (useAmazon && amazonAccessKeyId && amazonSecretAccessKey && amazonAssociateTag) {
+      console.log('Attempting Amazon PA API call with rate limiting...');
+      amazonResults = await searchAmazonPA(product_name, amazonAccessKeyId, amazonSecretAccessKey, amazonAssociateTag);
+      console.log(`Amazon PA API found ${amazonResults.length} results`);
+    } else {
+      console.log('Skipping Amazon API call - using Mercado Livre only');
+    }
 
     // Combine all results
     const allPrices = [...amazonResults, ...mercadoLivreResults];
 
-    // Calculate metrics
+    // Calculate final metrics
     const metrics = calculatePriceMetrics(allPrices);
     
     const finalResult: ProductSearchResult = {
@@ -80,7 +96,13 @@ serve(async (req) => {
     // Save to cache for future requests
     await savePriceCache(supabase, finalResult);
 
-    console.log(`Found ${allPrices.length} prices, confidence: ${metrics.confidence_level}`);
+    const sourcesSummary = {
+      amazon: amazonResults.length,
+      mercadolivre: mercadoLivreResults.length,
+      total: allPrices.length
+    };
+
+    console.log(`Search completed - Sources: ${JSON.stringify(sourcesSummary)}, Confidence: ${metrics.confidence_level}`);
     
     return new Response(JSON.stringify(finalResult), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -1,8 +1,9 @@
 
 import { createAWSSignature } from './aws-signature.ts';
+import { rateLimiter } from './rate-limiter.ts';
 import type { PriceResult } from './types.ts';
 
-// Real Amazon PA API search function
+// Enhanced Amazon PA API search function with rate limiting and circuit breaker
 export const searchAmazonPA = async (
   productName: string,
   amazonAccessKeyId: string,
@@ -15,8 +16,15 @@ export const searchAmazonPA = async (
       return [];
     }
 
-    console.log(`Searching Amazon PA API for: ${productName}`);
+    console.log(`Attempting Amazon PA API search for: ${productName}`);
     
+    // Check if we can make the call (rate limiting + circuit breaker)
+    const canCall = await rateLimiter.waitForAmazonCall();
+    if (!canCall) {
+      console.log('Amazon API call blocked by rate limiter or circuit breaker');
+      return [];
+    }
+
     const cleanQuery = productName
       .toLowerCase()
       .replace(/[^\w\s]/g, ' ')
@@ -33,7 +41,7 @@ export const searchAmazonPA = async (
         'CustomerReviews.Count'
       ],
       SearchIndex: 'All',
-      ItemCount: 10,
+      ItemCount: 5, // Reduced from 10 to minimize API load
       PartnerTag: amazonAssociateTag,
       PartnerType: 'Associates',
       Marketplace: 'www.amazon.com.br'
@@ -55,72 +63,108 @@ export const searchAmazonPA = async (
 
     const authorization = await createAWSSignature('POST', url, headers, payload, 'us-east-1', 'ProductAdvertisingAPI', amazonAccessKeyId, amazonSecretAccessKey);
     
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        ...headers,
-        'Authorization': authorization
-      },
-      body: payload
-    });
-
-    if (!response.ok) {
-      console.error(`Amazon PA API error: ${response.status} ${response.statusText}`);
-      const errorText = await response.text();
-      console.error('Amazon PA API error details:', errorText);
-      return [];
-    }
-
-    const data = await response.json();
-    console.log(`Amazon PA API response received`);
-
-    if (!data.SearchResult?.Items || data.SearchResult.Items.length === 0) {
-      console.log('No products found on Amazon PA API');
-      return [];
-    }
-
-    const priceResults: PriceResult[] = [];
+    // Retry logic with exponential backoff
+    let lastError: Error | null = null;
+    const maxRetries = 2; // Reduced retries to minimize load
     
-    for (const item of data.SearchResult.Items) {
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
-        const title = item.ItemInfo?.Title?.DisplayValue || 'Produto Amazon';
-        const offers = item.Offers?.Listings?.[0];
-        
-        if (!offers?.Price?.Amount) continue;
-        
-        const price = parseFloat(offers.Price.Amount);
-        const currency = offers.Price.Currency || 'BRL';
-        const availability = offers.Availability?.Message || '';
-        
-        // Skip if price is invalid or item is unavailable
-        if (price <= 0 || availability.toLowerCase().includes('indisponível')) continue;
-        
-        // Determine confidence based on availability and reviews
-        let confidence: 'high' | 'medium' | 'low' = 'high'; // Amazon data is generally reliable
-        
-        if (availability.toLowerCase().includes('estoque limitado')) {
-          confidence = 'medium';
+        if (attempt > 0) {
+          await rateLimiter.exponentialBackoff(attempt - 1, maxRetries);
         }
 
-        priceResults.push({
-          price: price,
-          currency: currency,
-          source: 'amazon-pa',
-          store_name: 'Amazon Brasil',
-          product_url: item.DetailPageURL || 'https://amazon.com.br',
-          confidence,
-          last_updated: new Date().toISOString()
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            ...headers,
+            'Authorization': authorization
+          },
+          body: payload
         });
-      } catch (itemError) {
-        console.error('Error processing Amazon item:', itemError);
-        continue;
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`Amazon PA API error (attempt ${attempt + 1}): ${response.status} ${response.statusText}`);
+          console.error('Amazon PA API error details:', errorText);
+          
+          // Handle rate limiting
+          if (response.status === 429) {
+            rateLimiter.handleAmazonError(response.status);
+            throw new Error(`Rate limited - attempt ${attempt + 1}`);
+          }
+          
+          // Don't retry on 4xx errors except 429
+          if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+            console.log('Amazon PA API client error - not retrying');
+            return [];
+          }
+          
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log(`Amazon PA API response received successfully`);
+
+        if (!data.SearchResult?.Items || data.SearchResult.Items.length === 0) {
+          console.log('No products found on Amazon PA API');
+          return [];
+        }
+
+        const priceResults: PriceResult[] = [];
+        
+        for (const item of data.SearchResult.Items) {
+          try {
+            const title = item.ItemInfo?.Title?.DisplayValue || 'Produto Amazon';
+            const offers = item.Offers?.Listings?.[0];
+            
+            if (!offers?.Price?.Amount) continue;
+            
+            const price = parseFloat(offers.Price.Amount);
+            const currency = offers.Price.Currency || 'BRL';
+            const availability = offers.Availability?.Message || '';
+            
+            // Skip if price is invalid or item is unavailable
+            if (price <= 0 || availability.toLowerCase().includes('indisponível')) continue;
+            
+            // Determine confidence based on availability and reviews
+            let confidence: 'high' | 'medium' | 'low' = 'high'; // Amazon data is generally reliable
+            
+            if (availability.toLowerCase().includes('estoque limitado')) {
+              confidence = 'medium';
+            }
+
+            priceResults.push({
+              price: price,
+              currency: currency,
+              source: 'amazon-pa',
+              store_name: 'Amazon Brasil',
+              product_url: item.DetailPageURL || 'https://amazon.com.br',
+              confidence,
+              last_updated: new Date().toISOString()
+            });
+          } catch (itemError) {
+            console.error('Error processing Amazon item:', itemError);
+            continue;
+          }
+        }
+
+        console.log(`Processed ${priceResults.length} valid price results from Amazon PA API`);
+        return priceResults;
+      } catch (error) {
+        lastError = error as Error;
+        console.error(`Amazon PA API attempt ${attempt + 1} failed:`, error);
+        
+        // Don't retry on rate limit errors
+        if (error instanceof Error && error.message.includes('Rate limited')) {
+          break;
+        }
       }
     }
 
-    console.log(`Processed ${priceResults.length} valid price results from Amazon PA API`);
-    return priceResults;
+    console.error('All Amazon PA API attempts failed:', lastError);
+    return [];
   } catch (error) {
-    console.error('Error searching Amazon PA API:', error);
+    console.error('Error in Amazon PA API search:', error);
     return [];
   }
 };

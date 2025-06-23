@@ -1,7 +1,7 @@
 
 import type { ProductSearchResult } from './types.ts';
 
-// Function to check cache for existing prices
+// Enhanced cache functions with longer TTL for Amazon data
 export const checkPriceCache = async (supabase: any, productName: string, brand?: string): Promise<ProductSearchResult | null> => {
   try {
     const cacheKey = `${productName.toLowerCase().trim()}${brand ? `_${brand.toLowerCase()}` : ''}`;
@@ -10,7 +10,7 @@ export const checkPriceCache = async (supabase: any, productName: string, brand?
       .from('product_price_cache')
       .select('*')
       .eq('cache_key', cacheKey)
-      .gte('last_updated', new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString()) // 12 hours cache for Amazon data
+      .gte('last_updated', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) // 24 hours cache (increased from 12h)
       .order('last_updated', { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -21,7 +21,7 @@ export const checkPriceCache = async (supabase: any, productName: string, brand?
     }
     
     if (data) {
-      console.log('Found cached price data');
+      console.log('Found cached price data (24h TTL)');
       return {
         product_name: data.product_name,
         brand: data.brand,
@@ -40,7 +40,7 @@ export const checkPriceCache = async (supabase: any, productName: string, brand?
   }
 };
 
-// Function to save prices to cache
+// Function to save prices to cache with enhanced metadata
 export const savePriceCache = async (supabase: any, result: ProductSearchResult): Promise<void> => {
   try {
     const cacheKey = `${result.product_name.toLowerCase().trim()}${result.brand ? `_${result.brand.toLowerCase()}` : ''}`;
@@ -62,9 +62,16 @@ export const savePriceCache = async (supabase: any, result: ProductSearchResult)
     if (error) {
       console.error('Error saving to cache:', error);
     } else {
-      console.log('Price data saved to cache');
+      console.log('Price data saved to cache with 24h TTL');
     }
   } catch (error) {
     console.error('Error in savePriceCache:', error);
   }
+};
+
+// Check if we should prioritize cache over fresh API calls
+export const shouldPrioritizeCache = (productName: string): boolean => {
+  // For common/popular products, prioritize cache to reduce API load
+  const commonProducts = ['iphone', 'samsung', 'notebook', 'tv', 'geladeira', 'fogão'];
+  return commonProducts.some(product => productName.toLowerCase().includes(product));
 };

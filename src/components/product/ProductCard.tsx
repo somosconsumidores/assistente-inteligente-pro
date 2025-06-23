@@ -1,8 +1,10 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import ProductSeal from './ProductSeal';
 import ProductActions from './ProductActions';
+import { ShoppingCart, TrendingUp } from 'lucide-react';
 
 interface FeaturedProduct {
   id: string;
@@ -12,6 +14,9 @@ interface FeaturedProduct {
   scoreMestre: number;
   seal: 'melhor' | 'barato' | 'recomendacao';
   link?: string;
+  priceConfidence?: 'real' | 'estimated';
+  priceSource?: string;
+  lastUpdated?: string;
 }
 
 interface ProductCardProps {
@@ -47,6 +52,24 @@ const formatPrice = (price: string | number): string => {
   }).format(numericPrice);
 };
 
+const getPriceConfidenceBadge = (confidence?: 'real' | 'estimated') => {
+  if (confidence === 'real') {
+    return (
+      <Badge variant="default" className="bg-green-100 text-green-800 border-green-300">
+        <ShoppingCart className="w-3 h-3 mr-1" />
+        Preço Real
+      </Badge>
+    );
+  }
+  
+  return (
+    <Badge variant="secondary" className="bg-orange-100 text-orange-800 border-orange-300">
+      <TrendingUp className="w-3 h-3 mr-1" />
+      Estimativa
+    </Badge>
+  );
+};
+
 const ProductCard = ({ product }: ProductCardProps) => {
   const sealComponent = ProductSeal({ seal: product.seal });
   
@@ -72,7 +95,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
       </CardHeader>
       
       <CardContent className="pt-0">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-3">
           <div>
             <p className="text-sm text-gray-600">Preço Médio</p>
             <p className="text-xl font-bold text-green-600">{formattedPrice}</p>
@@ -87,6 +110,24 @@ const ProductCard = ({ product }: ProductCardProps) => {
             </div>
           </div>
         </div>
+        
+        {/* Price confidence indicator */}
+        <div className="mb-4 flex items-center justify-between">
+          {getPriceConfidenceBadge(product.priceConfidence)}
+          {product.priceSource && (
+            <span className="text-xs text-gray-500">
+              Fonte: {product.priceSource}
+            </span>
+          )}
+        </div>
+        
+        {product.lastUpdated && (
+          <div className="mb-3">
+            <span className="text-xs text-gray-500">
+              Atualizado: {new Date(product.lastUpdated).toLocaleDateString('pt-BR')}
+            </span>
+          </div>
+        )}
         
         <ProductActions productName={product.name} productLink={product.link} />
       </CardContent>

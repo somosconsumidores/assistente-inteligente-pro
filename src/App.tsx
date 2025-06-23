@@ -61,7 +61,7 @@ function App() {
                   path="/direito-consumidor"
                   element={
                     <ProtectedRoute>
-                      <ProtectedAssistantRoute assistantId="direito-consumidor">
+                      <ProtectedAssistantRoute assistantId="direito-consumidor" assistantName="Direito do Consumidor">
                         <DireitoConsumidor />
                       </ProtectedAssistantRoute>
                     </ProtectedRoute>
@@ -71,7 +71,7 @@ function App() {
                   path="/financas"
                   element={
                     <ProtectedRoute>
-                      <ProtectedAssistantRoute assistantId="financas">
+                      <ProtectedAssistantRoute assistantId="financas" assistantName="Finanças">
                         <Financas />
                       </ProtectedAssistantRoute>
                     </ProtectedRoute>
@@ -81,7 +81,7 @@ function App() {
                   path="/produtos"
                   element={
                     <ProtectedRoute>
-                      <ProtectedAssistantRoute assistantId="produtos">
+                      <ProtectedAssistantRoute assistantId="produtos" assistantName="Mestre dos Produtos">
                         <Produtos />
                       </ProtectedAssistantRoute>
                     </ProtectedRoute>
@@ -91,7 +91,7 @@ function App() {
                   path="/supermercado"
                   element={
                     <ProtectedRoute>
-                      <ProtectedAssistantRoute assistantId="supermercado">
+                      <ProtectedAssistantRoute assistantId="supermercado" assistantName="Supermercado">
                         <Supermercado />
                       </ProtectedAssistantRoute>
                     </ProtectedRoute>
@@ -101,7 +101,7 @@ function App() {
                   path="/viagens"
                   element={
                     <ProtectedRoute>
-                      <ProtectedAssistantRoute assistantId="viagens">
+                      <ProtectedAssistantRoute assistantId="viagens" assistantName="Viagens">
                         <Viagens />
                       </ProtectedAssistantRoute>
                     </ProtectedRoute>

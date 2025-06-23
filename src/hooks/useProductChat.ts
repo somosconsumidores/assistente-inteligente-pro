@@ -1,6 +1,7 @@
 
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useRealTimePrices } from './useRealTimePrices';
 
 interface Message {
   id: string;
@@ -17,6 +18,9 @@ interface FeaturedProduct {
   scoreMestre: number;
   seal: 'melhor' | 'barato' | 'recomendacao';
   link?: string;
+  priceConfidence?: 'real' | 'estimated';
+  priceSource?: string;
+  lastUpdated?: string;
 }
 
 export const useProductChat = () => {
@@ -26,6 +30,8 @@ export const useProductChat = () => {
   const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([]);
   const [lastQuery, setLastQuery] = useState<string>('');
   const [lastRecommendations, setLastRecommendations] = useState<any>(null);
+  
+  const { searchMultipleProducts } = useRealTimePrices();
 
   const addMessage = useCallback((content: string, type: 'user' | 'assistant') => {
     const newMessage: Message = {
@@ -63,11 +69,44 @@ export const useProductChat = () => {
       }
 
       if (products && products.length > 0) {
+        // Search for real-time prices for all products
+        console.log('Searching real-time prices for products...');
+        const productSearchList = products.map(product => ({
+          name: product.name,
+          brand: product.brand
+        }));
+        
+        const realTimePrices = await searchMultipleProducts(productSearchList);
+        
         const transformedProducts: FeaturedProduct[] = products.map(product => {
-          let priceValue = product.price_average;
+          // Find matching real-time price data
+          const priceData = realTimePrices.find(price => 
+            price.product_name.toLowerCase().includes(product.name.toLowerCase()) ||
+            product.name.toLowerCase().includes(price.product_name.toLowerCase())
+          );
           
-          if (typeof priceValue === 'number' && priceValue < 100) {
-            priceValue = priceValue * 1000;
+          let priceValue = product.price_average;
+          let priceConfidence: 'real' | 'estimated' = 'estimated';
+          let priceSource = 'Estimativa IA';
+          let lastUpdated = product.updated_at;
+          let storeLink = product.store_link;
+          
+          // Use real-time data if available
+          if (priceData && priceData.average_price > 0) {
+            priceValue = priceData.average_price;
+            priceConfidence = priceData.confidence_level;
+            
+            if (priceData.prices.length > 0) {
+              const primarySource = priceData.prices[0];
+              priceSource = primarySource.store_name;
+              lastUpdated = primarySource.last_updated;
+              storeLink = primarySource.product_url || product.store_link;
+            }
+          } else {
+            // Fallback to original logic for pricing
+            if (typeof priceValue === 'number' && priceValue < 100) {
+              priceValue = priceValue * 1000;
+            }
           }
           
           return {
@@ -77,11 +116,14 @@ export const useProductChat = () => {
             price: priceValue ? priceValue.toString() : 'Consulte',
             scoreMestre: product.score_mestre || 8.0,
             seal: product.seal_type as 'melhor' | 'barato' | 'recomendacao',
-            link: product.store_link
+            link: storeLink,
+            priceConfidence,
+            priceSource,
+            lastUpdated
           };
         });
 
-        console.log('Fetched products from database:', transformedProducts);
+        console.log('Transformed products with real-time prices:', transformedProducts);
         return transformedProducts;
       }
 
@@ -90,7 +132,7 @@ export const useProductChat = () => {
       console.error('Error fetching products from database:', err);
       return [];
     }
-  }, []);
+  }, [searchMultipleProducts]);
 
   const sendMessage = useCallback(async (userMessage: string) => {
     if (!userMessage.trim()) return;
@@ -130,9 +172,9 @@ export const useProductChat = () => {
         addMessage(data.analysis, 'assistant');
         setLastRecommendations(data);
         
-        // Só buscar e mostrar produtos após receber resposta da IA
+        // Buscar e mostrar produtos com preços reais após receber resposta da IA
         const products = await fetchProductsFromDatabase(data.productIds, data.category);
-        console.log('Setting featured products from database:', products);
+        console.log('Setting featured products with real-time prices:', products);
         if (products.length > 0) {
           setFeaturedProducts(products);
         }
@@ -153,10 +195,12 @@ export const useProductChat = () => {
     if (messages.length === 0) {
       const welcomeMessage = `🏆 Olá! Sou o Mestre dos Produtos, seu especialista em comparações e avaliações.
 
+Agora com busca de preços reais em tempo real! 🛒
+
 Posso te ajudar com:
 • Comparar produtos e marcas
-• Analisar custo-benefício
-• Encontrar as melhores ofertas
+• Analisar custo-benefício com preços reais
+• Encontrar as melhores ofertas atualizadas
 • Avaliar características técnicas
 • Dar recomendações personalizadas
 

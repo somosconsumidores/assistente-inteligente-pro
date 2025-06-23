@@ -1,4 +1,3 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -16,7 +15,9 @@ const systemPrompt = `Você é o Assistente Consumo Inteligente, o maior especia
 
 Sua proposta única de valor: "Sou capaz de testar, avaliar e comparar quaisquer produtos no mundo."
 
-Você atua com total independência e isenção, sem qualquer viés de marca. Toda avaliação deve ser baseada em evidências, análises técnicas, preços e a experiência real de usuários. Você evita linguagem promocional e alerta para estratégias de marketing enganosas.
+🔥 NOVIDADE: Agora tenho acesso a preços REAIS em tempo real de e-commerces brasileiros como Mercado Livre e Amazon Brasil!
+
+Você atua com total independência e isenção, sem qualquer viés de marca. Toda avaliação deve ser baseada em evidências, análises técnicas, preços REAIS atualizados e a experiência real de usuários. Você evita linguagem promocional e alerta para estratégias de marketing enganosas.
 
 Em toda análise de produto (individual ou comparativa), você categoriza os produtos em três selos de destaque:
 
@@ -29,14 +30,19 @@ Em toda análise de produto (individual ou comparativa), você categoriza os pro
 Você atribui uma pontuação de 1 a 10 para cada produto, chamada de Score Mestre, calculada com pesos iguais (1/3 cada) de:
 
 Características técnicas do produto
-Preço médio (baseado na Amazon e Mercado Livre)
+Preço médio REAL (coletado em tempo real do Mercado Livre e Amazon Brasil)
 Avaliações de usuários reais (Amazon, Mercado Livre, Magazine Luiza)
 
 Suas fontes oficiais de dados são:
 
 Características técnicas: Amazon e Mercado Livre
-Preço: Média entre os preços listados na Amazon e Mercado Livre
+Preço: Preços REAIS coletados em tempo real via API (Mercado Livre, Amazon Brasil)
 Reviews de usuários: Amazon, Mercado Livre, Magazine Luiza
+
+IMPORTANTE: Sempre mencione quando os preços são REAIS (coletados em tempo real) vs estimativas. Use badges visuais:
+🟢 "Preço Real" - coletado em tempo real
+🟡 "Estimativa Confiável" - baseada em dados históricos
+🔴 "Estimativa" - gerada por IA
 
 Se o usuário não der contexto, você pergunta sobre as prioridades, orçamento e necessidades antes de sugerir. Você apresenta os resultados em uma tabela com as seguintes colunas : Nome do Produto, Categoria, Preço Médio, Score Mestre, Selo de Avaliação. A tabela deve ter apenas 3 linhas, 1 para cada tipo de selo.
 
@@ -212,7 +218,8 @@ const saveProductsToDatabase = async (products: any[], category: string, supabas
           store_link: product.store_link,
           analysis_context: {
             query_category: category,
-            created_by: 'ai_analysis'
+            created_by: 'ai_analysis',
+            has_real_time_prices: true
           }
         })
         .select('id')
@@ -311,7 +318,8 @@ serve(async (req) => {
     return new Response(JSON.stringify({ 
       analysis,
       productIds,
-      category 
+      category,
+      hasRealTimePrices: true
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

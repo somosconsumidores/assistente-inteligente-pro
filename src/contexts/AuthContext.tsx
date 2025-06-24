@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,7 +15,7 @@ interface AuthContextType {
   profile: UserProfile | null;
   session: Session | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string, isPremium: boolean = false) => Promise<void>;
   logout: () => Promise<void>;
   isLoading: boolean;
   updateSelectedAssistant: (assistantId: string) => Promise<void>;
@@ -135,19 +134,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const register = async (name: string, email: string, password: string) => {
+  const register = async (name: string, email: string, password: string, isPremium: boolean = false) => {
     setIsLoading(true);
     try {
       const redirectUrl = `${window.location.origin}/`;
+      
+      // Prepare metadata for premium registration
+      const metadata: any = {
+        name: name
+      };
+      
+      if (isPremium) {
+        metadata.is_premium = 'true';
+        console.log('Registering premium user with metadata:', metadata);
+      }
       
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: redirectUrl,
-          data: {
-            name: name
-          }
+          data: metadata
         }
       });
 

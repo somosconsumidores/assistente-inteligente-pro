@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import { MessageSquare, LogIn, UserPlus, LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { ThemeToggle } from './ThemeToggle';
+import Logo from './Logo';
 
 const Header = () => {
   const { user, profile, logout } = useAuth();
@@ -52,12 +52,11 @@ const Header = () => {
         <div className="mobile-padding py-3 sm:py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-2 touch-target" onClick={closeMobileMenu}>
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center text-sm text-center">
-                <span className="text-white font-bold text-sm sm:text-base">BI</span>
-              </div>
-              <span className="font-bold text-lg sm:text-xl text-white">Biblioteca IA</span>
-            </Link>
+            <Logo 
+              linkClassName="touch-target" 
+              className="text-sm text-center"
+              size="md"
+            />
             
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center space-x-8">

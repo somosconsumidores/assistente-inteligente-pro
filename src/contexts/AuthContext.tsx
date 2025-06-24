@@ -1,26 +1,8 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
-
-interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
-  plan: 'free' | 'premium';
-  selected_assistant_id?: string | null;
-}
-
-interface AuthContextType {
-  user: User | null;
-  profile: UserProfile | null;
-  session: Session | null;
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string, isPremium?: boolean) => Promise<void>;
-  logout: () => Promise<void>;
-  isLoading: boolean;
-  updateSelectedAssistant: (assistantId: string) => Promise<void>;
-}
+import React, { createContext, useContext, useState } from 'react';
+import { AuthContextType } from '@/types/auth';
+import { useAuthState } from '@/hooks/useAuthState';
+import { useAuthActions } from '@/hooks/useAuthActions';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -33,177 +15,25 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, profile, session, isLoading, setProfile } = useAuthState();
+  const [actionLoading, setActionLoading] = useState(false);
+  const { login, register, logout, updateSelectedAssistant } = useAuthActions(user, setProfile);
 
-  useEffect(() => {
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed:', event, session);
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          // Fetch user profile when authenticated
-          setTimeout(async () => {
-            await fetchUserProfile(session.user.id);
-            // Check subscription status after profile is loaded
-            await checkSubscriptionStatus();
-          }, 0);
-        } else {
-          setProfile(null);
-        }
-        
-        setIsLoading(false);
-      }
-    );
-
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        fetchUserProfile(session.user.id).then(() => {
-          checkSubscriptionStatus();
-        });
-      }
-      
-      setIsLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const fetchUserProfile = async (userId: string) => {
+  const wrappedLogin = async (email: string, password: string) => {
+    setActionLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (error) {
-        console.error('Error fetching profile:', error);
-        return;
-      }
-
-      if (data) {
-        setProfile({
-          id: data.id,
-          name: data.name,
-          email: data.email,
-          plan: data.plan as 'free' | 'premium',
-          selected_assistant_id: data.selected_assistant_id
-        });
-      }
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-    }
-  };
-
-  const checkSubscriptionStatus = async () => {
-    try {
-      await supabase.functions.invoke('check-subscription');
-      // Refetch profile to get updated plan
-      if (user) {
-        await fetchUserProfile(user.id);
-      }
-    } catch (error) {
-      console.error('Error checking subscription status:', error);
-    }
-  };
-
-  const login = async (email: string, password: string) => {
-    setIsLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      if (error) {
-        throw error;
-      }
-    } catch (error: any) {
-      throw new Error(error.message || 'Erro ao fazer login');
+      await login(email, password);
     } finally {
-      setIsLoading(false);
+      setActionLoading(false);
     }
   };
 
-  const register = async (name: string, email: string, password: string, isPremium: boolean = false) => {
-    setIsLoading(true);
+  const wrappedRegister = async (name: string, email: string, password: string, isPremium?: boolean) => {
+    setActionLoading(true);
     try {
-      const redirectUrl = `${window.location.origin}/`;
-      
-      // Prepare metadata for premium registration
-      const metadata: any = {
-        name: name
-      };
-      
-      if (isPremium) {
-        metadata.is_premium = 'true';
-        console.log('Registering premium user with metadata:', metadata);
-      }
-      
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: redirectUrl,
-          data: metadata
-        }
-      });
-
-      if (error) {
-        throw error;
-      }
-    } catch (error: any) {
-      throw new Error(error.message || 'Erro ao criar conta');
+      await register(name, email, password, isPremium);
     } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const logout = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        throw error;
-      }
-      setProfile(null);
-    } catch (error: any) {
-      throw new Error(error.message || 'Erro ao fazer logout');
-    }
-  };
-
-  const updateSelectedAssistant = async (assistantId: string) => {
-    if (!user) {
-      throw new Error("User not authenticated");
-    }
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .update({ selected_assistant_id: assistantId })
-        .eq('id', user.id)
-        .select()
-        .single();
-
-      if (error) {
-        throw error;
-      }
-
-      if (data) {
-        // Update local profile state
-        setProfile(prevProfile => prevProfile ? { ...prevProfile, selected_assistant_id: assistantId } : null);
-      }
-    } catch (error: any) {
-      console.error('Error updating selected assistant:', error);
-      throw new Error(error.message || 'Erro ao salvar escolha do assistente');
+      setActionLoading(false);
     }
   };
 
@@ -212,10 +42,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       user, 
       profile, 
       session, 
-      login, 
-      register, 
+      login: wrappedLogin, 
+      register: wrappedRegister, 
       logout, 
-      isLoading,
+      isLoading: isLoading || actionLoading,
       updateSelectedAssistant
     }}>
       {children}

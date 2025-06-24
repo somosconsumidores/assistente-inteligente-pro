@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,7 +16,7 @@ interface AuthContextType {
   profile: UserProfile | null;
   session: Session | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string, isPremium: boolean = false) => Promise<void>;
+  register: (name: string, email: string, password: string, isPremium?: boolean) => Promise<void>;
   logout: () => Promise<void>;
   isLoading: boolean;
   updateSelectedAssistant: (assistantId: string) => Promise<void>;

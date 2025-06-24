@@ -84,9 +84,14 @@ export const useAuthActions = (
 
       if (data) {
         // Update local profile state
-        setProfile((prevProfile: UserProfile | null) => 
-          prevProfile ? { ...prevProfile, selected_assistant_id: assistantId } : null
-        );
+        const updatedProfile: UserProfile = {
+          id: data.id,
+          name: data.name,
+          email: data.email,
+          plan: data.plan as 'free' | 'premium',
+          selected_assistant_id: assistantId
+        };
+        setProfile(updatedProfile);
       }
     } catch (error: any) {
       console.error('Error updating selected assistant:', error);

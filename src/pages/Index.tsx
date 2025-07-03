@@ -3,6 +3,7 @@ import React from 'react';
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
 import AssistantCards from '@/components/AssistantCards';
+import ExampleFlow from '@/components/ExampleFlow';
 import Features from '@/components/Features';
 import Pricing from '@/components/Pricing';
 import SocialProof from '@/components/SocialProof';
@@ -18,6 +19,7 @@ const Index = () => {
         <section className="mobile-padding py-8 sm:py-12 lg:py-16">
           <AssistantCards />
         </section>
+        <ExampleFlow />
         <Features />
         <Pricing />
         <SocialProof />

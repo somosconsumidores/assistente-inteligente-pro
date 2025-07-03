@@ -32,11 +32,19 @@ const isImageTransformationRequest = (content: string, hasAttachments: boolean):
     'transformar', 'converter', 'mudar para', 'no estilo', 'transform',
     'convert', 'change to', 'in the style of', 'make it look like',
     'transforme em', 'converta para', 'mude para', 'estilo pixar',
-    'estilo cartoon', 'estilo realista', 'estilo 3d', 'como se fosse'
+    'estilo cartoon', 'estilo realista', 'estilo 3d', 'como se fosse',
+    'mudar', 'alterar', 'modificar', 'change', 'modify', 'alter',
+    'deixar como', 'tornar', 'fazer parecer', 'aplicar estilo',
+    'estilizar', 'redesenhar', 'recriar', 'versão', 'formato'
   ];
   
   const lowerContent = content.toLowerCase();
-  return transformKeywords.some(keyword => lowerContent.includes(keyword));
+  console.log('Verificando transformação - Conteúdo:', lowerContent);
+  console.log('Verificando transformação - Tem anexos:', hasAttachments);
+  
+  const isTransform = transformKeywords.some(keyword => lowerContent.includes(keyword));
+  console.log('Verificando transformação - É transformação:', isTransform);
+  return isTransform;
 };
 
 // Função para analisar imagem usando GPT-4o Vision

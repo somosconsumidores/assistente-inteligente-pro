@@ -5,33 +5,47 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 220 25% 8%;
+    --foreground: 210 40% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 220 25% 10%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 220 25% 10%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 280 100% 70%;
+    --primary-foreground: 220 25% 8%;
 
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 215 85% 60%;
+    --secondary-foreground: 220 25% 8%;
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 220 25% 15%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 210 40% 96%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 280 100% 70%;
+    --accent-foreground: 220 25% 8%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 220 25% 20%;
+    --input: 220 25% 15%;
+    --ring: 280 100% 70%;
+
+    /* Futuristic colors */
+    --neon-purple: 280 100% 70%;
+    --neon-blue: 215 85% 60%;
+    --cobalt-blue: 220 90% 55%;
+    --soft-white: 210 40% 98%;
+    --light-gray: 215 20% 65%;
+    --dark-bg: 220 25% 8%;
+    --darker-bg: 220 30% 6%;
+    
+    /* Glow effects */
+    --glow-purple: 0 0 20px hsl(280 100% 70% / 0.5);
+    --glow-blue: 0 0 20px hsl(215 85% 60% / 0.5);
+    --glow-subtle: 0 0 15px hsl(280 100% 70% / 0.3);
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
@@ -90,7 +104,7 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     -webkit-overflow-scrolling: touch;
@@ -443,5 +457,108 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* Futuristic Design System */
+@layer utilities {
+  /* Neon effects */
+  .neon-glow {
+    box-shadow: var(--glow-purple);
+  }
+  
+  .neon-glow-blue {
+    box-shadow: var(--glow-blue);
+  }
+  
+  .neon-glow-subtle {
+    box-shadow: var(--glow-subtle);
+  }
+  
+  /* Futuristic buttons */
+  .btn-neon {
+    @apply bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300;
+    box-shadow: 0 0 20px hsl(280 100% 70% / 0.3);
+  }
+  
+  .btn-neon:hover {
+    @apply from-purple-500 to-blue-500;
+    box-shadow: 0 0 30px hsl(280 100% 70% / 0.6);
+    transform: translateY(-2px);
+  }
+  
+  .btn-neon-secondary {
+    @apply bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300;
+    box-shadow: 0 0 20px hsl(215 85% 60% / 0.3);
+  }
+  
+  .btn-neon-secondary:hover {
+    @apply from-blue-500 to-purple-500;
+    box-shadow: 0 0 30px hsl(215 85% 60% / 0.6);
+    transform: translateY(-2px);
+  }
+  
+  /* Glowing text */
+  .text-neon {
+    text-shadow: 0 0 10px hsl(280 100% 70% / 0.8);
+  }
+  
+  .text-neon-blue {
+    text-shadow: 0 0 10px hsl(215 85% 60% / 0.8);
+  }
+  
+  /* Futuristic cards */
+  .card-futuristic {
+    @apply bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  
+  .card-futuristic:hover {
+    @apply border-primary/50;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 20px hsl(280 100% 70% / 0.2);
+  }
+  
+  /* Animated background */
+  .bg-futuristic {
+    background: 
+      radial-gradient(circle at 20% 50%, hsl(280 100% 70% / 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, hsl(215 85% 60% / 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 80%, hsl(220 90% 55% / 0.1) 0%, transparent 50%),
+      hsl(var(--background));
+  }
+  
+  /* Icon glow */
+  .icon-glow {
+    filter: drop-shadow(0 0 8px hsl(280 100% 70% / 0.6));
+  }
+  
+  .icon-glow-blue {
+    filter: drop-shadow(0 0 8px hsl(215 85% 60% / 0.6));
+  }
+  
+  /* Futuristic borders */
+  .border-neon {
+    border: 1px solid hsl(280 100% 70% / 0.5);
+    box-shadow: 0 0 10px hsl(280 100% 70% / 0.2);
+  }
+  
+  .border-neon-blue {
+    border: 1px solid hsl(215 85% 60% / 0.5);
+    box-shadow: 0 0 10px hsl(215 85% 60% / 0.2);
+  }
+}
+
+/* Typography improvements */
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+  
+  .text-gradient-neon {
+    background: linear-gradient(135deg, hsl(280 100% 70%), hsl(215 85% 60%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 }

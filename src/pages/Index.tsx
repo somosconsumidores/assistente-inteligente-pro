@@ -11,7 +11,7 @@ import { AddToHomeScreenDialog } from '@/components/AddToHomeScreenDialog';
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-futuristic text-foreground">
       <Header />
       <main className="safe-area-top safe-area-bottom">
         <Hero />

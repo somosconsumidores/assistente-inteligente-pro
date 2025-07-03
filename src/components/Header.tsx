@@ -48,7 +48,7 @@ const Header = () => {
 
   return (
     <>
-      <header className="bg-gray-900/95 backdrop-blur-md border-b border-gray-800 sticky top-0 z-50 safe-area-top">
+      <header className="bg-background/95 backdrop-blur-md border-b border-border/50 sticky top-0 z-50 safe-area-top neon-glow-subtle">
         <div className="mobile-padding py-3 sm:py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
@@ -106,9 +106,9 @@ const Header = () => {
                       <span className="hidden sm:inline text-white">Entrar</span>
                     </Link>
                   </Button>
-                  <Button size="sm" asChild className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                  <Button size="sm" asChild className="btn-neon-secondary text-sm">
                     <Link to="/register" className="flex items-center space-x-1 touch-target text-white">
-                      <UserPlus className="w-4 h-4 text-white" />
+                      <UserPlus className="w-4 h-4 text-white icon-glow" />
                       <span className="hidden sm:inline text-white">Criar Conta</span>
                     </Link>
                   </Button>

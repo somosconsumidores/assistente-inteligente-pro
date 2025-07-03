@@ -8,30 +8,38 @@ const Hero = () => {
     user
   } = useAuth();
   return <section className="relative mobile-padding py-12 sm:py-16 lg:py-20 xl:py-24 overflow-hidden">
-      {/* Background Elements */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-purple-900/20 to-pink-900/20" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full bg-gradient-to-r from-transparent via-blue-500/5 to-transparent" />
+      {/* Futuristic Background Elements */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/30 via-blue-900/20 to-purple-900/30" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full bg-gradient-to-r from-transparent via-purple-500/10 to-transparent" />
+      
+      {/* Animated particles/dots background */}
+      <div className="absolute inset-0 opacity-30">
+        <div className="absolute top-20 left-20 w-2 h-2 bg-purple-400 rounded-full animate-pulse neon-glow"></div>
+        <div className="absolute top-40 right-32 w-1 h-1 bg-blue-400 rounded-full animate-pulse neon-glow-blue" style={{animationDelay: '1s'}}></div>
+        <div className="absolute bottom-32 left-40 w-3 h-3 bg-purple-300 rounded-full animate-pulse neon-glow" style={{animationDelay: '2s'}}></div>
+        <div className="absolute top-60 right-20 w-1.5 h-1.5 bg-blue-300 rounded-full animate-pulse neon-glow-blue" style={{animationDelay: '3s'}}></div>
+      </div>
       
       <div className="relative max-w-7xl mx-auto">
         <div className="text-center space-y-6 sm:space-y-8">
           {/* Badge */}
-          <div className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30">
-            <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-blue-400 mr-2" />
-            <span className="text-xs sm:text-sm font-medium text-blue-300">
+          <div className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-gradient-to-r from-purple-600/30 to-blue-600/30 border-neon neon-glow-subtle">
+            <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-neon mr-2 icon-glow" />
+            <span className="text-xs sm:text-sm font-medium text-gradient-neon">
               Assistentes IA Especializados
             </span>
           </div>
 
           {/* Main Heading */}
           <div className="space-y-4">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight">
-              <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight text-neon">
+              <span className="text-gradient-neon">
                 Biblioteca de Assistentes Inteligentes
               </span>
             </h1>
-            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-soft-white max-w-4xl mx-auto leading-relaxed">
               Resolva problemas do dia a dia com 6 especialistas digitais que funcionam 24h por dia.
-              <span className="block mt-2 text-sm sm:text-base md:text-lg text-gray-400">Direito, finanças, produtos, compras, viagens… Tudo em um só lugar. E tudo pronto para responder com precisão, em segundos.</span>
+              <span className="block mt-2 text-sm sm:text-base md:text-lg text-light-gray">Direito, finanças, produtos, compras, viagens… Tudo em um só lugar. E tudo pronto para responder com precisão, em segundos.</span>
             </p>
             
             {/* Impact Bullet Points */}
@@ -61,20 +69,20 @@ const Hero = () => {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-4 sm:pt-6">
-            {user ? <Button asChild size="lg" className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg touch-target">
+            {user ? <Button asChild size="lg" className="w-full sm:w-auto btn-neon">
                 <Link to="/dashboard" className="flex items-center">
-                  <LayoutDashboard className="mr-2 w-4 h-4 sm:w-5 sm:h-5" />
+                  <LayoutDashboard className="mr-2 w-4 h-4 sm:w-5 sm:h-5 icon-glow" />
                   Acessar meu Painel
                 </Link>
               </Button> : <>
-                <Button asChild size="lg" className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg touch-target">
+                <Button asChild size="lg" className="w-full sm:w-auto btn-neon">
                   <Link to="/register" className="flex items-center">
                     Acessar gratuitamente agora
-                    <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
+                    <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5 icon-glow" />
                   </Link>
                 </Button>
                 
-                <Button variant="outline" size="lg" asChild className="w-full sm:w-auto border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg touch-target">
+                <Button variant="outline" size="lg" asChild className="w-full sm:w-auto border-neon-blue bg-background/20 backdrop-blur-sm text-soft-white hover:bg-primary/10 hover:text-neon font-semibold px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg touch-target neon-glow-blue">
                   <Link to="/login">
                     Já tenho conta
                   </Link>

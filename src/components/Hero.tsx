@@ -15,9 +15,15 @@ const Hero = () => {
       {/* Animated particles/dots background */}
       <div className="absolute inset-0 opacity-30">
         <div className="absolute top-20 left-20 w-2 h-2 bg-purple-400 rounded-full animate-pulse neon-glow"></div>
-        <div className="absolute top-40 right-32 w-1 h-1 bg-blue-400 rounded-full animate-pulse neon-glow-blue" style={{animationDelay: '1s'}}></div>
-        <div className="absolute bottom-32 left-40 w-3 h-3 bg-purple-300 rounded-full animate-pulse neon-glow" style={{animationDelay: '2s'}}></div>
-        <div className="absolute top-60 right-20 w-1.5 h-1.5 bg-blue-300 rounded-full animate-pulse neon-glow-blue" style={{animationDelay: '3s'}}></div>
+        <div className="absolute top-40 right-32 w-1 h-1 bg-blue-400 rounded-full animate-pulse neon-glow-blue" style={{
+        animationDelay: '1s'
+      }}></div>
+        <div className="absolute bottom-32 left-40 w-3 h-3 bg-purple-300 rounded-full animate-pulse neon-glow" style={{
+        animationDelay: '2s'
+      }}></div>
+        <div className="absolute top-60 right-20 w-1.5 h-1.5 bg-blue-300 rounded-full animate-pulse neon-glow-blue" style={{
+        animationDelay: '3s'
+      }}></div>
       </div>
       
       <div className="relative max-w-7xl mx-auto">
@@ -92,9 +98,7 @@ const Hero = () => {
 
           {/* Additional Text */}
           <div className="pt-4">
-            <p className="text-lg sm:text-xl text-gray-300 font-medium">
-              Tenha especialistas de bolso. Sem mensalidade. Sem complicação.
-            </p>
+            <p className="text-lg sm:text-xl text-gray-300 font-medium">Tenha especialistas de bolso.  Sem complicação.</p>
           </div>
 
           {/* Stats */}

@@ -63,11 +63,6 @@ const ExampleFlow = () => {
     ],
     products: [
       {
-        image: "/lovable-uploads/6268ed3b-65e9-4f2a-a59a-9da8ba0c6970.png",
-        title: "Escolha o Mestre dos Produtos",
-        description: "Acesse comparações inteligentes e análises de produtos"
-      },
-      {
         image: "/lovable-uploads/64c12fd9-5bf2-4263-b76c-4e0776fc4c82.png",
         title: "Diga o produto que você deseja comprar e seu orçamento disponível",
         description: "Informe detalhes do que precisa e quanto quer investir na compra"
@@ -81,11 +76,6 @@ const ExampleFlow = () => {
         image: "/lovable-uploads/93f3ee1e-a93d-496e-ae28-72be754d5fac.png",
         title: "Salve as recomendações em seu painel de controle",
         description: "Monitore os preços para compra e receba alertas quando houver promoções"
-      },
-      {
-        image: "/lovable-uploads/93f3ee1e-a93d-496e-ae28-72be754d5fac.png",
-        title: "Acompanhe suas pesquisas e compare produtos",
-        description: "Tenha controle total das suas buscas e tome a melhor decisão de compra"
       }
     ]
   };

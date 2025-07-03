@@ -63,29 +63,29 @@ const ExampleFlow = () => {
     ],
     products: [
       {
-        image: "https://images.unsplash.com/photo-1498936178812-4b2e558d2937?w=400&h=600&fit=crop",
+        image: "/lovable-uploads/6268ed3b-65e9-4f2a-a59a-9da8ba0c6970.png",
         title: "Escolha o Mestre dos Produtos",
         description: "Acesse comparações inteligentes e análises de produtos"
       },
       {
-        image: "https://images.unsplash.com/photo-1518877593221-1f28583780b4?w=400&h=600&fit=crop",
-        title: "Descreva o produto que você procura",
-        description: "Conte detalhes do que precisa, orçamento e preferências"
+        image: "/lovable-uploads/64c12fd9-5bf2-4263-b76c-4e0776fc4c82.png",
+        title: "Diga o produto que você deseja comprar e seu orçamento disponível",
+        description: "Informe detalhes do que precisa e quanto quer investir na compra"
       },
       {
-        image: "https://images.unsplash.com/photo-1465379944081-7f47de8d74ac?w=400&h=600&fit=crop",
-        title: "Compare preços em tempo real",
-        description: "Veja preços atualizados de Amazon, Mercado Livre e outras lojas"
+        image: "/lovable-uploads/924ac83a-43fc-4d31-83dd-25b2928a2f6f.png",
+        title: "Receba nossa indicação com a classificação do Score Mestre",
+        description: "Veja as ofertas disponíveis com análise completa de custo-benefício"
       },
       {
-        image: "https://images.unsplash.com/photo-1469041797191-50ace28483c3?w=400&h=600&fit=crop",
-        title: "Analise características e benefícios",
-        description: "Receba comparações detalhadas entre diferentes opções"
+        image: "/lovable-uploads/93f3ee1e-a93d-496e-ae28-72be754d5fac.png",
+        title: "Salve as recomendações em seu painel de controle",
+        description: "Monitore os preços para compra e receba alertas quando houver promoções"
       },
       {
-        image: "https://images.unsplash.com/photo-1721322800607-8c38375eef04?w=400&h=600&fit=crop",
-        title: "Escolha a melhor opção para você",
-        description: "Recomendação final baseada em custo-benefício e suas necessidades"
+        image: "/lovable-uploads/93f3ee1e-a93d-496e-ae28-72be754d5fac.png",
+        title: "Acompanhe suas pesquisas e compare produtos",
+        description: "Tenha controle total das suas buscas e tome a melhor decisão de compra"
       }
     ]
   };

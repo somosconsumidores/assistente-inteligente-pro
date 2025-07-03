@@ -6,6 +6,11 @@ const ExampleFlow = () => {
 
   const slides = [
     {
+      image: "/lovable-uploads/6268ed3b-65e9-4f2a-a59a-9da8ba0c6970.png", // 13.png
+      title: "Escolha o Assistente Mestre das Viagens",
+      description: "Acesse todas as funcionalidades de planejamento de viagens"
+    },
+    {
       image: "/lovable-uploads/fd9ed4bb-731c-416b-b51c-346833c0ce2b.png", // 9.png
       title: "Escolha um destino e defina seu orçamento",
       description: "Informe para onde quer viajar, suas datas e orçamento disponível"
@@ -24,11 +29,6 @@ const ExampleFlow = () => {
       image: "/lovable-uploads/3753c324-b8e8-4479-a392-d5f8b7709fad.png", // 12.png
       title: "E pronto! Recomendamos um destino com base em seu orçamento disponível :)",
       description: "Receba sugestões personalizadas dentro do seu budget"
-    },
-    {
-      image: "/lovable-uploads/6268ed3b-65e9-4f2a-a59a-9da8ba0c6970.png", // 13.png
-      title: "Escolha o Assistente Mestre das Viagens",
-      description: "Acesse todas as funcionalidades de planejamento de viagens"
     }
   ];
 

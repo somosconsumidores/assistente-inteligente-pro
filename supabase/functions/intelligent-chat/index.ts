@@ -133,6 +133,12 @@ serve(async (req) => {
     const lastMessage = messages[messages.length - 1];
     const isImageRequest = lastMessage.role === 'user' && isImageGenerationRequest(lastMessage.content);
     const isTransformRequest = lastMessage.role === 'user' && isImageTransformationRequest(lastMessage.content, hasAttachments);
+    
+    console.log('Debug - Última mensagem:', lastMessage.content);
+    console.log('Debug - Tem anexos:', hasAttachments);
+    console.log('Debug - É solicitação de imagem:', isImageRequest);
+    console.log('Debug - É solicitação de transformação:', isTransformRequest);
+    console.log('Debug - Anexos da mensagem:', lastMessage.attachments?.length || 0);
 
     // Processar transformação de imagem
     if (isTransformRequest) {

@@ -199,7 +199,7 @@ Mantenha a mesma composição, poses dos personagens/objetos, cores principais a
         const imageData = await imageResponse.json();
         
         return new Response(JSON.stringify({
-          message: 'Aqui está sua imagem transformada! Analisei a imagem original e recriou preservando os elementos principais no novo estilo solicitado.',
+          message: 'Aqui está sua imagem transformada! Analisei a imagem original e a recriei no estilo solicitado.',
           imageUrl: imageData.data[0].url,
           isImageGeneration: true,
           isTransformation: true
@@ -233,7 +233,7 @@ Mantenha a mesma composição, poses dos personagens/objetos, cores principais a
         const imageData = await imageResponse.json();
         
         return new Response(JSON.stringify({
-          message: 'Aqui está a imagem transformada (usando método alternativo).',
+          message: 'Aqui está sua imagem transformada.',
           imageUrl: imageData.data[0].url,
           isImageGeneration: true,
           isTransformation: true
@@ -271,7 +271,7 @@ Mantenha a mesma composição, poses dos personagens/objetos, cores principais a
       const imageData = await imageResponse.json();
       
       return new Response(JSON.stringify({
-        message: 'Aqui está a imagem que você solicitou!',
+        message: 'Aqui está sua imagem!',
         imageUrl: imageData.data[0].url,
         isImageGeneration: true
       }), {
@@ -331,8 +331,8 @@ Mantenha a mesma composição, poses dos personagens/objetos, cores principais a
           {
             role: 'system',
             content: hasAttachments 
-              ? 'Você é um assistente inteligente avançado com capacidade de análise de imagens e documentos. Forneça respostas detalhadas, precisas e úteis baseadas no texto e nos arquivos fornecidos. Quando analisar imagens, descreva o que você vê de forma detalhada. Para documentos, extraia e analise as informações relevantes. Responda sempre em português brasileiro. IMPORTANTE: Para transformar imagens, você agora analisa a imagem original e recria ela no estilo solicitado. Use comandos como "transforme esta imagem no estilo [estilo]" para ativar a funcionalidade de transformação inteligente.'
-              : 'Você é um assistente inteligente avançado, similar ao ChatGPT Plus. Forneça respostas detalhadas, precisas e úteis. Você pode ajudar com análises, criação de conteúdo, programação, matemática, pesquisa e muito mais. Responda sempre em português brasileiro, a menos que especificamente solicitado em outro idioma. IMPORTANTE: Se o usuário solicitar geração de imagens, informe que deve usar palavras-chave como "gere uma imagem", "criar uma imagem", "desenhe" ou similares para ativar a funcionalidade de geração de imagens. Para transformações de imagem, elas podem enviar uma imagem e pedir para "transformar no estilo [estilo]" - agora você analisa a imagem original e a recria no novo estilo.'
+              ? 'Você é um assistente de IA avançado equivalente ao ChatGPT Plus. Você tem capacidade de análise de imagens, documentos (PDF, Word, Excel, CSV, texto), criação de conteúdo, programação, matemática, pesquisa e muito mais. Quando receber arquivos, analise-os de forma detalhada e responda com base no conteúdo. Para imagens, descreva o que vê e analise conforme solicitado. Para documentos, extraia informações relevantes, faça resumos, análises ou responda perguntas específicas. Para planilhas/CSV, analise dados, identifique padrões, faça cálculos se necessário. Seja versátil e adaptável ao que o usuário precisa. Responda sempre em português brasileiro de forma clara e útil.'
+              : 'Você é um assistente de IA avançado equivalente ao ChatGPT Plus. Você pode ajudar com: análise e criação de conteúdo, programação e debug de código, matemática e cálculos, pesquisa e explicações, geração e transformação de imagens, análise de dados, escrita criativa e técnica, tradução, educação e tutoria, resolução de problemas, e muito mais. Seja versátil, criativo e útil. Adapte-se ao que o usuário precisa. Responda sempre em português brasileiro de forma clara e detalhada, a menos que especificamente solicitado em outro idioma.'
           },
           ...processedMessages
         ],

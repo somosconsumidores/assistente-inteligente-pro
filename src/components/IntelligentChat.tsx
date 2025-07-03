@@ -125,26 +125,10 @@ const IntelligentChat: React.FC = () => {
     
     return (
       <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-        <div className="flex items-center gap-2 mb-3">
-          {isTransformation ? (
-            <>
-              <Sparkles className="w-4 h-4 text-purple-600" />
-              <span className="text-sm font-medium text-gray-700">Transformação Inteligente</span>
-              <Badge variant="outline" className="text-xs text-purple-600 border-purple-200 bg-purple-50">
-                Análise + Recriação
-              </Badge>
-            </>
-          ) : (
-            <>
-              <Image className="w-4 h-4 text-blue-600" />
-              <span className="text-sm font-medium text-gray-700">Imagem Gerada</span>
-            </>
-          )}
-        </div>
         <div className="relative group">
           <img 
             src={imageUrl} 
-            alt={isTransformation ? "Imagem transformada por IA" : "Imagem gerada por IA"} 
+            alt="Imagem gerada por IA" 
             className="w-full max-w-full rounded-lg border shadow-sm" 
           />
           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -158,11 +142,6 @@ const IntelligentChat: React.FC = () => {
             </Button>
           </div>
         </div>
-        {isTransformation && (
-          <div className="mt-2 text-xs text-gray-600 bg-purple-50 p-2 rounded">
-            💡 Esta imagem foi criada analisando sua foto original e recriando-a no estilo solicitado
-          </div>
-        )}
       </div>
     );
   };
@@ -227,7 +206,7 @@ const IntelligentChat: React.FC = () => {
               <div className="p-3 border-t border-gray-700">
                 <div className="flex items-center gap-2 text-xs text-gray-400">
                   <Crown className="w-3.5 h-3.5 text-yellow-500" />
-                  <span>Chat Inteligente Premium</span>
+                  <span>Assistente Premium</span>
                 </div>
               </div>
             </div>
@@ -243,14 +222,10 @@ const IntelligentChat: React.FC = () => {
                 <Menu className="w-5 h-5" />
               </Button>
               <div>
-                <h1 className="text-lg font-semibold text-gray-900">ChatGPT 4</h1>
+                <h1 className="text-lg font-semibold text-gray-900">Chat Inteligente</h1>
                 <div className="flex items-center gap-1 flex-wrap">
                   <Badge variant="outline" className="text-xs text-green-600 border-green-200 bg-green-50 px-1 py-0">
                     Online
-                  </Badge>
-                  <Badge variant="outline" className="text-xs text-blue-600 border-blue-200 bg-blue-50 px-1 py-0">
-                    <Image className="w-2 h-2 mr-1" />
-                    Imagens
                   </Badge>
                 </div>
               </div>
@@ -269,27 +244,15 @@ const IntelligentChat: React.FC = () => {
                     Como posso ajudá-lo?
                   </h2>
                   <p className="text-gray-600 text-center max-w-sm leading-relaxed mb-4">
-                    Assistente IA avançado para análises, imagens e muito mais.
+                    Assistente IA avançado para análise de documentos, imagens, dados e muito mais.
                   </p>
-                  <div className="space-y-3 max-w-sm w-full">
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Image className="w-3 h-3 text-blue-600" />
-                        <span className="text-xs font-medium text-blue-800">Geração de Imagens</span>
-                      </div>
-                      <p className="text-xs text-blue-700">
-                        Use "gere uma imagem de..." para criar imagens.
-                      </p>
-                    </div>
-                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Sparkles className="w-3 h-3 text-purple-600" />
-                        <span className="text-xs font-medium text-purple-800">Transformação</span>
-                      </div>
-                      <p className="text-xs text-purple-700">
-                        Envie uma foto e peça "transforme no estilo Pixar".
-                      </p>
-                    </div>
+                  <div className="space-y-2 max-w-sm w-full text-center">
+                    <p className="text-xs text-gray-500">
+                      • Analise documentos PDF, CSV, XLSX<br/>
+                      • Gere e transforme imagens<br/>
+                      • Responda perguntas sobre arquivos<br/>
+                      • E muito mais...
+                    </p>
                   </div>
                 </div>
               ) : (
@@ -413,7 +376,7 @@ const IntelligentChat: React.FC = () => {
                     <Input 
                       value={inputMessage} 
                       onChange={e => setInputMessage(e.target.value)} 
-                      placeholder="Mensagem, gere imagem ou transforme..." 
+                      placeholder="Envie uma mensagem..." 
                       disabled={isLoading} 
                       className="w-full pl-12 pr-4 py-3 min-h-[48px] text-base bg-white border border-gray-300 rounded-xl focus:border-gray-400 focus:ring-2 focus:ring-gray-200 resize-none text-black placeholder:text-gray-500" 
                     />
@@ -430,7 +393,7 @@ const IntelligentChat: React.FC = () => {
               </form>
               
               <div className="mt-2 text-xs text-gray-500 text-center">
-                ChatGPT pode cometer erros. • Use "gere uma imagem" ou "transforme no estilo..."
+                A IA pode cometer erros. Considere verificar informações importantes.
               </div>
             </div>
           </div>
@@ -493,7 +456,7 @@ const IntelligentChat: React.FC = () => {
         <div className="p-3 border-t border-gray-700">
           <div className="flex items-center gap-2 text-xs text-gray-400">
             <Crown className="w-3.5 h-3.5 text-yellow-500" />
-            <span>Chat Inteligente Premium</span>
+            <span>Assistente Premium</span>
           </div>
         </div>
       </div>
@@ -502,17 +465,9 @@ const IntelligentChat: React.FC = () => {
       <div className="flex-1 flex flex-col min-w-0">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white">
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-semibold text-gray-900">ChatGPT 4</h1>
+            <h1 className="text-xl font-semibold text-gray-900">Chat Inteligente</h1>
             <Badge variant="outline" className="text-xs text-green-600 border-green-200 bg-green-50 px-2 py-1">
               Online
-            </Badge>
-            <Badge variant="outline" className="text-xs text-blue-600 border-blue-200 bg-blue-50 px-2 py-1">
-              <Image className="w-3 h-3 mr-1" />
-              Geração de Imagens
-            </Badge>
-            <Badge variant="outline" className="text-xs text-purple-600 border-purple-200 bg-purple-50 px-2 py-1">
-              <Sparkles className="w-3 h-3 mr-1" />
-              Transformação Inteligente
             </Badge>
           </div>
         </div>
@@ -527,26 +482,19 @@ const IntelligentChat: React.FC = () => {
                 <h2 className="text-2xl font-semibold text-gray-900 mb-3 text-center">
                   Como posso ajudá-lo hoje?
                 </h2>
-                <p className="text-gray-600 text-center max-w-md leading-relaxed mb-4">
-                  Sou um assistente de IA avançado. Posso analisar imagens, documentos, e ajudá-lo com análises, criação de conteúdo, programação, matemática e muito mais.
+                <p className="text-gray-600 text-center max-w-md leading-relaxed mb-6">
+                  Assistente IA avançado para análise de documentos, imagens, dados, programação e muito mais.
                 </p>
-                <div className="space-y-4 max-w-lg">
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Image className="w-4 h-4 text-blue-600" />
-                      <span className="text-sm font-medium text-blue-800">Geração de Imagens</span>
-                    </div>
-                    <p className="text-sm text-blue-700">
-                      Use frases como "gere uma imagem de...", "criar uma imagem de..." ou "desenhe..." para criar imagens.
-                    </p>
-                  </div>
-                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Sparkles className="w-4 h-4 text-purple-600" />
-                      <span className="text-sm font-medium text-purple-800">Transformação Inteligente</span>
-                    </div>
-                    <p className="text-sm text-purple-700">
-                      Envie uma imagem e peça "transforme no estilo Pixar 3D". Eu analiso sua foto e a recrio no estilo desejado!
+                <div className="max-w-lg mx-auto">
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                    <p className="text-sm text-gray-700 leading-relaxed">
+                      • <strong>Documentos:</strong> Analise PDFs, Word, planilhas<br/>
+                      • <strong>Imagens:</strong> Gere, transforme e analise imagens<br/>
+                      • <strong>Dados:</strong> Processe CSV, XLSX e outros formatos<br/>
+                      • <strong>Programação:</strong> Escreva e debug código<br/>
+                      • <strong>Análises:</strong> Matemática, estatística, pesquisa<br/>
+                      • <strong>Criação:</strong> Textos, apresentações, relatórios<br/>
+                      • <strong>E muito mais...</strong> Experimente suas ideias!
                     </p>
                   </div>
                 </div>
@@ -672,7 +620,7 @@ const IntelligentChat: React.FC = () => {
                   <Input 
                     value={inputMessage} 
                     onChange={e => setInputMessage(e.target.value)} 
-                    placeholder="Envie uma mensagem, gere uma imagem ou transforme uma imagem..." 
+                    placeholder="Envie uma mensagem para o Chat Inteligente..." 
                     disabled={isLoading} 
                     className="w-full pl-12 pr-4 py-3 min-h-[48px] text-base bg-white border border-gray-300 rounded-xl focus:border-gray-400 focus:ring-2 focus:ring-gray-200 resize-none text-black placeholder:text-gray-500" 
                     style={{
@@ -693,7 +641,7 @@ const IntelligentChat: React.FC = () => {
             </form>
             
             <div className="mt-2 text-xs text-gray-500 text-center">
-              O ChatGPT pode cometer erros. Considere verificar informações importantes. • Use "gere uma imagem" para criar ou "transforme no estilo..." para transformação inteligente.
+              A IA pode cometer erros. Considere verificar informações importantes.
             </div>
           </div>
         </div>

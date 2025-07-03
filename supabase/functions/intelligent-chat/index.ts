@@ -161,27 +161,34 @@ serve(async (req) => {
       }
 
       try {
-        // Usar o endpoint de edição de imagem do OpenAI para modificações precisas
-        console.log('Editando imagem com instrução:', lastMessage.content);
-        
-        // Converter base64 para blob para o endpoint de edição
-        const base64Data = imageAttachment.base64.split(',')[1];
-        const imageBlob = new Uint8Array(atob(base64Data).split('').map(char => char.charCodeAt(0)));
-        
-        // Criar FormData para o endpoint de edições
-        const formData = new FormData();
-        formData.append('image', new Blob([imageBlob], { type: 'image/png' }), 'image.png');
-        formData.append('prompt', lastMessage.content);
-        formData.append('n', '1');
-        formData.append('size', '1024x1024');
+        // Analisar a imagem original usando GPT-4o Vision primeiro
+        console.log('Analisando imagem original para edição precisa...');
+        const imageAnalysis = await analyzeImageWithVision(imageAttachment.base64);
+        console.log('Análise da imagem:', imageAnalysis);
 
-        // Usar o endpoint de edição para modificar a imagem existente
-        const imageResponse = await fetch('https://api.openai.com/v1/images/edits', {
+        // Criar prompt específico para edição preservando elementos originais
+        const editPrompt = `Baseado na imagem fornecida: ${imageAnalysis}
+
+INSTRUÇÃO DE EDIÇÃO: ${lastMessage.content}
+
+IMPORTANTE: Mantenha EXATAMENTE a mesma pessoa, pose, expressão facial, composição, iluminação e todos os outros elementos visuais. Faça APENAS a alteração solicitada: ${lastMessage.content}. Preserve todos os outros aspectos da imagem original.`;
+
+        console.log('Prompt de edição:', editPrompt);
+
+        // Usar DALL-E 3 com prompt muito específico para edição
+        const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${openAIApiKey}`,
+            'Content-Type': 'application/json',
           },
-          body: formData
+          body: JSON.stringify({
+            model: 'dall-e-3',
+            prompt: editPrompt,
+            n: 1,
+            size: '1024x1024',
+            quality: 'hd'
+          }),
         });
 
         if (!imageResponse.ok) {

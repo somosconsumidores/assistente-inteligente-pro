@@ -36,29 +36,29 @@ const ExampleFlow = () => {
     ],
     financial: [
       {
-        image: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=400&h=600&fit=crop",
-        title: "Escolha o Consultor Financeiro",
-        description: "Acesse análises e planejamento financeiro personalizado"
+        image: "/lovable-uploads/a3a23be3-6eb5-488e-a373-82c81d62732d.png",
+        title: "Responda as perguntas do nosso Consultor Financeiro",
+        description: "Conte sobre sua situação financeira atual para receber análises personalizadas"
       },
       {
-        image: "https://images.unsplash.com/photo-1721322800607-8c38375eef04?w=400&h=600&fit=crop",
-        title: "Informe sua situação financeira atual",
-        description: "Insira sua renda, gastos fixos, variáveis e objetivos financeiros"
+        image: "/lovable-uploads/e225a78a-d0f1-4b49-a936-b1eaccba425c.png",
+        title: "Defina as suas metas e objetivos",
+        description: "Economizar, quitar dívidas, comprar um carro, etc - estabeleça seus objetivos financeiros"
       },
       {
-        image: "https://images.unsplash.com/photo-1466721591366-2d5fba72006d?w=400&h=600&fit=crop",
-        title: "Receba análise completa da sua situação",
-        description: "Dashboard com métricas, alertas e insights personalizados"
+        image: "/lovable-uploads/1b3f4d52-8cbf-4024-91f6-64573a72624a.png",
+        title: "Receba uma visão da sua situação financeira atual",
+        description: "Dashboard completo com análise detalhada das suas finanças e indicadores importantes"
       },
       {
-        image: "https://images.unsplash.com/photo-1493962853295-0fd70327578a?w=400&h=600&fit=crop",
-        title: "Visualize relatórios e projeções",
-        description: "Gráficos detalhados sobre seu orçamento e metas de economia"
+        image: "/lovable-uploads/101a25f0-4390-4e94-8eda-695deb64f85c.png",
+        title: "Solicite um plano de ação personalizado para a sua meta",
+        description: "Estratégias específicas e passos práticos para alcançar seus objetivos financeiros"
       },
       {
-        image: "https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=400&h=600&fit=crop",
-        title: "Receba recomendações personalizadas",
-        description: "Estratégias específicas para otimizar suas finanças e atingir objetivos"
+        image: "/lovable-uploads/2a51cf62-545d-46c5-9e59-d43df60a6747.png",
+        title: "Converse livremente com nosso consultor financeiro",
+        description: "Tire todas as suas dúvidas e receba orientações personalizadas em tempo real"
       }
     ],
     products: [

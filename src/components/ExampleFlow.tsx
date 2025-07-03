@@ -6,27 +6,27 @@ const ExampleFlow = () => {
 
   const slides = [
     {
-      image: "/lovable-uploads/fd9ed4bb-731c-416b-b51c-346833c0ce2b.png",
+      image: "/lovable-uploads/fd9ed4bb-731c-416b-b51c-346833c0ce2b.png", // 9.png
       title: "Escolha um destino e defina seu orçamento",
       description: "Informe para onde quer viajar, suas datas e orçamento disponível"
     },
     {
-      image: "/lovable-uploads/8e38893d-32f9-4426-8ae7-a8bb2973d37d.png",
+      image: "/lovable-uploads/8e38893d-32f9-4426-8ae7-a8bb2973d37d.png", // 10.png
       title: "Pronto, receba o preço da passagem, estimativa de hospedagem e roteiro completo", 
       description: "Em segundos você tem um planejamento completo com preços reais"
     },
     {
-      image: "/lovable-uploads/015618bc-508c-4ce2-8da7-59545a1d365b.png",
+      image: "/lovable-uploads/015618bc-508c-4ce2-8da7-59545a1d365b.png", // 11.png
       title: "Ou se estiver sem ideias, use o Destinos Surpresa",
-      description: "Nossa IA analisa seu orçamento e sugere destinos perfeitos"
+      description: "Basta inserir o orçamento que nossa IA analisa e sugere destinos perfeitos"
     },
     {
-      image: "/lovable-uploads/3753c324-b8e8-4479-a392-d5f8b7709fad.png",
-      title: "E pronto! Recomendamos um destino com base em seu orçamento",
+      image: "/lovable-uploads/3753c324-b8e8-4479-a392-d5f8b7709fad.png", // 12.png
+      title: "E pronto! Recomendamos um destino com base em seu orçamento disponível :)",
       description: "Receba sugestões personalizadas dentro do seu budget"
     },
     {
-      image: "/lovable-uploads/6268ed3b-65e9-4f2a-a59a-9da8ba0c6970.png",
+      image: "/lovable-uploads/6268ed3b-65e9-4f2a-a59a-9da8ba0c6970.png", // 13.png
       title: "Escolha o Assistente Mestre das Viagens",
       description: "Acesse todas as funcionalidades de planejamento de viagens"
     }

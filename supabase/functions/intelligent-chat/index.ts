@@ -161,34 +161,27 @@ serve(async (req) => {
       }
 
       try {
-        // Analisar a imagem original usando GPT-4o Vision
-        console.log('Analisando imagem original...');
-        const imageAnalysis = await analyzeImageWithVision(imageAttachment.base64);
-        console.log('Análise da imagem:', imageAnalysis);
+        // Usar o endpoint de edição de imagem do OpenAI para modificações precisas
+        console.log('Editando imagem com instrução:', lastMessage.content);
+        
+        // Converter base64 para blob para o endpoint de edição
+        const base64Data = imageAttachment.base64.split(',')[1];
+        const imageBlob = new Uint8Array(atob(base64Data).split('').map(char => char.charCodeAt(0)));
+        
+        // Criar FormData para o endpoint de edições
+        const formData = new FormData();
+        formData.append('image', new Blob([imageBlob], { type: 'image/png' }), 'image.png');
+        formData.append('prompt', lastMessage.content);
+        formData.append('n', '1');
+        formData.append('size', '1024x1024');
 
-        // Criar prompt combinado baseado na análise + estilo solicitado
-        const transformationPrompt = `Baseado nesta descrição detalhada da imagem original: "${imageAnalysis}"
-
-Agora crie uma nova imagem que mantenha todos os elementos principais, composição, poses e características descritas, mas ${lastMessage.content.toLowerCase()}.
-
-Mantenha a mesma composição, poses dos personagens/objetos, cores principais adaptadas ao novo estilo, e todos os elementos visuais importantes, apenas aplicando a transformação de estilo solicitada.`;
-
-        console.log('Prompt de transformação:', transformationPrompt);
-
-        // Gerar nova imagem usando DALL-E 3 com o prompt inteligente
-        const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
+        // Usar o endpoint de edição para modificar a imagem existente
+        const imageResponse = await fetch('https://api.openai.com/v1/images/edits', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${openAIApiKey}`,
-            'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            model: 'dall-e-3',
-            prompt: transformationPrompt,
-            n: 1,
-            size: '1024x1024',
-            quality: 'hd'
-          }),
+          body: formData
         });
 
         if (!imageResponse.ok) {

@@ -139,18 +139,19 @@ serve(async (req) => {
     }
 
     const lastMessage = messages[messages.length - 1];
-    const isImageRequest = lastMessage.role === 'user' && isImageGenerationRequest(lastMessage.content);
-    const isTransformRequest = lastMessage.role === 'user' && isImageTransformationRequest(lastMessage.content, hasAttachments);
+    const isImageRequest = lastMessage.role === 'user' && isImageGenerationRequest(lastMessage.content) && !hasAttachments;
     
     console.log('Debug - Última mensagem:', lastMessage.content);
     console.log('Debug - Tem anexos:', hasAttachments);
     console.log('Debug - É solicitação de imagem:', isImageRequest);
-    console.log('Debug - É solicitação de transformação:', isTransformRequest);
     console.log('Debug - Anexos da mensagem:', lastMessage.attachments?.length || 0);
 
-    // Processar transformação de imagem
-    if (isTransformRequest) {
-      console.log('Processando transformação real de imagem para prompt:', lastMessage.content);
+    // Verificar se há imagem anexada para transformação
+    const hasImageAttachment = lastMessage.attachments?.some((att: any) => att.type === 'image' && att.base64);
+    
+    // Processar transformação de imagem (qualquer solicitação com imagem anexada)
+    if (hasImageAttachment) {
+      console.log('Processando transformação de imagem para prompt:', lastMessage.content);
       
       // Encontrar a imagem anexada
       const imageAttachment = lastMessage.attachments?.find((att: any) => att.type === 'image' && att.base64);

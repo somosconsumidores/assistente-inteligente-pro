@@ -158,17 +158,29 @@ export const useIntelligentChat = () => {
         updatedAt: new Date()
       };
 
-      const existingSessions = JSON.parse(localStorage.getItem('intelligentChatSessions') || '[]');
-      const sessionIndex = existingSessions.findIndex((s: ChatSession) => s.id === sessionId);
-      
-      if (sessionIndex >= 0) {
-        existingSessions[sessionIndex] = session;
-      } else {
-        existingSessions.unshift(session);
-      }
+      try {
+        const existingSessions = JSON.parse(localStorage.getItem('intelligentChatSessions') || '[]');
+        const sessionIndex = existingSessions.findIndex((s: ChatSession) => s.id === sessionId);
+        
+        if (sessionIndex >= 0) {
+          existingSessions[sessionIndex] = session;
+        } else {
+          existingSessions.unshift(session);
+        }
 
-      localStorage.setItem('intelligentChatSessions', JSON.stringify(existingSessions));
-      setSessions(existingSessions);
+        // Limitar a 20 sessões para evitar exceder a quota do localStorage
+        const limitedSessions = existingSessions.slice(0, 20);
+        localStorage.setItem('intelligentChatSessions', JSON.stringify(limitedSessions));
+        setSessions(limitedSessions);
+      } catch (error) {
+        // Se localStorage estiver cheio, limpe e mantenha apenas a sessão atual
+        if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+          console.warn('LocalStorage quota exceeded, clearing old sessions');
+          const newSessions = [session];
+          localStorage.setItem('intelligentChatSessions', JSON.stringify(newSessions));
+          setSessions(newSessions);
+        }
+      }
 
     } catch (error) {
       console.error('Error sending message:', error);

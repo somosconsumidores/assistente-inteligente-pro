@@ -105,7 +105,7 @@ const ExampleFlow = () => {
         {/* Header */}
         <div className="text-center mb-8 sm:mb-12">
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
-            Veja um exemplo de como funciona{" "}
+            Veja como nossos assistentes trabalham{" "}
             <span className="text-gradient-neon">na prática</span>
           </h2>
           <p className="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto mb-8">

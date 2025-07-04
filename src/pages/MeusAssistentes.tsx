@@ -2,14 +2,17 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { assistants } from '@/data/assistants';
-import { Crown, Users } from 'lucide-react';
+import { Crown, Users, Lock } from 'lucide-react';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useMobileDeviceInfo } from '@/hooks/use-mobile';
+import { Button } from '@/components/ui/button';
+import { useSubscription } from '@/hooks/useSubscription';
 
 const MeusAssistentes = () => {
   const navigate = useNavigate();
   const { profile } = useAuth();
   const { isMobile } = useMobileDeviceInfo();
+  const { createCheckout } = useSubscription();
   const isPremiumUser = profile?.plan === 'premium';
 
   const handleAssistantClick = (assistant: typeof assistants[0]) => {
@@ -17,6 +20,35 @@ const MeusAssistentes = () => {
       navigate('/viagens?tab=planner', { replace: true });
     } else {
       navigate(assistant.path);
+    }
+  };
+
+  const handleUpgrade = async () => {
+    try {
+      await createCheckout();
+    } catch (error) {
+      console.error('Error during upgrade:', error);
+    }
+  };
+
+  // Determina se o assistente pode ser acessado
+  const getAssistantAccess = (assistant: typeof assistants[0]) => {
+    // Se é usuário premium, todos os assistentes estão liberados
+    if (isPremiumUser) {
+      return { canAccess: true, isSelected: false, isBlocked: false };
+    }
+
+    // Se é usuário gratuito
+    if (!assistant.isPremium) {
+      // Assistentes gratuitos - verifica se foi o selecionado
+      const isSelected = profile?.selected_assistant_id === assistant.id;
+      const canAccess = isSelected || !profile?.selected_assistant_id; // Pode acessar se foi selecionado ou se ainda não selecionou nenhum
+      const isBlocked = profile?.selected_assistant_id && !isSelected; // Está bloqueado se já selecionou outro
+
+      return { canAccess, isSelected, isBlocked };
+    } else {
+      // Assistentes premium para usuário gratuito - sempre bloqueados
+      return { canAccess: false, isSelected: false, isBlocked: true };
     }
   };
 
@@ -50,25 +82,61 @@ const MeusAssistentes = () => {
         }`}>
           {assistants.map((assistant) => {
             const IconComponent = assistant.icon;
-            const canAccess = !assistant.isPremium || isPremiumUser;
+            const { canAccess, isSelected, isBlocked } = getAssistantAccess(assistant);
 
             return (
               <div
                 key={assistant.id}
-                onClick={() => canAccess && handleAssistantClick(assistant)}
                 className={`
-                  group relative bg-card border border-border rounded-lg p-6 transition-all duration-300 cursor-pointer
+                  group relative bg-card border border-border rounded-lg p-6 transition-all duration-300
                   ${canAccess 
-                    ? 'hover:shadow-lg hover:border-primary/50' 
-                    : 'opacity-60 cursor-not-allowed'
+                    ? 'hover:shadow-lg hover:border-primary/50 cursor-pointer' 
+                    : 'opacity-60'
                   }
-                  ${!canAccess ? 'grayscale' : ''}
+                  ${isSelected ? 'border-green-500 bg-green-50/5' : ''}
+                  ${isBlocked ? 'grayscale' : ''}
                 `}
+                onClick={() => canAccess && handleAssistantClick(assistant)}
               >
-                {/* Premium Badge */}
-                {assistant.isPremium && !isPremiumUser && (
+                {/* Status Badge */}
+                {isSelected && (
+                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
+                    <span className="text-white text-xs font-bold">✓</span>
+                  </div>
+                )}
+                {assistant.isPremium && !isPremiumUser && !isSelected && (
                   <div className="absolute -top-2 -right-2 w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center shadow-lg">
                     <Crown className="w-4 h-4 text-yellow-900" />
+                  </div>
+                )}
+                {isBlocked && !assistant.isPremium && (
+                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center shadow-lg">
+                    <Lock className="w-4 h-4 text-white" />
+                  </div>
+                )}
+
+                {/* Lock Overlay para assistentes bloqueados */}
+                {isBlocked && (
+                  <div className="absolute inset-0 bg-gray-900/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-lg">
+                    <div className="text-center p-4">
+                      <div className="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Lock className="w-6 h-6 text-gray-400" />
+                      </div>
+                      <p className="text-white text-sm font-medium mb-3">
+                        {assistant.isPremium ? 'Requer Premium' : 'Assistente Bloqueado'}
+                      </p>
+                      <Button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleUpgrade();
+                        }}
+                        size="sm"
+                        className="bg-yellow-500 hover:bg-yellow-600 text-yellow-900 font-medium"
+                      >
+                        <Crown className="w-4 h-4 mr-2" />
+                        Fazer Upgrade
+                      </Button>
+                    </div>
                   </div>
                 )}
 
@@ -104,23 +172,29 @@ const MeusAssistentes = () => {
 
                 {/* Access Status */}
                 <div className="mt-4 pt-4 border-t border-border">
-                  {canAccess ? (
+                  {isSelected ? (
                     <div className="text-center">
                       <span className="text-green-500 text-sm font-medium">
-                        ✓ Acesso liberado
+                        ✓ Assistente Selecionado
+                      </span>
+                    </div>
+                  ) : canAccess ? (
+                    <div className="text-center">
+                      <span className="text-blue-500 text-sm font-medium">
+                        📱 Clique para usar
                       </span>
                     </div>
                   ) : (
                     <div className="text-center">
-                      <span className="text-yellow-500 text-sm font-medium">
-                        🔒 Requer plano Premium
+                      <span className="text-gray-500 text-sm font-medium">
+                        🔒 Bloqueado
                       </span>
                     </div>
                   )}
                 </div>
 
                 {/* Hover Effect Overlay */}
-                {canAccess && (
+                {canAccess && !isBlocked && (
                   <div className="absolute inset-0 bg-primary/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                 )}
               </div>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,7 +6,6 @@ import { LayoutDashboard, Scale, TrendingUp, Package, ShoppingCart, MapPin, LogO
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { assistants } from '@/data/assistants';
-
 const menuItems = [{
   title: 'Meus Assistentes',
   url: '/meus-assistentes',
@@ -49,7 +47,6 @@ const menuItems = [{
   icon: MapPin,
   isPremium: true
 }];
-
 export function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -60,17 +57,14 @@ export function AppSidebar() {
   const {
     state
   } = useSidebar();
-  
   const isActive = (path: string) => {
     // Remove query params for comparison
     const pathWithoutQuery = path.split('?')[0];
     const currentPathWithoutQuery = location.pathname;
     return currentPathWithoutQuery === pathWithoutQuery;
   };
-  
   const isPremiumUser = profile?.plan === 'premium';
   const isCollapsed = state === 'collapsed';
-  
   const handleLogout = async () => {
     try {
       await logout();
@@ -79,31 +73,30 @@ export function AppSidebar() {
       console.error('Erro ao fazer logout:', error);
     }
   };
-
   const handleNavigation = (item: typeof menuItems[0]) => {
     if (item.url === '/viagens') {
       // Always navigate to planner tab for travel consultant
-      navigate('/viagens?tab=planner', { replace: true });
+      navigate('/viagens?tab=planner', {
+        replace: true
+      });
     } else {
       navigate(item.url);
     }
   };
-
   const handleAssistantNavigation = (assistant: typeof assistants[0]) => {
     if (assistant.path === '/viagens') {
-      navigate('/viagens?tab=planner', { replace: true });
+      navigate('/viagens?tab=planner', {
+        replace: true
+      });
     } else {
       navigate(assistant.path);
     }
   };
-  
   const getPlanBadge = (isPremium: boolean) => {
     // Não mostra badge para usuários premium
     if (!isPremium || isPremiumUser) return null;
-    
     return;
   };
-
   return <Sidebar className="bg-slate-900 border-slate-700">
       <SidebarHeader className="p-4 bg-zinc-800">
         <div className="flex items-center gap-3">
@@ -111,7 +104,7 @@ export function AppSidebar() {
             <LayoutDashboard className="w-4 h-4 text-white" />
           </div>
           {!isCollapsed && <div>
-              <h2 className="text-lg font-bold text-white">AssistIA</h2>
+              <h2 className="text-lg font-bold text-white">Biblioteca IA</h2>
               <p className="text-xs text-slate-400">Seus assistentes inteligentes</p>
             </div>}
         </div>

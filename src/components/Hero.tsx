@@ -99,7 +99,7 @@ const Hero = () => {
         
         {/* Stats Section */}
         <div className="flex justify-center items-center pt-8 sm:pt-12">
-          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8">
+          <div className="flex flex-row items-center gap-2 sm:gap-8 justify-center flex-wrap">
             {/* 6 Especialistas */}
             <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-600/20 to-blue-600/20 border border-purple-500/30 backdrop-blur-sm">
               <span className="text-2xl sm:text-3xl font-bold text-neon">6</span>

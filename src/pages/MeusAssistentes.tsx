@@ -100,7 +100,6 @@ const MeusAssistentes = () => {
                   group relative bg-card border border-border rounded-lg p-6 transition-all duration-300
                   ${canAccess ? 'hover:shadow-lg hover:border-primary/50 cursor-pointer' : 'opacity-60'}
                   ${isSelected ? 'border-green-500 bg-green-50/5' : ''}
-                  ${isBlocked ? 'grayscale' : ''}
                 `} onClick={() => canAccess && handleAssistantClick(assistant)}>
                 {/* Status Badge */}
                 {isSelected && <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg">

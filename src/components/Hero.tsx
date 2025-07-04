@@ -30,19 +30,19 @@ const Hero = () => {
         <div className="grid lg:grid-cols-2 gap-8 items-start">
           {/* Left Column - Text Content */}
           <div className="text-center lg:text-left space-y-6 sm:space-y-8 -mt-8">
-          {/* Badge */}
+          {/* Mobile Image - moved to top */}
+          <div className="lg:hidden flex justify-center items-center">
+            <div className="relative">
+              <img src="/lovable-uploads/34bb5e1e-d7aa-4050-be50-2baeacf13021.png" alt="Aplicativo Biblioteca IA em dispositivos móveis e desktop" className="max-w-full h-auto rounded-lg shadow-2xl" />
+            </div>
+          </div>
+
+          {/* Badge - moved below image on mobile */}
           <div className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-gradient-to-r from-purple-600/30 to-blue-600/30 border-neon neon-glow-subtle">
             <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-neon mr-2 icon-glow" />
             <span className="text-xs sm:text-sm font-medium text-gradient-neon">
               Biblioteca de Assistentes Inteligentes
             </span>
-          </div>
-
-          {/* Mobile Image - appears after badge */}
-          <div className="lg:hidden flex justify-center items-center pt-6">
-            <div className="relative">
-              <img src="/lovable-uploads/34bb5e1e-d7aa-4050-be50-2baeacf13021.png" alt="Aplicativo Biblioteca IA em dispositivos móveis e desktop" className="max-w-full h-auto rounded-lg shadow-2xl" />
-            </div>
           </div>
 
           {/* Main Heading */}

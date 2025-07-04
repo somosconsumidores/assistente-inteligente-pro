@@ -50,29 +50,6 @@ const Hero = () => {
               <span className="block mt-2 text-sm sm:text-base md:text-lg text-light-gray">Direito, finanças, produtos, compras, viagens… Tudo em um só lugar. E tudo pronto para responder com precisão, em segundos.</span>
             </p>
             
-            {/* Impact Bullet Points */}
-            <div className="mt-6 sm:mt-8 space-y-3 text-left max-w-2xl mx-auto">
-              <div className="flex items-start gap-3 text-sm sm:text-base text-gray-300">
-                <span className="text-green-400 font-semibold">🔐</span>
-                <span>Consultas ilimitadas com IA treinada para te dar respostas reais</span>
-              </div>
-              <div className="flex items-start gap-3 text-sm sm:text-base text-gray-300">
-                <span className="text-green-400 font-semibold">💸</span>
-                <span>Economize US$ 20 por mês utilizando o Chat Inteligente</span>
-              </div>
-              <div className="flex items-start gap-3 text-sm sm:text-base text-gray-300">
-                <span className="text-green-400 font-semibold">⚖️</span>
-                <span>Dúvidas jurídicas? Compras? Planejamento financeiro? Temos um especialista pra isso.</span>
-              </div>
-              <div className="flex items-start gap-3 text-sm sm:text-base text-gray-300">
-                <span className="text-green-400 font-semibold">📲</span>
-                <span>Acesse do celular, quando quiser, onde estiver</span>
-              </div>
-              <div className="flex items-start gap-3 text-sm sm:text-base text-gray-300">
-                <span className="text-green-400 font-semibold">💬</span>
-                <span>5.000+ consultas já realizadas com 98% de satisfação</span>
-              </div>
-            </div>
           </div>
 
           {/* CTA Buttons */}

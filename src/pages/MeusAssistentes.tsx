@@ -88,7 +88,7 @@ const MeusAssistentes = () => {
         </div>
 
         {/* Assistants Grid */}
-        <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
+        <div className={`grid gap-4 ${isMobile ? 'grid-cols-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
           {assistants.map(assistant => {
           const IconComponent = assistant.icon;
           const {
@@ -97,7 +97,7 @@ const MeusAssistentes = () => {
             isBlocked
           } = getAssistantAccess(assistant);
           return <div key={assistant.id} className={`
-                  group relative bg-card border border-border rounded-lg p-6 transition-all duration-300
+                  group relative bg-card border border-border rounded-lg ${isMobile ? 'p-3' : 'p-6'} transition-all duration-300
                   ${canAccess ? 'hover:shadow-lg hover:border-primary/50 cursor-pointer' : 'opacity-60'}
                   ${isSelected ? 'border-green-500 bg-green-50/5' : ''}
                 `} onClick={() => canAccess && handleAssistantClick(assistant)}>

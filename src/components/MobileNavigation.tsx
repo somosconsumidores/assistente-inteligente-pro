@@ -62,7 +62,7 @@ export function MobileNavigation() {
                 disabled={!hasAccess}
                 className={`
                   flex flex-col items-center justify-center p-2 rounded-lg text-xs font-medium
-                  transition-all duration-200 min-h-[64px] relative
+                  transition-all duration-200 min-h-[48px] relative
                   ${isItemActive 
                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25' 
                     : hasAccess 

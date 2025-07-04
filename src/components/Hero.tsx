@@ -45,7 +45,7 @@ const Hero = () => {
             </h1>
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-soft-white max-w-4xl mx-auto leading-relaxed">
               Resolva problemas do dia a dia com 6 especialistas digitais que funcionam 24h por dia.
-              <span className="block mt-2 text-sm sm:text-base md:text-lg text-light-gray">Direito, finanças, produtos, compras, viagens… Tudo em um só lugar. E tudo pronto para responder com precisão, em segundos.</span>
+              <span className="block mt-2 text-sm sm:text-base text-light-gray md:text-base">Direito, finanças, produtos, compras, viagens… Tudo em um só lugar. E tudo pronto para responder com precisão, em segundos.</span>
             </p>
             
           </div>

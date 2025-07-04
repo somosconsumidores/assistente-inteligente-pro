@@ -92,10 +92,24 @@ const Hero = () => {
         
         {/* Stats Section */}
         <div className="flex justify-center items-center pt-8 sm:pt-12">
-          <div className="text-center">
-            <p className="text-lg sm:text-xl text-soft-white font-medium">
-              6 especialistas | 24 horas disponíves | 100% gratuito para começar
-            </p>
+          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8">
+            {/* 6 Especialistas */}
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-600/20 to-blue-600/20 border border-purple-500/30 backdrop-blur-sm">
+              <span className="text-2xl sm:text-3xl font-bold text-neon">6</span>
+              <span className="text-sm sm:text-base text-soft-white">especialistas</span>
+            </div>
+            
+            {/* 24 Horas */}
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30 backdrop-blur-sm">
+              <span className="text-2xl sm:text-3xl font-bold text-neon-blue">24h</span>
+              <span className="text-sm sm:text-base text-soft-white">disponíveis</span>
+            </div>
+            
+            {/* 100% Gratuito */}
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-green-600/20 to-blue-600/20 border border-green-500/30 backdrop-blur-sm">
+              <span className="text-2xl sm:text-3xl font-bold text-green-400">100%</span>
+              <span className="text-sm sm:text-base text-soft-white">gratuito</span>
+            </div>
           </div>
         </div>
       </div>

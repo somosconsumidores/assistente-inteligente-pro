@@ -38,6 +38,13 @@ const Hero = () => {
             </span>
           </div>
 
+          {/* Mobile Image - appears after badge */}
+          <div className="lg:hidden flex justify-center items-center pt-6">
+            <div className="relative">
+              <img src="/lovable-uploads/34bb5e1e-d7aa-4050-be50-2baeacf13021.png" alt="Aplicativo Biblioteca IA em dispositivos móveis e desktop" className="max-w-full h-auto rounded-lg shadow-2xl" />
+            </div>
+          </div>
+
           {/* Main Heading */}
           <div className="space-y-4">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight text-neon">
@@ -71,13 +78,6 @@ const Hero = () => {
                   </Link>
                 </Button>
               </>}
-          </div>
-
-          {/* Mobile Image - appears after badge */}
-          <div className="lg:hidden flex justify-center items-center pt-6">
-            <div className="relative">
-              <img src="/lovable-uploads/34bb5e1e-d7aa-4050-be50-2baeacf13021.png" alt="Aplicativo Biblioteca IA em dispositivos móveis e desktop" className="max-w-full h-auto rounded-lg shadow-2xl" />
-            </div>
           </div>
 
           {/* Additional Text */}

@@ -16,36 +16,6 @@ const menuItems = [{
   url: '/dashboard',
   icon: LayoutDashboard,
   isPremium: false
-}, {
-  title: 'Chat Inteligente',
-  url: '/chat-inteligente',
-  icon: MessageCircle,
-  isPremium: true
-}, {
-  title: 'Mestre do Direito do Consumidor',
-  url: '/direito-consumidor',
-  icon: Scale,
-  isPremium: true
-}, {
-  title: 'Mestre das Finanças',
-  url: '/financas',
-  icon: TrendingUp,
-  isPremium: true
-}, {
-  title: 'Mestre dos Produtos',
-  url: '/produtos',
-  icon: Package,
-  isPremium: true
-}, {
-  title: 'Assistente de Compras no Supermercado',
-  url: '/supermercado',
-  icon: ShoppingCart,
-  isPremium: true
-}, {
-  title: 'Consultor de Viagens',
-  url: '/viagens',
-  icon: MapPin,
-  isPremium: true
 }];
 export function AppSidebar() {
   const navigate = useNavigate();

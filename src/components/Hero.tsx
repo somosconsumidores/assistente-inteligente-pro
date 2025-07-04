@@ -79,7 +79,7 @@ const Hero = () => {
           </div>
 
           {/* Stats - moved to bottom center */}
-          <div className="pt-16 sm:pt-20 flex justify-center">
+          <div className="pt-24 sm:pt-32 flex justify-center items-center min-h-[200px]">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-3xl">
               <div className="text-center">
                 <div className="text-2xl sm:text-3xl font-bold text-white mb-1">6</div>

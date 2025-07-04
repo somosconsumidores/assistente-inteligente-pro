@@ -131,7 +131,7 @@ const MeusAssistentes = () => {
                       <Button onClick={e => {
                   e.stopPropagation();
                   handleUpgrade();
-                }} size="sm" className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium">
+                }} size="sm" className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium bg-orange-500 hover:bg-orange-400">
                         <Crown className="w-4 h-4 mr-2" />
                         Fazer Upgrade
                       </Button>
@@ -191,25 +191,17 @@ const MeusAssistentes = () => {
 
         {/* Footer Note */}
         <div className="mt-12 text-center">
-          {!isPremiumUser ? (
-            <Button 
-              onClick={handleUpgrade}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-muted hover:bg-muted/80 text-muted-foreground border border-border"
-              variant="ghost"
-            >
+          {!isPremiumUser ? <Button onClick={handleUpgrade} className="inline-flex items-center gap-2 px-6 py-3 bg-muted hover:bg-muted/80 text-muted-foreground border border-border" variant="ghost">
               <Crown className="w-5 h-5 text-yellow-500" />
               <span>
                 Faça upgrade para <span className="text-yellow-500 font-semibold">Premium</span> e libere todos os assistentes
               </span>
-            </Button>
-          ) : (
-            <div className="inline-flex items-center gap-2 px-6 py-3 bg-muted rounded-lg border border-border">
+            </Button> : <div className="inline-flex items-center gap-2 px-6 py-3 bg-muted rounded-lg border border-border">
               <Crown className="w-5 h-5 text-green-500" />
               <span className="text-muted-foreground">
                 Você tem acesso <span className="text-green-500 font-semibold">Premium</span> a todos os assistentes
               </span>
-            </div>
-          )}
+            </div>}
         </div>
       </div>
     </DashboardLayout>;

@@ -128,29 +128,16 @@ const MeusAssistentes = () => {
                       <p className="text-white text-xs font-medium mb-3">
                         {assistant.isPremium ? 'Requer Premium' : 'Assistente Bloqueado'}
                       </p>
-                      <div 
+                      <button 
                         onClick={e => {
                           e.stopPropagation();
                           handleUpgrade();
                         }} 
-                        className="cursor-pointer inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white rounded-md z-50 relative transition-all duration-200 hover:scale-105"
-                        style={{
-                          background: 'linear-gradient(135deg, #f97316 0%, #ef4444 100%)',
-                          boxShadow: '0 4px 14px 0 rgba(249, 115, 22, 0.4)',
-                          border: 'none'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.background = 'linear-gradient(135deg, #ea580c 0%, #dc2626 100%)';
-                          e.currentTarget.style.boxShadow = '0 6px 20px 0 rgba(234, 88, 12, 0.6)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.background = 'linear-gradient(135deg, #f97316 0%, #ef4444 100%)';
-                          e.currentTarget.style.boxShadow = '0 4px 14px 0 rgba(249, 115, 22, 0.4)';
-                        }}
+                        className="cursor-pointer inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white rounded-md z-50 relative transition-all duration-200 hover:scale-105 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 shadow-lg hover:shadow-xl border-0"
                       >
                         <Crown className="w-4 h-4 mr-2" />
                         Fazer Upgrade
-                      </div>
+                      </button>
                     </div>
                   </div>}
 

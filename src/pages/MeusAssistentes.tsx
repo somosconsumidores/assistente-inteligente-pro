@@ -128,10 +128,25 @@ const MeusAssistentes = () => {
                       <p className="text-white text-xs font-medium mb-3">
                         {assistant.isPremium ? 'Requer Premium' : 'Assistente Bloqueado'}
                       </p>
-                      <Button onClick={e => {
-                  e.stopPropagation();
-                  handleUpgrade();
-                }} size="sm" variant="ghost" className="!bg-gradient-to-r !from-orange-500 !to-red-500 hover:!from-orange-600 hover:!to-red-600 !text-white font-medium z-50 relative !border-none">
+                      <Button 
+                        onClick={e => {
+                          e.stopPropagation();
+                          handleUpgrade();
+                        }} 
+                        size="sm" 
+                        style={{
+                          background: 'linear-gradient(to right, #f97316, #ef4444)',
+                          color: 'white',
+                          border: 'none'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'linear-gradient(to right, #ea580c, #dc2626)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'linear-gradient(to right, #f97316, #ef4444)';
+                        }}
+                        className="z-50 relative font-medium"
+                      >
                         <Crown className="w-4 h-4 mr-2" />
                         Fazer Upgrade
                       </Button>

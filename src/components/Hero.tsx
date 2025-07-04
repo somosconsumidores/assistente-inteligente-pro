@@ -80,21 +80,6 @@ const Hero = () => {
             <p className="text-lg sm:text-xl text-gray-300 font-medium">Tenha especialistas de bolso.  Sem complicação.</p>
           </div>
 
-          {/* Stats */}
-          <div className="pt-8 sm:pt-12 grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-3xl mx-auto">
-            <div className="text-center">
-              <div className="text-2xl sm:text-3xl font-bold text-white mb-1">6</div>
-              <div className="text-sm sm:text-base text-gray-400">Assistentes Especializados</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl sm:text-3xl font-bold text-white mb-1">24/7</div>
-              <div className="text-sm sm:text-base text-gray-400">Disponibilidade</div>
-            </div>
-            <div className="text-center lg:text-left">
-              <div className="text-2xl sm:text-3xl font-bold text-white mb-1">100%</div>
-              <div className="text-sm sm:text-base text-gray-400">Gratuito para começar</div>
-            </div>
-          </div>
           </div>
           
           {/* Right Column - Image */}
@@ -105,6 +90,24 @@ const Hero = () => {
                 alt="Aplicativo Biblioteca IA em dispositivos móveis e desktop"
                 className="max-w-full h-auto rounded-lg shadow-2xl"
               />
+            </div>
+          </div>
+        </div>
+        
+        {/* Stats - Moved to bottom center */}
+        <div className="pt-12 sm:pt-16">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-3xl mx-auto">
+            <div className="text-center">
+              <div className="text-2xl sm:text-3xl font-bold text-white mb-1">6</div>
+              <div className="text-sm sm:text-base text-gray-400">Assistentes Especializados</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl sm:text-3xl font-bold text-white mb-1">24/7</div>
+              <div className="text-sm sm:text-base text-gray-400">Disponibilidade</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl sm:text-3xl font-bold text-white mb-1">100%</div>
+              <div className="text-sm sm:text-base text-gray-400">Gratuito para começar</div>
             </div>
           </div>
         </div>

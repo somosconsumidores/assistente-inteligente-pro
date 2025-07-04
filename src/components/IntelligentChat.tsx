@@ -146,7 +146,7 @@ const IntelligentChat: React.FC = () => {
     );
   };
 
-  // Mobile Layout
+  // Mobile Layout - when used in ChatInteligente page, don't render mobile wrapper
   if (isMobile) {
     return (
       <div className="flex h-screen bg-white relative">
@@ -314,7 +314,7 @@ const IntelligentChat: React.FC = () => {
           </ScrollArea>
 
           {/* Mobile Input Area */}
-          <div className="border-t border-gray-200 bg-white safe-area-bottom">
+          <div className="border-t border-gray-200 bg-white pb-16">
             <div className="p-3">
               {selectedFiles.length > 0 && (
                 <div className="mb-3 p-2 bg-gray-50 rounded-lg">

@@ -89,6 +89,15 @@ const Hero = () => {
             </div>
           </div>
         </div>
+        
+        {/* Stats Section */}
+        <div className="flex justify-center items-center pt-8 sm:pt-12">
+          <div className="text-center">
+            <p className="text-lg sm:text-xl text-soft-white font-medium">
+              6 especialistas | 24 horas disponíves | 100% gratuito para começar
+            </p>
+          </div>
+        </div>
       </div>
     </section>;
 };

@@ -82,7 +82,7 @@ const Hero = () => {
 
           {/* Additional Text */}
           <div className="pt-4">
-            <p className="text-lg sm:text-xl text-gray-300 font-medium text-center">Tenha especialistas de bolso.  Sem complicação.</p>
+            
           </div>
 
           {/* Stats - moved to bottom center */}

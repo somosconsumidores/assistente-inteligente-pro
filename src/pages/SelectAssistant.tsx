@@ -124,7 +124,7 @@ const SelectAssistant = () => {
         {/* Title Section */}
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Painel de <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            Escolha seu <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
               Assistentes Especializados
             </span>
           </h1>

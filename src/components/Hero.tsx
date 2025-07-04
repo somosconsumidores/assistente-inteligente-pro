@@ -29,7 +29,7 @@ const Hero = () => {
       <div className="relative max-w-7xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-8 items-center">
           {/* Left Column - Text Content */}
-          <div className="text-center lg:text-left space-y-4 sm:space-y-6 -mt-8 sm:-mt-12">
+          <div className="text-center lg:text-left space-y-6 sm:space-y-8">
           {/* Badge */}
           <div className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-gradient-to-r from-purple-600/30 to-blue-600/30 border-neon neon-glow-subtle">
             <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-neon mr-2 icon-glow" />
@@ -41,15 +41,36 @@ const Hero = () => {
           {/* Main Heading */}
           <div className="space-y-4">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight text-neon">
-              <span className="text-soft-white">
-                Biblioteca de Assistentes Inteligentes
-              </span>
+              
             </h1>
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-soft-white max-w-4xl mx-auto leading-relaxed">
               Resolva problemas do dia a dia com 6 especialistas digitais que funcionam 24h por dia.
               <span className="block mt-2 text-sm sm:text-base md:text-lg text-light-gray">Direito, finanças, produtos, compras, viagens… Tudo em um só lugar. E tudo pronto para responder com precisão, em segundos.</span>
             </p>
             
+            {/* Impact Bullet Points */}
+            <div className="mt-6 sm:mt-8 space-y-3 text-left max-w-2xl mx-auto">
+              <div className="flex items-start gap-3 text-sm sm:text-base text-gray-300">
+                <span className="text-green-400 font-semibold">🔐</span>
+                <span>Consultas ilimitadas com IA treinada para te dar respostas reais</span>
+              </div>
+              <div className="flex items-start gap-3 text-sm sm:text-base text-gray-300">
+                <span className="text-green-400 font-semibold">💸</span>
+                <span>Economize US$ 20 por mês utilizando o Chat Inteligente</span>
+              </div>
+              <div className="flex items-start gap-3 text-sm sm:text-base text-gray-300">
+                <span className="text-green-400 font-semibold">⚖️</span>
+                <span>Dúvidas jurídicas? Compras? Planejamento financeiro? Temos um especialista pra isso.</span>
+              </div>
+              <div className="flex items-start gap-3 text-sm sm:text-base text-gray-300">
+                <span className="text-green-400 font-semibold">📲</span>
+                <span>Acesse do celular, quando quiser, onde estiver</span>
+              </div>
+              <div className="flex items-start gap-3 text-sm sm:text-base text-gray-300">
+                <span className="text-green-400 font-semibold">💬</span>
+                <span>5.000+ consultas já realizadas com 98% de satisfação</span>
+              </div>
+            </div>
           </div>
 
           {/* CTA Buttons */}
@@ -80,23 +101,8 @@ const Hero = () => {
             <p className="text-lg sm:text-xl text-gray-300 font-medium">Tenha especialistas de bolso.  Sem complicação.</p>
           </div>
 
-          </div>
-          
-          {/* Right Column - Image */}
-          <div className="hidden lg:flex justify-center items-center">
-            <div className="relative">
-              <img 
-                src="/lovable-uploads/34bb5e1e-d7aa-4050-be50-2baeacf13021.png" 
-                alt="Aplicativo Biblioteca IA em dispositivos móveis e desktop"
-                className="max-w-full h-auto rounded-lg shadow-2xl"
-              />
-            </div>
-          </div>
-        </div>
-        
-        {/* Stats - Moved to bottom center */}
-        <div className="pt-12 sm:pt-16">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-3xl mx-auto">
+          {/* Stats */}
+          <div className="pt-8 sm:pt-12 grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-3xl mx-auto">
             <div className="text-center">
               <div className="text-2xl sm:text-3xl font-bold text-white mb-1">6</div>
               <div className="text-sm sm:text-base text-gray-400">Assistentes Especializados</div>
@@ -105,9 +111,17 @@ const Hero = () => {
               <div className="text-2xl sm:text-3xl font-bold text-white mb-1">24/7</div>
               <div className="text-sm sm:text-base text-gray-400">Disponibilidade</div>
             </div>
-            <div className="text-center">
+            <div className="text-center lg:text-left">
               <div className="text-2xl sm:text-3xl font-bold text-white mb-1">100%</div>
               <div className="text-sm sm:text-base text-gray-400">Gratuito para começar</div>
+            </div>
+          </div>
+          </div>
+          
+          {/* Right Column - Image */}
+          <div className="hidden lg:flex justify-center items-center">
+            <div className="relative">
+              <img src="/lovable-uploads/34bb5e1e-d7aa-4050-be50-2baeacf13021.png" alt="Aplicativo Biblioteca IA em dispositivos móveis e desktop" className="max-w-full h-auto rounded-lg shadow-2xl" />
             </div>
           </div>
         </div>

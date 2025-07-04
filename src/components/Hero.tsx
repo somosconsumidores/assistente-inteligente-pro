@@ -34,7 +34,7 @@ const Hero = () => {
           <div className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-gradient-to-r from-purple-600/30 to-blue-600/30 border-neon neon-glow-subtle">
             <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-neon mr-2 icon-glow" />
             <span className="text-xs sm:text-sm font-medium text-gradient-neon">
-              Assistentes IA Especializados
+              Biblioteca de Assistentes Inteligentes
             </span>
           </div>
 

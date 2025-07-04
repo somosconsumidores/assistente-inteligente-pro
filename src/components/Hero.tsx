@@ -79,22 +79,7 @@ const Hero = () => {
           </div>
 
           {/* Stats - moved to bottom center */}
-          <div className="pt-24 sm:pt-32 flex justify-center items-center min-h-[200px]">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-3xl">
-              <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-white mb-1">6</div>
-                <div className="text-sm sm:text-base text-gray-400">Assistentes Especializados</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-white mb-1">24/7</div>
-                <div className="text-sm sm:text-base text-gray-400">Disponibilidade</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-white mb-1">100%</div>
-                <div className="text-sm sm:text-base text-gray-400">Gratuito para começar</div>
-              </div>
-            </div>
-          </div>
+          
           </div>
           
           {/* Right Column - Image */}

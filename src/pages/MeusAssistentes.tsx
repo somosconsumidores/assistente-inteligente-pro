@@ -7,22 +7,27 @@ import { DashboardLayout } from '@/components/DashboardLayout';
 import { useMobileDeviceInfo } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { useSubscription } from '@/hooks/useSubscription';
-
 const MeusAssistentes = () => {
   const navigate = useNavigate();
-  const { profile } = useAuth();
-  const { isMobile } = useMobileDeviceInfo();
-  const { createCheckout } = useSubscription();
+  const {
+    profile
+  } = useAuth();
+  const {
+    isMobile
+  } = useMobileDeviceInfo();
+  const {
+    createCheckout
+  } = useSubscription();
   const isPremiumUser = profile?.plan === 'premium';
-
   const handleAssistantClick = (assistant: typeof assistants[0]) => {
     if (assistant.path === '/viagens') {
-      navigate('/viagens?tab=planner', { replace: true });
+      navigate('/viagens?tab=planner', {
+        replace: true
+      });
     } else {
       navigate(assistant.path);
     }
   };
-
   const handleUpgrade = async () => {
     try {
       await createCheckout();
@@ -35,7 +40,11 @@ const MeusAssistentes = () => {
   const getAssistantAccess = (assistant: typeof assistants[0]) => {
     // Se é usuário premium, todos os assistentes estão liberados
     if (isPremiumUser) {
-      return { canAccess: true, isSelected: false, isBlocked: false };
+      return {
+        canAccess: true,
+        isSelected: false,
+        isBlocked: false
+      };
     }
 
     // Se é usuário gratuito
@@ -45,15 +54,21 @@ const MeusAssistentes = () => {
       const canAccess = isSelected || !profile?.selected_assistant_id; // Pode acessar se foi selecionado ou se ainda não selecionou nenhum
       const isBlocked = profile?.selected_assistant_id && !isSelected; // Está bloqueado se já selecionou outro
 
-      return { canAccess, isSelected, isBlocked };
+      return {
+        canAccess,
+        isSelected,
+        isBlocked
+      };
     } else {
       // Assistentes premium para usuário gratuito - sempre bloqueados
-      return { canAccess: false, isSelected: false, isBlocked: true };
+      return {
+        canAccess: false,
+        isSelected: false,
+        isBlocked: true
+      };
     }
   };
-
-  return (
-    <DashboardLayout>
+  return <DashboardLayout>
       <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 ${isMobile ? 'mobile-safe-area' : ''}`}>
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -66,58 +81,40 @@ const MeusAssistentes = () => {
                 <h1 className={`font-bold text-foreground ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
                   Meus Assistentes
                 </h1>
-                <p className={`text-muted-foreground ${isMobile ? 'text-sm' : ''}`}>
-                  Escolha um dos nossos assistentes especializados para começar.
-                </p>
+                
               </div>
             </div>
           </div>
         </div>
 
         {/* Assistants Grid */}
-        <div className={`grid gap-6 ${
-          isMobile 
-            ? 'grid-cols-1' 
-            : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
-        }`}>
-          {assistants.map((assistant) => {
-            const IconComponent = assistant.icon;
-            const { canAccess, isSelected, isBlocked } = getAssistantAccess(assistant);
-
-            return (
-              <div
-                key={assistant.id}
-                className={`
+        <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
+          {assistants.map(assistant => {
+          const IconComponent = assistant.icon;
+          const {
+            canAccess,
+            isSelected,
+            isBlocked
+          } = getAssistantAccess(assistant);
+          return <div key={assistant.id} className={`
                   group relative bg-card border border-border rounded-lg p-6 transition-all duration-300
-                  ${canAccess 
-                    ? 'hover:shadow-lg hover:border-primary/50 cursor-pointer' 
-                    : 'opacity-60'
-                  }
+                  ${canAccess ? 'hover:shadow-lg hover:border-primary/50 cursor-pointer' : 'opacity-60'}
                   ${isSelected ? 'border-green-500 bg-green-50/5' : ''}
                   ${isBlocked ? 'grayscale' : ''}
-                `}
-                onClick={() => canAccess && handleAssistantClick(assistant)}
-              >
+                `} onClick={() => canAccess && handleAssistantClick(assistant)}>
                 {/* Status Badge */}
-                {isSelected && (
-                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
+                {isSelected && <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
                     <span className="text-white text-xs font-bold">✓</span>
-                  </div>
-                )}
-                {assistant.isPremium && !isPremiumUser && !isSelected && (
-                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center shadow-lg">
+                  </div>}
+                {assistant.isPremium && !isPremiumUser && !isSelected && <div className="absolute -top-2 -right-2 w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center shadow-lg">
                     <Crown className="w-4 h-4 text-yellow-900" />
-                  </div>
-                )}
-                {isBlocked && !assistant.isPremium && (
-                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center shadow-lg">
+                  </div>}
+                {isBlocked && !assistant.isPremium && <div className="absolute -top-2 -right-2 w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center shadow-lg">
                     <Lock className="w-4 h-4 text-white" />
-                  </div>
-                )}
+                  </div>}
 
                 {/* Lock Overlay para assistentes bloqueados */}
-                {isBlocked && (
-                  <div className="absolute inset-0 bg-gray-900/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-lg">
+                {isBlocked && <div className="absolute inset-0 bg-gray-900/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-lg">
                     <div className="text-center p-4">
                       <div className="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3">
                         <Lock className="w-6 h-6 text-gray-400" />
@@ -125,20 +122,15 @@ const MeusAssistentes = () => {
                       <p className="text-white text-sm font-medium mb-3">
                         {assistant.isPremium ? 'Requer Premium' : 'Assistente Bloqueado'}
                       </p>
-                      <Button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleUpgrade();
-                        }}
-                        size="sm"
-                        className="bg-yellow-500 hover:bg-yellow-600 text-yellow-900 font-medium"
-                      >
+                      <Button onClick={e => {
+                  e.stopPropagation();
+                  handleUpgrade();
+                }} size="sm" className="bg-yellow-500 hover:bg-yellow-600 text-yellow-900 font-medium">
                         <Crown className="w-4 h-4 mr-2" />
                         Fazer Upgrade
                       </Button>
                     </div>
-                  </div>
-                )}
+                  </div>}
 
                 {/* Icon */}
                 <div className={`
@@ -162,44 +154,33 @@ const MeusAssistentes = () => {
 
                 {/* Benefits */}
                 <ul className="space-y-2">
-                  {assistant.benefits.slice(0, 3).map((benefit, index) => (
-                    <li key={index} className="flex items-center text-sm text-muted-foreground">
+                  {assistant.benefits.slice(0, 3).map((benefit, index) => <li key={index} className="flex items-center text-sm text-muted-foreground">
                       <div className="w-1.5 h-1.5 bg-primary rounded-full mr-3 flex-shrink-0"></div>
                       {benefit}
-                    </li>
-                  ))}
+                    </li>)}
                 </ul>
 
                 {/* Access Status */}
                 <div className="mt-4 pt-4 border-t border-border">
-                  {isSelected ? (
-                    <div className="text-center">
+                  {isSelected ? <div className="text-center">
                       <span className="text-green-500 text-sm font-medium">
                         ✓ Assistente Selecionado
                       </span>
-                    </div>
-                  ) : canAccess ? (
-                    <div className="text-center">
+                    </div> : canAccess ? <div className="text-center">
                       <span className="text-blue-500 text-sm font-medium">
                         📱 Clique para usar
                       </span>
-                    </div>
-                  ) : (
-                    <div className="text-center">
+                    </div> : <div className="text-center">
                       <span className="text-gray-500 text-sm font-medium">
                         🔒 Bloqueado
                       </span>
-                    </div>
-                  )}
+                    </div>}
                 </div>
 
                 {/* Hover Effect Overlay */}
-                {canAccess && !isBlocked && (
-                  <div className="absolute inset-0 bg-primary/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                )}
-              </div>
-            );
-          })}
+                {canAccess && !isBlocked && <div className="absolute inset-0 bg-primary/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>}
+              </div>;
+        })}
         </div>
 
         {/* Footer Note */}
@@ -207,17 +188,11 @@ const MeusAssistentes = () => {
           <div className="inline-flex items-center gap-2 px-6 py-3 bg-muted rounded-lg border border-border">
             <Crown className="w-5 h-5 text-yellow-500" />
             <span className="text-muted-foreground">
-              {!isPremiumUser ? (
-                <>Faça upgrade para <span className="text-yellow-500 font-semibold">Premium</span> e libere todos os assistentes</>
-              ) : (
-                <>Você tem acesso <span className="text-green-500 font-semibold">Premium</span> a todos os assistentes</>
-              )}
+              {!isPremiumUser ? <>Faça upgrade para <span className="text-yellow-500 font-semibold">Premium</span> e libere todos os assistentes</> : <>Você tem acesso <span className="text-green-500 font-semibold">Premium</span> a todos os assistentes</>}
             </span>
           </div>
         </div>
       </div>
-    </DashboardLayout>
-  );
+    </DashboardLayout>;
 };
-
 export default MeusAssistentes;

@@ -8,45 +8,15 @@ import { useMobileDeviceInfo } from '@/hooks/use-mobile';
 
 const mobileMenuItems = [
   {
-    title: 'Painel',
-    url: '/dashboard',
+    title: 'Meus Assistentes',
+    url: '/meus-assistentes',
     icon: LayoutDashboard,
     isPremium: false
   },
   {
-    title: 'Chat IA',
-    url: '/chat-inteligente',
-    icon: MessageSquare,
-    isPremium: true
-  },
-  {
-    title: 'Direito',
-    url: '/direito-consumidor',
-    icon: Scale,
-    isPremium: false
-  },
-  {
-    title: 'Finanças',
-    url: '/financas',
-    icon: TrendingUp,
-    isPremium: false
-  },
-  {
-    title: 'Produtos',
-    url: '/produtos',
-    icon: Package,
-    isPremium: false
-  },
-  {
-    title: 'Mercado',
-    url: '/supermercado',
-    icon: ShoppingCart,
-    isPremium: false
-  },
-  {
-    title: 'Viagens',
-    url: '/viagens',
-    icon: MapPin,
+    title: 'Meu Painel',
+    url: '/dashboard',
+    icon: LayoutDashboard,
     isPremium: false
   }
 ];
@@ -68,45 +38,22 @@ export function MobileNavigation() {
   };
 
   const handleNavigation = (item: typeof mobileMenuItems[0]) => {
-    if (item.url === '/viagens') {
-      navigate('/viagens?tab=planner', { replace: true });
-    } else {
-      navigate(item.url);
-    }
+    navigate(item.url);
   };
 
-  const hasAccessToAssistant = (item: typeof mobileMenuItems[0]) => {
-    // Chat Inteligente é premium only
-    if (item.url === '/chat-inteligente') {
-      return isPremiumUser;
-    }
-    
-    // Outros assistentes: premium users têm acesso total, free users precisam ter selecionado
-    if (isPremiumUser) return true;
-    
-    if (!profile?.selected_assistant_id) return false;
-    
-    // Mapear URLs para IDs dos assistentes
-    const urlToAssistantId: { [key: string]: string } = {
-      '/direito-consumidor': 'direito-consumidor',
-      '/financas': 'financas',
-      '/produtos': 'produtos',
-      '/supermercado': 'supermercado',
-      '/viagens': 'viagens'
-    };
-    
-    const assistantId = urlToAssistantId[item.url];
-    return assistantId === profile.selected_assistant_id;
+  const hasAccessToAssistant = () => {
+    // Ambos os itens são sempre acessíveis
+    return true;
   };
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-gray-900/95 backdrop-blur-md border-t border-gray-700">
       {/* Safe area spacer */}
       <div className="pb-safe">
-        <div className="grid grid-cols-7 gap-0.5 px-1 py-2">
+        <div className="grid grid-cols-2 gap-2 px-4 py-2">
           {mobileMenuItems.map((item) => {
             const isItemActive = isActive(item.url);
-            const hasAccess = hasAccessToAssistant(item);
+            const hasAccess = hasAccessToAssistant();
 
             return (
               <button
@@ -125,7 +72,7 @@ export function MobileNavigation() {
                 `}
               >
                 <item.icon className="w-4 h-4 mb-1 flex-shrink-0" />
-                <span className="text-[8px] leading-tight text-center truncate w-full px-0.5">
+                <span className="text-[10px] leading-tight text-center truncate w-full px-0.5">
                   {item.title}
                 </span>
                 {!hasAccess && item.isPremium && (

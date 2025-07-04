@@ -115,11 +115,17 @@ const MeusAssistentes = () => {
 
                 {/* Lock Overlay para assistentes bloqueados */}
                 {isBlocked && <div className="absolute inset-0 bg-gray-900/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-lg">
-                    <div className="text-center p-4">
+                    <div className="text-center p-4 max-w-xs">
                       <div className="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3">
                         <Lock className="w-6 h-6 text-gray-400" />
                       </div>
-                      <p className="text-white text-sm font-medium mb-3">
+                      <h4 className="text-white text-sm font-bold mb-1">
+                        {assistant.title}
+                      </h4>
+                      <p className="text-gray-300 text-xs mb-3 leading-relaxed">
+                        {assistant.description}
+                      </p>
+                      <p className="text-white text-xs font-medium mb-3">
                         {assistant.isPremium ? 'Requer Premium' : 'Assistente Bloqueado'}
                       </p>
                       <Button onClick={e => {

@@ -108,7 +108,7 @@ const SelectAssistant = () => {
             <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">BI</span>
             </div>
-            <span className="font-bold text-xl text-white">Biblioteca AI</span>
+            <span className="font-bold text-xl text-white">Biblioteca IA</span>
           </Link>
           
           <div className="flex items-center space-x-2 bg-gradient-to-r from-orange-500/20 to-red-500/20 text-orange-300 px-4 py-2 rounded-full border border-orange-500/30">

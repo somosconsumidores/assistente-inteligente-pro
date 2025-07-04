@@ -1,20 +1,15 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { MessageSquare, Mail, Phone, MapPin } from 'lucide-react';
-
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-
   const handleWhatsAppClick = () => {
     const phoneNumber = "5521971467532";
     const message = "Olá! Gostaria de saber mais sobre a Biblioteca IA.";
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
-
-  return (
-    <footer className="bg-gray-950 border-t border-gray-800 safe-area-bottom">
+  return <footer className="bg-gray-950 border-t border-gray-800 safe-area-bottom">
       <div className="mobile-padding py-8 sm:py-12">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-12">
@@ -91,10 +86,7 @@ const Footer = () => {
               <ul className="space-y-2 sm:space-y-3">
                 <li className="flex items-center space-x-3">
                   <MessageSquare className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                  <button 
-                    onClick={handleWhatsAppClick}
-                    className="text-sm sm:text-base text-gray-400 hover:text-blue-400 transition-colors cursor-pointer"
-                  >
+                  <button onClick={handleWhatsAppClick} className="text-sm sm:text-base text-gray-400 hover:text-blue-400 transition-colors cursor-pointer">
                     WhatsApp
                   </button>
                 </li>
@@ -102,10 +94,7 @@ const Footer = () => {
                   <Mail className="w-4 h-4 text-gray-400 flex-shrink-0" />
                   <span className="text-sm sm:text-base text-gray-400">contato@bibliotecaai.com</span>
                 </li>
-                <li className="flex items-center space-x-3">
-                  <Phone className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                  <span className="text-sm sm:text-base text-gray-400">(21) 97146-7532</span>
-                </li>
+                
                 <li className="flex items-start space-x-3">
                   <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
                   <span className="text-sm sm:text-base text-gray-400">Rio de Janeiro, RJ</span>
@@ -135,8 +124,6 @@ const Footer = () => {
           </div>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;

@@ -50,8 +50,8 @@ const Hero = () => {
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight text-neon">
               
             </h1>
-            <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-soft-white max-w-4xl mx-auto leading-relaxed">
-              6 assistentes inteligentes para resolver seus problemas, em um único lugar.
+            <p className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-soft-white max-w-4xl mx-auto leading-relaxed">
+              6 assistentes inteligentes para te ajudar, em um único lugar.
               <span className="block mt-2 text-sm sm:text-base text-light-gray md:text-base">Direito, finanças, produtos, compras, viagens… Tudo em um só lugar. E tudo pronto para responder com precisão, em segundos.</span>
             </p>
             

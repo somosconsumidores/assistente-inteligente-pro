@@ -27,7 +27,9 @@ const Hero = () => {
       </div>
       
       <div className="relative max-w-7xl mx-auto">
-        <div className="text-center space-y-6 sm:space-y-8">
+        <div className="grid lg:grid-cols-2 gap-8 items-center">
+          {/* Left Column - Text Content */}
+          <div className="text-center lg:text-left space-y-6 sm:space-y-8">
           {/* Badge */}
           <div className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-gradient-to-r from-purple-600/30 to-blue-600/30 border-neon neon-glow-subtle">
             <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-neon mr-2 icon-glow" />
@@ -111,9 +113,21 @@ const Hero = () => {
               <div className="text-2xl sm:text-3xl font-bold text-white mb-1">24/7</div>
               <div className="text-sm sm:text-base text-gray-400">Disponibilidade</div>
             </div>
-            <div className="text-center">
+            <div className="text-center lg:text-left">
               <div className="text-2xl sm:text-3xl font-bold text-white mb-1">100%</div>
               <div className="text-sm sm:text-base text-gray-400">Gratuito para começar</div>
+            </div>
+          </div>
+          </div>
+          
+          {/* Right Column - Image */}
+          <div className="hidden lg:flex justify-center items-center">
+            <div className="relative">
+              <img 
+                src="/lovable-uploads/34bb5e1e-d7aa-4050-be50-2baeacf13021.png" 
+                alt="Aplicativo Biblioteca IA em dispositivos móveis e desktop"
+                className="max-w-full h-auto rounded-lg shadow-2xl"
+              />
             </div>
           </div>
         </div>

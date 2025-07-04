@@ -6,6 +6,7 @@ import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGrou
 import { LayoutDashboard, Scale, TrendingUp, Package, ShoppingCart, MapPin, LogOut, Crown, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { assistants } from '@/data/assistants';
 
 const menuItems = [{
   title: 'Meu Painel',
@@ -82,6 +83,14 @@ export function AppSidebar() {
       navigate(item.url);
     }
   };
+
+  const handleAssistantNavigation = (assistant: typeof assistants[0]) => {
+    if (assistant.path === '/viagens') {
+      navigate('/viagens?tab=planner', { replace: true });
+    } else {
+      navigate(assistant.path);
+    }
+  };
   
   const getPlanBadge = (isPremium: boolean) => {
     // Não mostra badge para usuários premium
@@ -104,6 +113,90 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="px-2 bg-neutral-800">
+        {/* Meus Assistentes Section */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-slate-400 text-xs font-medium uppercase tracking-wider mb-3">
+            {!isCollapsed && 'Meus Assistentes'}
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            {!isCollapsed ? (
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                {assistants.map((assistant) => {
+                  const IconComponent = assistant.icon;
+                  const isAssistantActive = isActive(assistant.path);
+                  const canAccess = !assistant.isPremium || isPremiumUser;
+                  
+                  return (
+                    <button
+                      key={assistant.id}
+                      onClick={() => handleAssistantNavigation(assistant)}
+                      disabled={!canAccess}
+                      className={`
+                        group relative flex flex-col items-center p-3 rounded-2xl transition-all duration-200
+                        ${isAssistantActive 
+                          ? 'bg-gradient-to-br from-blue-500/20 to-purple-500/20 ring-2 ring-blue-400/50' 
+                          : 'hover:bg-slate-800/50'
+                        }
+                        ${!canAccess ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}
+                      `}
+                    >
+                      <div className={`
+                        w-12 h-12 rounded-2xl flex items-center justify-center mb-2 transition-all duration-200
+                        bg-gradient-to-br ${assistant.color}
+                        ${isAssistantActive ? 'scale-110 shadow-lg' : 'group-hover:scale-105'}
+                        ${!canAccess ? 'grayscale' : ''}
+                      `}>
+                        <IconComponent className="w-6 h-6 text-white" />
+                      </div>
+                      <span className={`
+                        text-xs text-center leading-tight font-medium max-w-full
+                        ${isAssistantActive ? 'text-white' : 'text-slate-300'}
+                      `}>
+                        {assistant.title.split(' ').slice(0, 2).join(' ')}
+                      </span>
+                      {assistant.isPremium && !isPremiumUser && (
+                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-yellow-500 rounded-full flex items-center justify-center">
+                          <Crown className="w-3 h-3 text-yellow-900" />
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2 mb-4">
+                {assistants.map((assistant) => {
+                  const IconComponent = assistant.icon;
+                  const isAssistantActive = isActive(assistant.path);
+                  const canAccess = !assistant.isPremium || isPremiumUser;
+                  
+                  return (
+                    <button
+                      key={assistant.id}
+                      onClick={() => handleAssistantNavigation(assistant)}
+                      disabled={!canAccess}
+                      className={`
+                        relative w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200
+                        bg-gradient-to-br ${assistant.color}
+                        ${isAssistantActive ? 'scale-110 ring-2 ring-blue-400/50' : 'hover:scale-105'}
+                        ${!canAccess ? 'opacity-60 cursor-not-allowed grayscale' : 'cursor-pointer'}
+                      `}
+                    >
+                      <IconComponent className="w-5 h-5 text-white" />
+                      {assistant.isPremium && !isPremiumUser && (
+                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center">
+                          <Crown className="w-2.5 h-2.5 text-yellow-900" />
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Navigation Section */}
         <SidebarGroup>
           <SidebarGroupLabel className="text-slate-400 text-xs font-medium uppercase tracking-wider mb-2">
             {!isCollapsed && 'Navegação'}

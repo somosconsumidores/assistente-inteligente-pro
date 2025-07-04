@@ -160,35 +160,46 @@ const MeusAssistentes = () => {
                   {assistant.title}
                 </h3>
 
-                {/* Description */}
-                <p className="text-muted-foreground text-sm leading-relaxed mb-4 text-center">
-                  {assistant.description}
-                </p>
+                {/* Premium users get clean view - only show "Clique para usar" */}
+                {isPremiumUser ? (
+                  <div className="text-center">
+                    <span className="text-blue-500 text-sm font-medium">
+                      📱 Clique para usar
+                    </span>
+                  </div>
+                ) : (
+                  <>
+                    {/* Description */}
+                    <p className="text-muted-foreground text-sm leading-relaxed mb-4 text-center">
+                      {assistant.description}
+                    </p>
 
-                {/* Benefits */}
-                <ul className="space-y-2">
-                  {assistant.benefits.slice(0, 3).map((benefit, index) => <li key={index} className="flex items-center text-sm text-muted-foreground">
-                      <div className="w-1.5 h-1.5 bg-primary rounded-full mr-3 flex-shrink-0"></div>
-                      {benefit}
-                    </li>)}
-                </ul>
+                    {/* Benefits */}
+                    <ul className="space-y-2">
+                      {assistant.benefits.slice(0, 3).map((benefit, index) => <li key={index} className="flex items-center text-sm text-muted-foreground">
+                          <div className="w-1.5 h-1.5 bg-primary rounded-full mr-3 flex-shrink-0"></div>
+                          {benefit}
+                        </li>)}
+                    </ul>
 
-                {/* Access Status */}
-                <div className="mt-4 pt-4 border-t border-border">
-                  {isSelected ? <div className="text-center">
-                      <span className="text-green-500 text-sm font-medium">
-                        ✓ Assistente Selecionado
-                      </span>
-                    </div> : canAccess ? <div className="text-center">
-                      <span className="text-blue-500 text-sm font-medium">
-                        📱 Clique para usar
-                      </span>
-                    </div> : <div className="text-center">
-                      <span className="text-gray-500 text-sm font-medium">
-                        🔒 Bloqueado
-                      </span>
-                    </div>}
-                </div>
+                    {/* Access Status */}
+                    <div className="mt-4 pt-4 border-t border-border">
+                      {isSelected ? <div className="text-center">
+                          <span className="text-green-500 text-sm font-medium">
+                            ✓ Assistente Selecionado
+                          </span>
+                        </div> : canAccess ? <div className="text-center">
+                          <span className="text-blue-500 text-sm font-medium">
+                            📱 Clique para usar
+                          </span>
+                        </div> : <div className="text-center">
+                          <span className="text-gray-500 text-sm font-medium">
+                            🔒 Bloqueado
+                          </span>
+                        </div>}
+                    </div>
+                  </>
+                )}
 
                 {/* Hover Effect Overlay */}
                 {canAccess && !isBlocked && <div className="absolute inset-0 bg-primary/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>}

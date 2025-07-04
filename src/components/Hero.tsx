@@ -27,9 +27,9 @@ const Hero = () => {
       </div>
       
       <div className="relative max-w-7xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-8 items-center">
+        <div className="grid lg:grid-cols-2 gap-8 items-start">
           {/* Left Column - Text Content */}
-          <div className="text-center lg:text-left space-y-6 sm:space-y-8">
+          <div className="text-center lg:text-left space-y-6 sm:space-y-8 -mt-8">
           {/* Badge */}
           <div className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-gradient-to-r from-purple-600/30 to-blue-600/30 border-neon neon-glow-subtle">
             <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-neon mr-2 icon-glow" />

@@ -52,7 +52,7 @@ const Hero = () => {
             </h1>
             <p className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-soft-white max-w-4xl mx-auto leading-relaxed">
               6 assistentes inteligentes para te ajudar, em um único lugar.
-              <span className="block mt-2 text-sm sm:text-base text-light-gray md:text-base">Direito, finanças, produtos, compras, viagens… Tudo em um só lugar. E tudo pronto para responder com precisão, em segundos.</span>
+              <span className="block mt-2 text-sm sm:text-base text-light-gray md:text-base font-extralight">Direito, finanças, produtos, compras, viagens… Tudo em um só lugar. E tudo pronto para responder com precisão, em segundos.</span>
             </p>
             
           </div>

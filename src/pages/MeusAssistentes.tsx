@@ -131,7 +131,7 @@ const MeusAssistentes = () => {
                       <Button onClick={e => {
                   e.stopPropagation();
                   handleUpgrade();
-                }} size="sm" className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium bg-orange-500 hover:bg-orange-400">
+                }} size="sm" className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium bg-orange-500 hover:bg-orange-400 z-50 relative">
                         <Crown className="w-4 h-4 mr-2" />
                         Fazer Upgrade
                       </Button>

@@ -73,6 +73,13 @@ const Hero = () => {
               </>}
           </div>
 
+          {/* Mobile Image - appears after badge */}
+          <div className="lg:hidden flex justify-center items-center pt-6">
+            <div className="relative">
+              <img src="/lovable-uploads/34bb5e1e-d7aa-4050-be50-2baeacf13021.png" alt="Aplicativo Biblioteca IA em dispositivos móveis e desktop" className="max-w-full h-auto rounded-lg shadow-2xl" />
+            </div>
+          </div>
+
           {/* Additional Text */}
           <div className="pt-4">
             <p className="text-lg sm:text-xl text-gray-300 font-medium">Tenha especialistas de bolso.  Sem complicação.</p>

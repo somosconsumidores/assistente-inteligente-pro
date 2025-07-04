@@ -97,6 +97,13 @@ const Hero = () => {
           </div>
         </div>
         
+        {/* Texto adicional centralizado */}
+        <div className="text-center pt-8 sm:pt-12">
+          <p className="text-xl sm:text-2xl font-bold text-soft-white">
+            Tenha especialistas de bolso. Sem complicação.
+          </p>
+        </div>
+        
         {/* Stats Section */}
         <div className="flex justify-center items-center pt-6 sm:pt-12">
           <div className="flex flex-row items-center gap-2 sm:gap-8 justify-center flex-wrap">

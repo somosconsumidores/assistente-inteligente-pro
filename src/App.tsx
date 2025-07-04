@@ -15,6 +15,7 @@ import Supermercado from '@/pages/Supermercado';
 import Viagens from '@/pages/Viagens';
 import ChatInteligente from '@/pages/ChatInteligente';
 import SelectAssistant from '@/pages/SelectAssistant';
+import MeusAssistentes from '@/pages/MeusAssistentes';
 import SavedRecommendations from '@/pages/SavedRecommendations';
 import SavedPetitions from '@/pages/SavedPetitions';
 import NotFound from '@/pages/NotFound';
@@ -46,6 +47,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/meus-assistentes"
+                  element={
+                    <ProtectedRoute>
+                      <MeusAssistentes />
                     </ProtectedRoute>
                   }
                 />

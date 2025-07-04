@@ -102,7 +102,7 @@ const Hero = () => {
           </div>
 
           {/* Stats */}
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-3xl">
+          <div className="pt-8 sm:pt-12 grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-3xl mx-auto">
             <div className="text-center">
               <div className="text-2xl sm:text-3xl font-bold text-white mb-1">6</div>
               <div className="text-sm sm:text-base text-gray-400">Assistentes Especializados</div>

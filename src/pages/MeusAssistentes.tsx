@@ -114,7 +114,7 @@ const MeusAssistentes = () => {
                   </div>}
 
                 {/* Lock Overlay para assistentes bloqueados */}
-                {isBlocked && <div className="absolute inset-0 bg-gray-900/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-lg">
+                {isBlocked && <div className="absolute inset-0 bg-black/90 flex items-center justify-center z-10 rounded-lg">
                     <div className="text-center p-4 max-w-xs">
                       <div className="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3">
                         <Lock className="w-6 h-6 text-gray-400" />
@@ -132,8 +132,13 @@ const MeusAssistentes = () => {
                         onClick={e => {
                           e.stopPropagation();
                           handleUpgrade();
-                        }} 
-                        className="cursor-pointer inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white rounded-md z-50 relative transition-all duration-200 hover:scale-105 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 shadow-lg hover:shadow-xl border-0"
+                        }}
+                        style={{
+                          background: 'linear-gradient(135deg, #f97316, #ef4444)',
+                          border: 'none',
+                          color: 'white'
+                        }}
+                        className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl z-[60] relative"
                       >
                         <Crown className="w-4 h-4 mr-2" />
                         Fazer Upgrade

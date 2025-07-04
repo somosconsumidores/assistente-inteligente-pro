@@ -16,25 +16,6 @@ const Index = () => {
       <Header />
       <main className="safe-area-top safe-area-bottom">
         <Hero />
-        
-        {/* Independent Stats Section - Centered */}
-        <section className="fixed inset-0 flex items-center justify-center pointer-events-none z-20">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-3xl pointer-events-auto">
-            <div className="text-center">
-              <div className="text-2xl sm:text-3xl font-bold text-white mb-1">6</div>
-              <div className="text-sm sm:text-base text-gray-400">Assistentes Especializados</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl sm:text-3xl font-bold text-white mb-1">24/7</div>
-              <div className="text-sm sm:text-base text-gray-400">Disponibilidade</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl sm:text-3xl font-bold text-white mb-1">100%</div>
-              <div className="text-sm sm:text-base text-gray-400">Gratuito para começar</div>
-            </div>
-          </div>
-        </section>
-        <Hero />
         <section className="mobile-padding py-8 sm:py-12 lg:py-16">
           <AssistantCards />
         </section>

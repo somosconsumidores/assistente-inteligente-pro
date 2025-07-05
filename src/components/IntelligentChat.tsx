@@ -10,6 +10,7 @@ import { ptBR } from 'date-fns/locale';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { FileUpload, FileWithPreview } from '@/components/chat/FileUpload';
 import { useIsMobile } from '@/hooks/use-mobile';
+import FormattedMessage from '@/components/FormattedMessage';
 
 const IntelligentChat: React.FC = () => {
   const [inputMessage, setInputMessage] = useState('');
@@ -65,12 +66,7 @@ const IntelligentChat: React.FC = () => {
   };
 
   const formatMessage = (content: string) => {
-    return content.split('\n').map((line, index) => (
-      <span key={index}>
-        {line}
-        {index < content.split('\n').length - 1 && <br />}
-      </span>
-    ));
+    return <FormattedMessage content={content} className="text-gray-800" />;
   };
 
   const downloadImage = async (imageUrl: string, isTransformation?: boolean) => {
@@ -274,9 +270,7 @@ const IntelligentChat: React.FC = () => {
                         
                         <div className="flex-1 min-w-0 space-y-2">
                           <div className="prose prose-sm max-w-none">
-                            <div className="text-gray-800 whitespace-pre-wrap leading-relaxed text-sm">
-                              {formatMessage(message.content)}
-                            </div>
+                            {formatMessage(message.content)}
                           </div>
                           {renderAttachments(message.attachments)}
                           {renderGeneratedImage(message.imageUrl, message.isImageGeneration, message.isTransformation)}
@@ -516,15 +510,19 @@ const IntelligentChat: React.FC = () => {
                         </div>
                       </div>
                       
-                      <div className="flex-1 min-w-0 space-y-2">
-                        <div className="prose prose-gray max-w-none">
-                          <div className="text-gray-800 whitespace-pre-wrap leading-relaxed">
-                            {formatMessage(message.content)}
-                          </div>
-                        </div>
-                        {renderAttachments(message.attachments)}
-                        {renderGeneratedImage(message.imageUrl, message.isImageGeneration, message.isTransformation)}
-                      </div>
+                       <div className="flex-1 min-w-0 space-y-2">
+                         <div className="prose prose-gray max-w-none">
+                           {message.role === 'user' ? (
+                             <div className="whitespace-pre-wrap text-gray-800 leading-relaxed">
+                               {message.content}
+                             </div>
+                           ) : (
+                             <FormattedMessage content={message.content} className="text-gray-800" />
+                           )}
+                         </div>
+                         {renderAttachments(message.attachments)}
+                         {renderGeneratedImage(message.imageUrl, message.isImageGeneration, message.isTransformation)}
+                       </div>
                     </div>
                   </div>
                 ))}

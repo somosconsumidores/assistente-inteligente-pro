@@ -7,6 +7,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Content-Type': 'application/json; charset=utf-8',
 };
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
@@ -348,11 +349,14 @@ IMPORTANTE: Mantenha EXATAMENTE a mesma pessoa, pose, expressão facial, composi
 
     const data = await response.json();
     
+    // Garantir que a resposta seja tratada como UTF-8
+    const messageContent = data.choices[0].message.content || '';
+    
     return new Response(JSON.stringify({
-      message: data.choices[0].message.content,
+      message: messageContent,
       usage: data.usage
     }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' },
     });
 
   } catch (error) {
@@ -361,7 +365,7 @@ IMPORTANTE: Mantenha EXATAMENTE a mesma pessoa, pose, expressão facial, composi
       error: error.message || 'Erro interno do servidor'
     }), {
       status: error.message?.includes('premium') ? 403 : 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' },
     });
   }
 });

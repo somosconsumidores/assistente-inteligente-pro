@@ -31,6 +31,9 @@ export const useFinancialAIChat = () => {
   const sendMessage = useCallback(async (userMessage: string) => {
     if (!userMessage.trim()) return;
 
+    console.log('Sending message:', userMessage);
+    console.log('Current messages count:', messages.length);
+
     addMessage(userMessage, 'user');
     setIsLoading(true);
 
@@ -40,6 +43,8 @@ export const useFinancialAIChat = () => {
         content: msg.content
       }));
 
+      console.log('Conversation history:', conversation);
+
       const { data, error } = await supabase.functions.invoke('financial-chat', {
         body: { 
           message: userMessage,
@@ -47,24 +52,40 @@ export const useFinancialAIChat = () => {
         }
       });
 
+      console.log('Supabase response:', { data, error });
+
+      // Verifica se há reply na resposta (seja sucesso ou erro)
+      if (data?.reply) {
+        console.log('Assistant reply:', data.reply);
+        addMessage(data.reply, 'assistant');
+        return;
+      }
+
+      // Se há erro mas não há reply, trata como erro
       if (error) {
+        console.error('Supabase error:', error);
         throw new Error(error.message || 'Erro ao enviar mensagem');
       }
 
-      if (data?.reply) {
-        addMessage(data.reply, 'assistant');
-      } else {
-        throw new Error('Resposta inválida do servidor');
+      // Se não há erro nem reply, também é um erro
+      if (!data) {
+        console.error('No data received from function');
+        throw new Error('Nenhuma resposta recebida do servidor');
       }
 
+      console.error('No reply in data:', data);
+      throw new Error('Resposta inválida do servidor');
+
     } catch (error) {
-      console.error('Erro no chat:', error);
+      console.error('Erro no chat financeiro:', error);
       
-      addMessage('Desculpe, ocorreu um erro ao processar sua mensagem. Verifique sua conexão e tente novamente.', 'assistant');
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      
+      addMessage(`Desculpe, ocorreu um erro: ${errorMessage}. Tente novamente em alguns instantes.`, 'assistant');
       
       toast({
-        title: "Erro",
-        description: "Não foi possível enviar a mensagem. Tente novamente.",
+        title: "Erro no Chat",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {

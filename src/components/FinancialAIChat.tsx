@@ -25,8 +25,21 @@ const FinancialAIChat: React.FC = () => {
     });
   }, [messages]);
 
+  // Debug logging
+  useEffect(() => {
+    console.log('FinancialAIChat - Messages updated:', messages.length);
+  }, [messages]);
+
+  useEffect(() => {
+    console.log('FinancialAIChat - Loading state changed:', isLoading);
+  }, [isLoading]);
+
   const handleSend = async () => {
     if (!inputValue.trim() || isLoading) return;
+    
+    console.log('FinancialAIChat - Sending message:', inputValue);
+    console.log('FinancialAIChat - isLoading:', isLoading);
+    
     await sendMessage(inputValue);
     setInputValue('');
   };

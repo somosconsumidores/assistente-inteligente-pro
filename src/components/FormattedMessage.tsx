@@ -33,12 +33,13 @@ const FormattedMessage = ({ content, className = '' }: FormattedMessageProps) =>
       .replace(/Ã´/g, 'ô')
       .replace(/Ã§/g, 'ç')
       .replace(/Ã /g, 'à')
-      // Remove markdown-style formatting
-      .replace(/\*\*(.*?)\*\*/g, '$1')
-      .replace(/\*(.*?)\*/g, '$1')
-      .replace(/^[\s]*[•\-\*]\s+/gm, '• ')
-      .replace(/\s+/g, ' ')
-      .replace(/\n\s*\n/g, '\n\n');
+      // Remove markdown formatting completely
+      .replace(/#{1,6}\s*/g, '')  // Remove # headers
+      .replace(/\*\*(.*?)\*\*/g, '$1')  // Remove bold **text**
+      .replace(/\*(.*?)\*/g, '$1')  // Remove italic *text*
+      .replace(/^[\s]*[•\-\*]\s+/gm, '• ')  // Clean bullet points
+      .replace(/\s+/g, ' ')  // Clean multiple spaces
+      .replace(/\n\s*\n/g, '\n\n');  // Clean line breaks
 
     return formatted;
   };

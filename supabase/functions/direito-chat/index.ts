@@ -139,7 +139,7 @@ Responda sempre de forma profissional, precisa e útil, baseando-se preferencial
     const assistantReply = data.choices[0].message.content;
 
     return new Response(JSON.stringify({ reply: assistantReply }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' },
     });
 
   } catch (error) {
@@ -149,7 +149,7 @@ Responda sempre de forma profissional, precisa e útil, baseando-se preferencial
       reply: 'Desculpe, ocorreu um erro ao processar sua solicitação. Tente novamente em alguns instantes.'
     }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' },
     });
   }
 });

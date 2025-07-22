@@ -16,17 +16,28 @@ interface FormattedMessageProps {
 
 const FormattedMessage = ({ content, className = '' }: FormattedMessageProps) => {
   const formatContent = (text: string) => {
-    // Remove markdown-style formatting
+    // Decode HTML entities and fix encoding issues
     let formatted = text
-      // Remove bold markers (**text** -> text)
+      // Fix common encoding issues
+      .replace(/â€™/g, "'")
+      .replace(/â€œ/g, '"')
+      .replace(/â€/g, '"')
+      .replace(/â€¢/g, '•')
+      .replace(/Ã¡/g, 'á')
+      .replace(/Ã©/g, 'é')
+      .replace(/Ã­/g, 'í')
+      .replace(/Ã³/g, 'ó')
+      .replace(/Ãº/g, 'ú')
+      .replace(/Ã¢/g, 'â')
+      .replace(/Ãª/g, 'ê')
+      .replace(/Ã´/g, 'ô')
+      .replace(/Ã§/g, 'ç')
+      .replace(/Ã /g, 'à')
+      // Remove markdown-style formatting
       .replace(/\*\*(.*?)\*\*/g, '$1')
-      // Remove italic markers (*text* -> text)
       .replace(/\*(.*?)\*/g, '$1')
-      // Remove bullet point markers
       .replace(/^[\s]*[•\-\*]\s+/gm, '• ')
-      // Clean up multiple spaces
       .replace(/\s+/g, ' ')
-      // Clean up line breaks
       .replace(/\n\s*\n/g, '\n\n');
 
     return formatted;

@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarFooter, useSidebar } from '@/components/ui/sidebar';
-import { LayoutDashboard, Scale, TrendingUp, Package, ShoppingCart, MapPin, LogOut, Crown, MessageCircle } from 'lucide-react';
+import { LayoutDashboard, Scale, TrendingUp, Package, ShoppingCart, MapPin, LogOut, Crown, MessageCircle, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { assistants } from '@/data/assistants';
@@ -15,6 +15,11 @@ const menuItems = [{
   title: 'Meu Painel',
   url: '/dashboard',
   icon: LayoutDashboard,
+  isPremium: false
+}, {
+  title: 'Logs de Acesso',
+  url: '/login-logs',
+  icon: History,
   isPremium: false
 }];
 export function AppSidebar() {

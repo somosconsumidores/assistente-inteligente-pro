@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { UserProfile } from '@/types/auth';
 import { fetchUserProfile } from '@/utils/authUtils';
+import { logUserAccess } from '@/utils/loginLogger';
 
 export const useAuthActions = (
   user: User | null,
@@ -10,13 +11,20 @@ export const useAuthActions = (
 ) => {
   const login = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
       if (error) {
+        // Registrar tentativa de login falhada
+        await logUserAccess('', email, false, error.message);
         throw error;
+      }
+
+      // Registrar login bem-sucedido
+      if (data.user) {
+        await logUserAccess(data.user.id, email, true);
       }
     } catch (error: any) {
       throw new Error(error.message || 'Erro ao fazer login');

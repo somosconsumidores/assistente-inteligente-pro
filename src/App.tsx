@@ -18,6 +18,7 @@ import SelectAssistant from '@/pages/SelectAssistant';
 import MeusAssistentes from '@/pages/MeusAssistentes';
 import SavedRecommendations from '@/pages/SavedRecommendations';
 import SavedPetitions from '@/pages/SavedPetitions';
+import LoginLogs from '@/pages/LoginLogs';
 import NotFound from '@/pages/NotFound';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import ProtectedAssistantRoute from '@/components/ProtectedAssistantRoute';
@@ -137,6 +138,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <SavedPetitions />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/login-logs"
+                  element={
+                    <ProtectedRoute>
+                      <LoginLogs />
                     </ProtectedRoute>
                   }
                 />

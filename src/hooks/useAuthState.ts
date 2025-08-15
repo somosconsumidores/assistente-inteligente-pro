@@ -4,6 +4,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { UserProfile } from '@/types/auth';
 import { fetchUserProfile, checkSubscriptionStatus } from '@/utils/authUtils';
+import { logUserAccess } from '@/utils/loginLogger';
 
 export const useAuthState = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -28,6 +29,11 @@ export const useAuthState = () => {
             }
             // Check subscription status after profile is loaded
             await checkSubscriptionStatus();
+            
+            // Log access for session restoration (if it's a SIGNED_IN event)
+            if (event === 'SIGNED_IN') {
+              await logUserAccess(session.user.id, session.user.email || '', true);
+            }
           }, 0);
         } else {
           setProfile(null);

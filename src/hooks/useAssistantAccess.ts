@@ -1,14 +1,17 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useSubscription } from '@/hooks/useSubscription';
 
 export const useAssistantAccess = () => {
   const { profile } = useAuth();
   const { toast } = useToast();
+  const { subscribed, subscription_tier } = useSubscription();
 
   const checkAssistantAccess = (assistantId: string): boolean => {
     console.log('[useAssistantAccess] Checking access for assistant:', assistantId);
     console.log('[useAssistantAccess] User profile:', profile);
+    console.log('[useAssistantAccess] Subscription:', { subscribed, subscription_tier });
 
     // Se não tem profile carregado ainda
     if (!profile) {
@@ -16,9 +19,9 @@ export const useAssistantAccess = () => {
       return false;
     }
 
-    // Usuários premium têm acesso a tudo
-    if (profile.plan === 'premium') {
-      console.log('[useAssistantAccess] Premium user, granting access');
+    // Usuários com assinatura ativa (premium ou trial) têm acesso a tudo
+    if (subscribed || profile.plan === 'premium') {
+      console.log('[useAssistantAccess] Subscribed/Premium user, granting access');
       return true;
     }
 

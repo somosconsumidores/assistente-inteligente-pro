@@ -65,23 +65,35 @@ serve(async (req) => {
     const customerId = customers.data[0].id;
     logStep("Found Stripe customer", { customerId });
 
-    const subscriptions = await stripe.subscriptions.list({
+    // Check for both active and trialing subscriptions
+    const activeSubscriptions = await stripe.subscriptions.list({
       customer: customerId,
       status: "active",
       limit: 1,
     });
+
+    const trialingSubscriptions = await stripe.subscriptions.list({
+      customer: customerId,
+      status: "trialing",
+      limit: 1,
+    });
     
-    const hasActiveSub = subscriptions.data.length > 0;
+    const hasActiveSub = activeSubscriptions.data.length > 0 || trialingSubscriptions.data.length > 0;
+    const subscription = activeSubscriptions.data[0] || trialingSubscriptions.data[0];
     let subscriptionTier = null;
     let subscriptionEnd = null;
 
-    if (hasActiveSub) {
-      const subscription = subscriptions.data[0];
+    if (hasActiveSub && subscription) {
       subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
-      subscriptionTier = "Premium";
-      logStep("Active subscription found", { subscriptionId: subscription.id, endDate: subscriptionEnd });
+      const isTrialing = subscription.status === 'trialing';
+      subscriptionTier = isTrialing ? "Premium (Trial)" : "Premium";
+      logStep("Subscription found", { 
+        subscriptionId: subscription.id, 
+        status: subscription.status,
+        endDate: subscriptionEnd 
+      });
     } else {
-      logStep("No active subscription found");
+      logStep("No active or trialing subscription found");
     }
 
     // Update subscribers table

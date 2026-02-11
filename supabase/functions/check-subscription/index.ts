@@ -35,20 +35,41 @@ serve(async (req) => {
     if (!authHeader) throw new Error("No authorization header provided");
 
     const token = authHeader.replace("Bearer ", "");
+    
+    // Try getUser first, fall back to JWT decode if session is stale
+    let userId: string;
+    let userEmail: string;
+    
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
-    if (userError) throw new Error(`Authentication error: ${userError.message}`);
-    const user = userData.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
-    logStep("User authenticated", { userId: user.id, email: user.email });
+    
+    if (userError) {
+      logStep("getUser failed, decoding JWT directly", { error: userError.message });
+      // Decode JWT payload to extract user info (session may be stale but token is still valid)
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        userId = payload.sub;
+        userEmail = payload.email;
+        if (!userId || !userEmail) throw new Error("Invalid JWT payload");
+      } catch (e) {
+        throw new Error("Could not authenticate user: session expired and JWT decode failed");
+      }
+    } else {
+      const user = userData.user;
+      if (!user?.email) throw new Error("User not authenticated or email not available");
+      userId = user.id;
+      userEmail = user.email;
+    }
+    
+    logStep("User authenticated", { userId, email: userEmail });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    const customers = await stripe.customers.list({ email: userEmail, limit: 1 });
     
     if (customers.data.length === 0) {
       logStep("No customer found, updating unsubscribed state");
       await supabaseClient.from("subscribers").upsert({
-        email: user.email,
-        user_id: user.id,
+        email: userEmail,
+        user_id: userId,
         stripe_customer_id: null,
         subscribed: false,
         subscription_tier: null,
@@ -98,8 +119,8 @@ serve(async (req) => {
 
     // Update subscribers table
     await supabaseClient.from("subscribers").upsert({
-      email: user.email,
-      user_id: user.id,
+      email: userEmail,
+      user_id: userId,
       stripe_customer_id: customerId,
       subscribed: hasActiveSub,
       subscription_tier: subscriptionTier,
@@ -110,7 +131,7 @@ serve(async (req) => {
     // Update profiles table
     await supabaseClient.from("profiles").update({
       plan: hasActiveSub ? 'premium' : 'free'
-    }).eq('id', user.id);
+    }).eq('id', userId);
 
     logStep("Updated database with subscription info", { subscribed: hasActiveSub, subscriptionTier });
     

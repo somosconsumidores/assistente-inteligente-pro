@@ -53,8 +53,11 @@ const FormattedMessage = ({ content, className = '' }: FormattedMessageProps) =>
     lines.forEach((line, index) => {
       const cleanLine = line.trim();
       
+      // Check if line is a separator row (|---|---|)
+      const isSeparatorRow = /^\|[\s\-:|]+\|$/.test(cleanLine);
+      
       // Check if line looks like a table row (contains | characters)
-      if (cleanLine.includes('|') && cleanLine.split('|').length > 2) {
+      if (!isSeparatorRow && cleanLine.includes('|') && cleanLine.split('|').length > 2) {
         if (tableStart === -1) {
           tableStart = index;
           currentTable = [];

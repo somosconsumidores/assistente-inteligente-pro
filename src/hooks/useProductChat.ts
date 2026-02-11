@@ -91,22 +91,20 @@ export const useProductChat = () => {
           let lastUpdated = product.updated_at;
           let storeLink = product.store_link;
           
-          // Use real-time data if available
-          if (priceData && priceData.average_price > 0) {
-            priceValue = priceData.average_price;
-            priceConfidence = priceData.confidence_level;
-            
-            if (priceData.prices.length > 0) {
-              const primarySource = priceData.prices[0];
-              priceSource = primarySource.store_name;
-              lastUpdated = primarySource.last_updated;
-              storeLink = primarySource.product_url || product.store_link;
+          // Keep DB price as primary, use real-time only for source/link
+          if (priceData && priceData.prices.length > 0) {
+            const bestPrice = priceData.prices.reduce((min, p) => p.price < min.price ? p : min, priceData.prices[0]);
+            priceSource = bestPrice.store_name;
+            lastUpdated = bestPrice.last_updated;
+            if (bestPrice.product_url) {
+              storeLink = bestPrice.product_url;
             }
-          } else {
-            // Fallback to original logic for pricing
-            if (typeof priceValue === 'number' && priceValue < 100) {
-              priceValue = priceValue * 1000;
-            }
+            priceConfidence = 'real';
+          }
+          
+          // Fallback for very low values (likely missing decimal)
+          if (typeof priceValue === 'number' && priceValue < 100) {
+            priceValue = priceValue * 1000;
           }
           
           return {
